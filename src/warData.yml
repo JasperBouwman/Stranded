@@ -1,0 +1,5 @@
+war:
+  pending:
+  #time is in seconds
+    timeIslandInvite: 180
+    timeIslandWarriors: 180

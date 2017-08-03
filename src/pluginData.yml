@@ -1,0 +1,247 @@
+plugin:
+  hub:
+    location:
+      ==: org.bukkit.Location
+      world: World
+      x: -1322440
+      y: 72
+      z: -373910
+      pitch: 0.0
+      yaw: 0.0
+  scoreboard:
+    default:
+      # there are a couple of extra functions to use:
+      # %walk% this will get the walk score
+      # %pvp% this will get the pvp score
+      # %mining% this will get the mining score
+      # %health% this will get the health
+      # %null% this is no line
+      # %player% will display the player name
+      # %online% will display the online players
+      # %maxonline% get the max players
+      # %island% will display the island name you're on
+      # %islandonline% will display the amount of online people of your island
+      # %islandcount% will display the amount of online people of your island
+      # %islandlvl%
+      #
+      # max lenght is 36 (else players will get an error message)
+      name: "§2§o§nStranded"
+      line1: ""
+      line2: "§3%player% (§b%online%/%maxonline%§3)"
+      line3: ""
+      line4: "§3%island% (§b%islandonline%/%islandcount%§3)"
+      line5: "§3Island level§b %islandlvl%"
+      line6: ""
+      line7: "§3Fitness Walking§b %walk%"
+      line8: "§3Fitness Mining§b %mining%"
+      line9: "§3Fitness PvP§b %pvp%"
+      line10: ""
+      line11: "§3Health§b %health%"
+      line12: "%null%"
+      line13: "%null%"
+      line14: "%null%"
+      line15: "%null%"
+    walking:
+      amplifier: 10000
+    pvp:
+      amplifier: 300
+    mining:
+      amplifier: 800
+  nexusShop:
+    # defoult ItemStack for the nexusShop
+    # customName:
+    #   item:
+    #     ==: org.bukkit.inventory.ItemStack
+    #     type: STONE (here goes the material name)
+    #     meta:
+    #       ==: ItemMeta
+    #       meta-type: UNSPECIFIC
+    #       display-name: "name that appears"
+    #       lore:
+    #       - "the lore of the item"
+    #   slots:
+    #   - 1
+    #   - 2
+    #   target: "custom name of the inventory"
+    #
+    #   lore is optonal!!
+    #
+    #   targets:
+    #   use "upgrade" to get the upgradr butten
+    #   use "friendly" for the friendly towers
+    #   use "enemy" for the enemy towers
+    #
+    main:
+      size: 9
+      name: "§2Nexus"
+      items:
+        friendly:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: DIAMOND_BLOCK
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Friendly Towers"
+              lore:
+              - Regeneration
+              - Haste
+              - Speed
+          slots:
+          - 0
+          - 1
+          - 2
+          target: "friendly"
+        enemy:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: REDSTONE_BLOCK
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Enemy Towers"
+              lore:
+              - TNT
+              - Slowness
+              - Hunger
+              - Wither
+              - Arrow
+          slots:
+          - 6
+          - 7
+          - 8
+          target: "enemy"
+        islandUpgrade:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: MONSTER_EGG
+            meta:
+              ==: ItemMeta
+              meta-type: SPAWN_EGG
+              display-name: "island upgrades"
+              id: villager
+              lore:
+              - lol
+          slots:
+          - 4
+          target: "upgrade"
+    friendly:
+      size: 9
+      name: "§3Friendly Towers"
+      items:
+        regeneration:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 1
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Regeneration"
+              lore:
+              - "cost: 15"
+          slots:
+          - 0
+          target: "buy"
+        haste:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 4
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Haste"
+              lore:
+              - "cost: 10"
+          slots:
+          - 1
+          target: "buy"
+        speed:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 0
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Speed"
+              lore:
+              - "cost: 7"
+          slots:
+          - 2
+          target: "buy"
+    enemy:
+      size: 9
+      name: "§4Enemy Towers"
+      items:
+        tnt:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 14
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "TNT"
+              lore:
+              - "cost: 15"
+          slots:
+          - 0
+          target: "buy"
+        slowness:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 10
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Slowness"
+              lore:
+              - "cost: 15"
+          slots:
+          - 1
+          target: "buy"
+        hunger:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 13
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Hunger"
+              lore:
+              - "cost: 15"
+          slots:
+          - 2
+          target: "buy"
+        wither:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 15
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Wither"
+              lore:
+              - "cost: 15"
+          slots:
+          - 3
+          target: "buy"
+        arrow:
+          item:
+            ==: org.bukkit.inventory.ItemStack
+            type: WOOL
+            damage: 8
+            meta:
+              ==: ItemMeta
+              meta-type: UNSPECIFIC
+              display-name: "Arrow"
+              lore:
+              - "cost: 15"
+          slots:
+          - 4
+          target: "buy"

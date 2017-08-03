@@ -1,0 +1,115 @@
+islandData:
+  default:
+    X: -200000
+    Z: -200000
+  islandTypes:
+    island1:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -200000.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default
+      enabled: true
+    island2:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199971.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default2
+      enabled: true
+    island3:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199942.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default3
+      enabled: true
+    island4:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199913.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default4
+      enabled: true
+    island5:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199884.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default5
+      enabled: true
+    island6:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199855.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default6
+      enabled: true
+    island7:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199826.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default7
+      enabled: true
+    island8:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199797.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default8
+      enabled: true
+    island9:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199768.0
+        pitch: 0.0
+        yaw: 0.0
+      name: default9
+      enabled: true
+    island10:
+      defaultLocation:
+        ==: org.bukkit.Location
+        world: world
+        x: -201000.0
+        y: 76.0
+        z: -199739.0
+        pitch: 0.0
+        yaw: 0.0
+      name: fakU
+      enabled: false

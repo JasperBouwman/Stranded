@@ -1,0 +1,15 @@
+main: com.Stranded.Main
+version: 1.12
+name: Stranded
+authors: [The_Spaceman, 7he_4rch3r]
+
+commands:
+  nexus:
+    description: summon a nexus
+  edit:
+    description: test
+  war:
+    description: testas
+  island:
+    description: get item
+    aliases: [i]

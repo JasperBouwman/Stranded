@@ -1,0 +1,11 @@
+{
+  "text": "[quoted] <The_Spaceman> sdfu ",
+  "clickEvent": {
+    "action": "suggest_command",
+    "value": "/quote %start_quote% [quoted] <The_Spaceman> sdfu  &end_quote%"
+  },
+  "hoverEvent": {
+    "action:": "show_text",
+    "value": "<The_Spaceman> rsfxc "
+  }
+}

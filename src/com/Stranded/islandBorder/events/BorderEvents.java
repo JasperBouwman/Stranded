@@ -10,15 +10,17 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 
+import static com.Stranded.commands.war.Add.wandStuff;
+
 public class BorderEvents implements Listener {
 
+    private boolean loop = false;
     private Main p;
+    private BorderUtils bu = new BorderUtils();
 
     public BorderEvents(Main main) {
         p = main;
     }
-
-    private BorderUtils bu = new BorderUtils();
 
     @EventHandler
     @SuppressWarnings("unused")
@@ -42,6 +44,9 @@ public class BorderEvents implements Listener {
     @EventHandler
     @SuppressWarnings("unused")
     public void onPlayerInteract(PlayerInteractEvent e) {
+
+        e.setCancelled(wandStuff(e, p));
+
         if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             return;
         }

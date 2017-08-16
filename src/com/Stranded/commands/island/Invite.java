@@ -22,7 +22,7 @@ public class Invite extends CmdManager implements Runnable {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
         if (args.length == 2) {
 
             if (!p.getConfig().contains("island." + player.getName())) {
@@ -76,7 +76,6 @@ public class Invite extends CmdManager implements Runnable {
     @Override
     public void run() {
         //pending to remove a invite
-        player.sendMessage("");
     }
 
 //    public static void invite(Player sender, String invited, Main p) {

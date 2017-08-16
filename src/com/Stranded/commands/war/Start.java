@@ -3,6 +3,7 @@ package com.Stranded.commands.war;
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ public class Start extends CmdManager implements Runnable {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         if (!p.getConfig().contains("island." + player.getName())) {
             player.sendMessage("you aren't in an island");
@@ -148,18 +149,18 @@ public class Start extends CmdManager implements Runnable {
     @Override
     public void run() {
 
-        Files war = new Files(p, "warData.yml");
-
-        ArrayList<String> list = (ArrayList<String>) war.getConfig().getStringList("war.pending.memberInvite." + p.getConfig().getString("island." + player.getName()) + ".warriors");
-
-        for (String s : list) {
-            if (Bukkit.getPlayerExact(s) != null) {
-                Bukkit.getPlayerExact(s).sendMessage("not everyone answered, the war does,t get send to other islands");
-            }
-        }
-
-        war.getConfig().set("war.pending.memberInvite." + p.getConfig().contains("island." + player.getName()), null);
-        war.saveConfig();
+//        Files war = new Files(p, "warData.yml");
+//
+//        ArrayList<String> list = (ArrayList<String>) war.getConfig().getStringList("war.pending.memberInvite." + p.getConfig().getString("island." + player.getName()) + ".warriors");
+//
+//        for (String s : list) {
+//            if (Bukkit.getPlayerExact(s) != null) {
+//                Bukkit.getPlayerExact(s).sendMessage("not everyone answered, the war does,t get send to other islands");
+//            }
+//        }
+//
+//        war.getConfig().set("war.pending.memberInvite." + p.getConfig().contains("island." + player.getName()), null);
+//        war.saveConfig();
 
     }
 }

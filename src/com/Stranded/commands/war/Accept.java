@@ -1,6 +1,7 @@
 package com.Stranded.commands.war;
 
 import com.Stranded.commands.CmdManager;
+import org.bukkit.entity.Player;
 
 public class Accept extends CmdManager {
     @Override
@@ -14,7 +15,7 @@ public class Accept extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         if (!p.getConfig().contains("island." + player.getName())) {
             player.sendMessage("you aren't in an island");

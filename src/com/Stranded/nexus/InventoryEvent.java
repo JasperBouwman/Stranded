@@ -189,7 +189,7 @@ public class InventoryEvent implements Listener {
         player.openInventory(new VillagerInteract(p).inv("main", player));
     }
 
-    private static ItemStack newItemStack(Material m, int damage, String displayName) {
+    public static ItemStack newItemStack(Material m, int damage, String displayName) {
 
         ItemStack is = new ItemStack(m, (byte) 1, (short) damage);
         ItemMeta im = is.getItemMeta();

@@ -109,7 +109,7 @@ public class IslandGeneration {
         return v.getLocation();
     }
 
-    private static void setBlock(Block blockFrom, Block blockTo) {
+    public static void setBlock(Block blockFrom, Block blockTo) {
 
         blockTo.setType(blockFrom.getType());
         blockTo.setData(blockFrom.getData());
@@ -162,12 +162,17 @@ public class IslandGeneration {
 
                 break;
             case CHEST:
+            case TRAPPED_CHEST:
 
                 Chest toChest = (Chest) blockTo.getState();
                 Chest fromChest = (Chest) blockFrom.getState();
 
                 toChest.setCustomName(fromChest.getCustomName());
-                toChest.getInventory().setContents(fromChest.getInventory().getContents());
+                try {
+                    toChest.getInventory().setContents(fromChest.getInventory().getContents());
+                } catch (IllegalArgumentException e) {
+                    //
+                }
                 toChest.setLock(fromChest.getLock());
                 toChest.update();
 
@@ -335,7 +340,8 @@ public class IslandGeneration {
                 toShulkerBox.update();
 
                 break;
+            default:
+                return;
         }
-
     }
 }

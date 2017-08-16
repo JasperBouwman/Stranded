@@ -1,5 +1,7 @@
 package com.Stranded;
 
+import com.Stranded.commands.tabComplete.IslandTabComplete;
+import com.Stranded.commands.tabComplete.WarTabComplete;
 import com.Stranded.events.LoginEvent;
 import com.Stranded.islandBorder.events.*;
 import com.Stranded.worldGeneration.WorldGenerate;
@@ -16,25 +18,20 @@ import com.Stranded.towers.TowerManager;
 import com.Stranded.towers.events.BlockPlace;
 import com.Stranded.towers.events.PlayerInteract;
 import com.Stranded.towers.events.Tnt;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main extends JavaPlugin {
 
     public void onEnable() {
 
         getCommand("nexus").setExecutor(new Nexus(this));
-        getCommand("edit").setExecutor(new Edit());
+        getCommand("edit").setExecutor(new Edit(this));
         getCommand("war").setExecutor(new War(this));
         getCommand("island").setExecutor(new Island(this));
-//        getCommand("i").setAliases(new  ArrayList<String>().add("i"));
+
+        getCommand("island").setTabCompleter(new IslandTabComplete(this));
+        getCommand("war").setTabCompleter(new WarTabComplete(this));
 
         PluginManager pm = getServer().getPluginManager();
         //boarder
@@ -55,7 +52,6 @@ public class Main extends JavaPlugin {
         pm.registerEvents(new CobbleGenEvent(), this);
         pm.registerEvents(new LoginEvent(this), this);
 
-
         PlayerEffects pe = new PlayerEffects(this);
         pe.Effects();
 
@@ -73,35 +69,11 @@ public class Main extends JavaPlugin {
         Files islands = new Files(this, "islands.yml");
         islands.saveDefaultConfig();
 
-        Files war = new Files(this, "warData.yml");
-        war.saveDefaultConfig();
+        Files warData = new Files(this, "warData.yml");
+        warData.saveDefaultConfig();
 
-
-
-//        String jsonMessage = "{text: \"This is some text!\"}";
-//        ReflectionUtils reflectChat = new ReflectionUtils(null, getNMSClass("ChatSerializer"));
-//        Object chatComponent = ReflectionUtils.invokeMethod(reflectChat.getMethodDeclared("a", String.class), null, jsonMessage);
-//        Object packetPlayOutChat = ReflectionUtils.constructObject(new ReflectionUtils(null, getNMSClass("PacketPlayOutChat")).getConstructor(getNMSClass("IChatBaseComponent")), chatComponent);
-//        Field playerConnection = new ReflectionUtils(null, getNMSClass("EntityPlayer")).getFieldDeclared("playerConnection");
-//        Method sendPacket = new ReflectionUtils(null, getNMSClass("PlayerConnection")).getMethodDeclared("sendPacket", getNMSClass("Packet"));
-//
-//        for (Player player : Bukkit.getOnlinePlayers()) {
-//            Object handle = ReflectionUtils.invokeMethod(new ReflectionUtils(player, player.getClass()).getMethodDeclared("getHandle"), player);
-//            Object connection = ReflectionUtils.getFieldValue(playerConnection, handle);
-//            ReflectionUtils.invokeMethod(sendPacket, connection, packetPlayOutChat);
-//        }
-
-
+        Files warIslands = new Files(this, "warIslands.yml");
+        warIslands.saveDefaultConfig();
 
     }
-
-//    public static final String bukkitVersion;
-//    static {
-//        bukkitVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-//    }
-//
-//    private Class<?> getNMSClass(String name) {
-//        return ReflectionUtils.getClassForName("net.minecraft.server." + bukkitVersion + "." + name);
-//    }
-
 }

@@ -12,6 +12,10 @@ public class BorderUtils {
 
     public boolean border(Location location, Main p) {
 
+        if (!location.getWorld().getName().equals("Islands")) {
+            return false;
+        }
+
         if (location.getBlockX() <= -200987 && location.getBlockX() >= -201013 &&
                 location.getBlockZ() >= -200013 && location.getBlockZ() <= -199726) {
             return false;
@@ -58,6 +62,10 @@ public class BorderUtils {
     public boolean border(Location location, Main p, Player player) {
         try {
             Files f = new Files(p, "islands.yml");
+
+            if (true) {
+                return false;
+            }
 
             if (!player.getWorld().getName().equals("Islands")) {
                 return false;

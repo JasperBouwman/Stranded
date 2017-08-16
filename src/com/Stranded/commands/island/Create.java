@@ -6,6 +6,7 @@ import com.Stranded.worldGeneration.IslandGeneration;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
@@ -22,7 +23,7 @@ public class Create extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
         if (args.length == 1) {
             player.sendMessage("pls enter a name and a island type");
         } else if (args.length == 2) {

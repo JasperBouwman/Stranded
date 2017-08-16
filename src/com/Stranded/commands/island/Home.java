@@ -4,6 +4,7 @@ import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 public class Home extends CmdManager {
     @Override
@@ -17,7 +18,7 @@ public class Home extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         if (!p.getConfig().contains("island." + player.getName())) {
             player.sendMessage("your aren't in an island");

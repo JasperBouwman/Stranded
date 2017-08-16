@@ -3,6 +3,7 @@ package com.Stranded.commands.island;
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 public class Visit extends CmdManager {
     @Override
@@ -16,7 +17,7 @@ public class Visit extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         Files f = new Files(p, "islands.yml");
 

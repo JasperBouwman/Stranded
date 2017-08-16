@@ -23,7 +23,7 @@ import java.util.List;
 public class Island implements CommandExecutor {
     private Main p;
 
-    private List<CmdManager> actions = new ArrayList<>();
+    public List<CmdManager> actions = new ArrayList<>();
 
     public Island(Main main) {
         p = main;
@@ -72,9 +72,8 @@ public class Island implements CommandExecutor {
 
         for (CmdManager action : this.actions) {
             if (args[0].toLowerCase().equals(action.getName()) || args[0].toLowerCase().equals(action.getAlias())) {
-                action.setPlayer(player);
                 action.setMain(p);
-                action.run(args);
+                action.run(args, player);
                 return false;
             }
         }

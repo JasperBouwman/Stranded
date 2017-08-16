@@ -2,6 +2,7 @@ package com.Stranded.commands.island;
 
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,7 @@ public class Delete extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         Files f = new Files(p, "islands.yml");
 

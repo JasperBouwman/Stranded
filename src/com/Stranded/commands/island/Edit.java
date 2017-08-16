@@ -3,6 +3,7 @@ package com.Stranded.commands.island;
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class Edit extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         if (!player.hasPermission("Stranded.editDefaultIslands")) {
             player.sendMessage("no permission");

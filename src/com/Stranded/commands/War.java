@@ -4,7 +4,7 @@ import com.Stranded.FancyMessageUtil;
 import com.Stranded.Main;
 import com.Stranded.commands.war.Edit;
 import com.Stranded.commands.war.Accept;
-import com.Stranded.commands.war.Generate;
+import com.Stranded.commands.war.Add;
 import com.Stranded.commands.war.Ready;
 import com.Stranded.commands.war.Start;
 import org.bukkit.Location;
@@ -26,11 +26,11 @@ public class War implements CommandExecutor {
         actions.add(new Start());
         actions.add(new Accept());
         actions.add(new Ready());
-        actions.add(new Generate());
+        actions.add(new Add());
         actions.add(new Edit());
     }
 
-    private List<CmdManager> actions = new ArrayList<>();
+    public List<CmdManager> actions = new ArrayList<>();
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
@@ -70,9 +70,8 @@ public class War implements CommandExecutor {
 
             for (CmdManager action : this.actions) {
                 if (args[0].toLowerCase().equals(action.getName()) || args[0].toLowerCase().equals(action.getAlias())) {
-                    action.setPlayer(player);
                     action.setMain(p);
-                    action.run(args);
+                    action.run(args, player);
                     return false;
                 }
             }

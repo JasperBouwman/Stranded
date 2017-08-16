@@ -1,0 +1,5 @@
+warIslands:
+  nextLocation:
+    X: -300000
+    Z: -300000
+    newZ: -300000

@@ -1,5 +1,6 @@
 package com.Stranded.commands;
 
+import com.Stranded.Main;
 import com.Stranded.worldGeneration.Generator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -7,9 +8,16 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class Edit implements CommandExecutor {
+
+    Main p;
+
+    public Edit(Main instance) {
+        p = instance;
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 
@@ -25,13 +33,8 @@ public class Edit implements CommandExecutor {
 
         if (args.length == 0) {
 
-            for (double x = 1; x <= 100; x++) {
-
-                double y = Math.sinh((x + 30)/20);
-
-                player.sendMessage(x + " " + y);
-
-            }
+            int ping = ((CraftPlayer) player).getHandle().ping;
+            player.sendMessage(ping + "");
 
         }
 

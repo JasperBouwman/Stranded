@@ -21,7 +21,7 @@ public class Ready extends CmdManager implements Runnable {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
 
         if (!p.getConfig().contains("island." + player.getName())) {
             player.sendMessage("you aren't in an island");
@@ -163,18 +163,18 @@ public class Ready extends CmdManager implements Runnable {
     @Override
     public void run() {
 
-        Files war = new Files(p, "warData.yml");
-
-        ArrayList<String> list = (ArrayList<String>) war.getConfig().getStringList("war.pending.memberInvite." + p.getConfig().getString("island." + player.getName()) + ".warriors");
-
-        for (String s : list) {
-            if (Bukkit.getPlayerExact(s) != null) {
-                Bukkit.getPlayerExact(s).sendMessage("no island has accepted this war request");
-            }
-        }
-
-        war.getConfig().set("war.pending.islandInvite." + p.getConfig().contains("island." + player.getName()), null);
-        war.saveConfig();
+//        Files war = new Files(p, "warData.yml");
+//
+//        ArrayList<String> list = (ArrayList<String>) war.getConfig().getStringList("war.pending.memberInvite." + p.getConfig().getString("island." + player.getName()) + ".warriors");
+//
+//        for (String s : list) {
+//            if (Bukkit.getPlayerExact(s) != null) {
+//                Bukkit.getPlayerExact(s).sendMessage("no island has accepted this war request");
+//            }
+//        }
+//
+//        war.getConfig().set("war.pending.islandInvite." + p.getConfig().contains("island." + player.getName()), null);
+//        war.saveConfig();
 
     }
 }

@@ -4,6 +4,7 @@ import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class Confirm extends CmdManager {
     }
 
     @Override
-    public void run(String[] args) {
+    public void run(String[] args, Player player) {
         if (args.length == 1) {
             ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("deleteIsland");
             if (list.contains(player.getName())) {

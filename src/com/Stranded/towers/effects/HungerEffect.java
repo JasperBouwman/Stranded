@@ -5,9 +5,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class HungerEffect {
-    public void eff(Player player, int lvl) {
+    public static void eff(Player player, int lvl) {
 
-        int strengt = 0;
+        int strength = 0;
         int length = 1;
 
         if (lvl == 1) {
@@ -28,10 +28,10 @@ public class HungerEffect {
             length = 160;
         } else if (lvl == 0) {
             length = 200;
-            strengt = 1;
+            strength = 1;
         }
-        player.sendMessage("you just got hunger " + (strengt + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, length, strengt, false, false));
+        player.sendMessage("you just got hunger " + (strength + 1) + " for " + length / 20 + " seconds");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, length, strength, false, false));
 
     }
 }

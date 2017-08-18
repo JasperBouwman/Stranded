@@ -43,7 +43,7 @@ public class VillagerInteract implements Listener {
         }
     }
 
-    public Inventory inv(String invName, Player player) {
+    Inventory inv(String invName, Player player) {
 
         Files f = new Files(p, "pluginData.yml");
         Files islands = new Files(p, "islands.yml");

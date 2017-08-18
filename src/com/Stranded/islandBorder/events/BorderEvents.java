@@ -14,7 +14,6 @@ import static com.Stranded.commands.war.Add.wandStuff;
 
 public class BorderEvents implements Listener {
 
-    private boolean loop = false;
     private Main p;
     private BorderUtils bu = new BorderUtils();
 
@@ -68,7 +67,7 @@ public class BorderEvents implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "deprecation"})
     public void onPlayerPickupItem(PlayerPickupItemEvent e) {
         e.setCancelled(bu.border(e.getPlayer().getLocation(), p, e.getPlayer()));
     }

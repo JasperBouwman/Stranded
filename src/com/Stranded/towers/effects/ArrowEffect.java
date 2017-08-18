@@ -9,17 +9,11 @@ import org.bukkit.util.Vector;
 
 public class ArrowEffect implements Runnable {
 
-    private Main p;
     private Player player;
 
-    public ArrowEffect(Main main, Player pl) {
-        p = main;
+    public void eff(Main p, Player pl, int lvl) {
+
         player = pl;
-    }
-
-    public void eff(int lvl) {
-
-
 
         int amount = 1;
 

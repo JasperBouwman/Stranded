@@ -7,7 +7,7 @@ import org.bukkit.util.Vector;
 
 public class TntEffect {
 
-    public void eff(Player player, Location l) {
+    public static void eff(Player player, Location l) {
 
 //        Location l1 = l;
         Location l2 = player.getLocation();

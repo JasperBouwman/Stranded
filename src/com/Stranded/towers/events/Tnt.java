@@ -18,8 +18,6 @@ public class Tnt implements Listener {
 
             Location l = event.getEntity().getLocation();
             event.getEntity().getWorld().createExplosion(l.getX(), l.getY(), l.getZ(), 2f, false, false);
-
-            event.setCancelled(true);
         }
     }
 }

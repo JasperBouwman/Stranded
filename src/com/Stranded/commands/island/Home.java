@@ -3,7 +3,6 @@ package com.Stranded.commands.island;
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 public class Home extends CmdManager {

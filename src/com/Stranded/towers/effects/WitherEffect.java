@@ -5,9 +5,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class WitherEffect {
-    public void eff(Player player, int lvl) {
+    public static void eff(Player player, int lvl) {
 
-        int strengt = 0;
+        int strength = 0;
         int length = 1;
 
         if (lvl == 1) {
@@ -29,8 +29,8 @@ public class WitherEffect {
         } else if (lvl == 0) {
             length = 140;
         }
-        player.sendMessage("you just got wither " + (strengt + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, length, strengt, false, false));
+        player.sendMessage("you just got wither " + (strength + 1) + " for " + length / 20 + " seconds");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, length, strength, false, false));
 
     }
 }

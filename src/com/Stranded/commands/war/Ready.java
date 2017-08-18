@@ -7,8 +7,6 @@ import com.Stranded.commands.CmdManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-
 public class Ready extends CmdManager implements Runnable {
     @Override
     public String getName() {

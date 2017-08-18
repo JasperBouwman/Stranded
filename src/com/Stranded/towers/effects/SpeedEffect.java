@@ -6,7 +6,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class SpeedEffect {
 
-    public void eff(Player player, int lvl) {
+    public static void eff(Player player, int lvl) {
 
         int strength = 0;
         int length = 1;

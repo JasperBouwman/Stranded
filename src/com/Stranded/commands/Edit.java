@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 
 public class Edit implements CommandExecutor {
 
-    Main p;
+    private Main p;
 
     public Edit(Main instance) {
         p = instance;

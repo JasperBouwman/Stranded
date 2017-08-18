@@ -22,7 +22,7 @@ public class MoonCraterPopulator extends BlockPopulator {
             int centerZ = (source.getZ() << 4) + random.nextInt(16);
             int centerY = world.getHighestBlockYAt(centerX, centerZ);
             Vector center = new BlockVector(centerX, centerY, centerZ);
-            int radius = 0;
+            int radius;
 
             if (random.nextInt(100) <= BIG_CRATER_CHANCE) {
                 radius = random.nextInt(BIG_CRATER_SIZE - MIN_CRATER_SIZE + 1) + MIN_CRATER_SIZE;

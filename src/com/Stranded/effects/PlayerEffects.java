@@ -134,7 +134,7 @@ public class PlayerEffects implements Runnable {
                     Bukkit.getServer().getPlayerExact(s).addPotionEffect(
                             new PotionEffect(PotionEffectType.REGENERATION, 999999, 0, true, false));
 
-                } else if (l <= 100 && l >= 80) {
+                } else if (l < 100 && l >= 80) {
 
                     Bukkit.getServer().getPlayerExact(s).addPotionEffect(
                             new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 1, true, false));

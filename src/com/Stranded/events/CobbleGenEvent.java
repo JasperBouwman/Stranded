@@ -12,13 +12,13 @@ import java.util.Random;
 public class CobbleGenEvent implements Listener {
 
     @EventHandler
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "deprecation"})
     public void onFromTo(BlockFromToEvent event) {
         int id = event.getBlock().getTypeId();
         if (id >= 8 && id <= 11) {
             Block b = event.getToBlock();
-            int toid = b.getTypeId();
-            if (toid == 0) {
+            int toID = b.getTypeId();
+            if (toID == 0) {
                 if (generatesCobble(id, b)) {
                     Random pick = new Random();
                     int chance = 0;
@@ -52,6 +52,7 @@ public class CobbleGenEvent implements Listener {
         }
     private final BlockFace[] faces = new BlockFace[] { BlockFace.SELF, BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
 
+    @SuppressWarnings("deprecation")
     private boolean generatesCobble(int id, Block b) {
         int mirrorID1 = (id == 8 || id == 9 ? 10 : 8);
         int mirrorID2 = (id == 8 || id == 9 ? 11 : 9);

@@ -45,7 +45,7 @@ public class Main extends JavaPlugin {
         pm.registerEvents(new VillagerInteract(this), this);
         pm.registerEvents(new DamageEvent(), this);
         //towers
-        pm.registerEvents(new PlayerInteract(this), this);
+        pm.registerEvents(new PlayerInteract(), this);
         pm.registerEvents(new BlockPlace(this), this);
         pm.registerEvents(new Tnt(), this);
         //other

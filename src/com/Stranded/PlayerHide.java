@@ -5,9 +5,9 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
-public class PlayerHide {
+class PlayerHide {
 
-    public static void playerHide(Main p) {
+    static void playerHide(Main p) {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             Files f = new Files(p, "islands.yml");
@@ -38,5 +38,4 @@ public class PlayerHide {
             }
         }
     }
-
 }

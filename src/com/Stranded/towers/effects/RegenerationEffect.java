@@ -5,9 +5,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class RegenerationEffect {
-    public void eff(Player player, int lvl) {
 
-        int strengt = 0;
+    public static void eff(Player player, int lvl) {
+
+        int strength = 0;
         int length = 1;
 
         if (lvl == 1) {
@@ -29,8 +30,8 @@ public class RegenerationEffect {
         } else if (lvl == 0) {
             length = 120;
         }
-        player.sendMessage("you just got regeneration " + (strengt + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, length, strengt, false, false));
+        player.sendMessage("you just got regeneration " + (strength + 1) + " for " + length / 20 + " seconds");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, length, strength, false, false));
 
     }
 }

@@ -29,7 +29,6 @@ public class Edit extends CmdManager {
         if (args.length > 1) {
             if (args[1].equalsIgnoreCase("build")) {
                 if (args.length == 3) {
-//                com.Stranded.commands.island.Edit.EditIsland(p, player, args[2]);
 
                     Files f = new Files(p, "islands.yml");
                     for (String s : f.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
@@ -68,7 +67,6 @@ public class Edit extends CmdManager {
 
             } else if (args[1].equalsIgnoreCase("rename")) {
                 if (args.length == 4) {
-//                com.Stranded.commands.island.Edit.Rename(p, args[2], args[3], player);
 
                     Files f = new Files(p, "islands.yml");
 
@@ -98,32 +96,4 @@ public class Edit extends CmdManager {
         }
 
     }
-
-//    public static void EditIsland(Main p, Player player, String island) {
-//        Files f = new Files(p, "islands.yml");
-//        for (String s : f.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-//            if (island.equalsIgnoreCase(s)) {
-//                Location l = (Location) f.getConfig().get("islandData.islandTypes." + s + ".defaultLocation");
-//                player.teleport(l);
-//                return;
-//            }
-//        }
-//
-//        player.sendMessage("not a valid island name given");
-//
-//    }
-
-//    public static void Rename(Main p, String oldName, String newName, Player player) {
-//        Files f = new Files(p, "islands.yml");
-//
-//        for (String s : f.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-//            if (oldName.equalsIgnoreCase(f.getConfig().getString("islandData.islandTypes." + s + ".name"))) {
-//                f.getConfig().set("islandData.islandTypes." + s + ".name", newName);
-//                player.sendMessage("renamed");
-//                f.saveConfig();
-//                return;
-//            }
-//        }
-//        player.sendMessage("invalid island type given");
-//    }
 }

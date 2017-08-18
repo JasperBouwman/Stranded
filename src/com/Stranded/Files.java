@@ -47,9 +47,7 @@ public class Files {
     }
 
     public void saveConfig() {
-        if (fileConfiguration == null || configFile == null) {
-            return;
-        } else {
+        if (fileConfiguration != null && configFile != null) {
             try {
                 getConfig().save(configFile);
             } catch (IOException ex) {

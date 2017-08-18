@@ -5,9 +5,6 @@ import com.Stranded.Main;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/**
- * Created on 05-Jul-17.
- */
 public class BorderUtils {
 
     public boolean border(Location location, Main p) {

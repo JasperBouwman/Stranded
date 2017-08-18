@@ -5,9 +5,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class HasteEffect {
-    public void eff(Player player, int lvl) {
+    public static void eff(Player player, int lvl) {
 
-        int strengt = 0;
+        int strength = 0;
         int length = 1;
 
         if (lvl == 1) {
@@ -28,9 +28,9 @@ public class HasteEffect {
             length = 140;
         } else if (lvl == 0) {
             length = 160;
-            strengt = 1;
+            strength = 1;
         }
-        player.sendMessage("you just got haste " + (strengt + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, length, strengt, false, false));
+        player.sendMessage("you just got haste " + (strength + 1) + " for " + length / 20 + " seconds");
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, length, strength, false, false));
     }
 }

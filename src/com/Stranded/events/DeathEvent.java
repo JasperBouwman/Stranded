@@ -23,15 +23,12 @@ public class DeathEvent implements Listener {
     @SuppressWarnings("unused")
     public void Death(PlayerDeathEvent e) {
 
-        if (p.getConfig().contains("warMode." + e.getEntity().getPlayer())) {
-            if (p.getConfig().getBoolean("warMode." + e.getEntity().getPlayer())) {
+        if (p.getConfig().contains("warMode." + e.getEntity().getPlayer().getName())) {
+            if (p.getConfig().getBoolean("warMode." + e.getEntity().getPlayer().getName())) {
                 Files f = new Files(p, "islands.yml");
                 Location l = (Location) f.getConfig().get("island." + p.getConfig().getString("island." + e.getEntity().getPlayer().getName()) + ".location");
                 e.getEntity().getPlayer().teleport(l);
             }
         }
-
     }
-
-
 }

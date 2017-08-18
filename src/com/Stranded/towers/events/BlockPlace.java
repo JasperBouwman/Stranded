@@ -53,46 +53,35 @@ public class BlockPlace implements Listener {
                     type = s;
                 }
                 e.setCancelled(true);
-                if (type.equals("TNT")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    TntTower tower = new TntTower();
-                    tower.Tower(l);
 
 
-                } else if (type.equals("Slowness")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    SlowTower tower = new SlowTower();
-                    tower.Tower(l);
-
-
-                } else if (type.equals("Hunger")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    HungerTower tower = new HungerTower();
-                    tower.Tower(l);
-
-
-                } else if (type.equals("Wither")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    WitherTower tower = new WitherTower();
-                    tower.Tower(l);
-
-
-                } else if (type.equals("Arrow")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    ArrowTower tower = new ArrowTower();
-                    tower.Tower(l);
-
-
+                switch (type) {
+                    case "TNT":
+                        Location TNTLocation = block.getLocation();
+                        SaveTower(TNTLocation, player, type);
+                        new TntTower().Tower(TNTLocation);
+                        break;
+                    case "Slowness":
+                        Location SlowLocation = block.getLocation();
+                        SaveTower(SlowLocation, player, type);
+                        SlowTower tower = new SlowTower();
+                        tower.Tower(SlowLocation);
+                        break;
+                    case "Hunger":
+                        Location HungerLocation = block.getLocation();
+                        SaveTower(HungerLocation, player, type);
+                        new HungerTower().Tower(HungerLocation);
+                        break;
+                    case "Wither":
+                        Location WitherLocation = block.getLocation();
+                        SaveTower(WitherLocation, player, type);
+                        new WitherTower().Tower(WitherLocation);
+                        break;
+                    case "Arrow":
+                        Location ArrowLocation = block.getLocation();
+                        SaveTower(ArrowLocation, player, type);
+                        new ArrowTower().Tower(ArrowLocation);
+                        break;
                 }
             } else if (im.getDisplayName().equals("§3Friendly Tower")) {
 
@@ -107,34 +96,29 @@ public class BlockPlace implements Listener {
                     type = s;
                 }
                 e.setCancelled(true);
-                if (type.equals("Haste")) {
 
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    HasteTower tower = new HasteTower();
-                    tower.Tower(l);
-
-
-                } else if (type.equals("Regeneration")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    RegenerationTower tower = new RegenerationTower();
-                    tower.Tower(l);
-
-
-                } else if (type.equals("Speed")) {
-
-                    Location l = block.getLocation();
-                    SaveTower(l, player, type);
-                    SpeedTower tower = new SpeedTower();
-                    tower.Tower(l);
-
+                switch (type) {
+                    case "Haste":
+                        Location HasteTower = block.getLocation();
+                        SaveTower(HasteTower, player, type);
+                        new HasteTower().Tower(HasteTower);
+                        break;
+                    case "Regeneration":
+                        Location RegenLocation = block.getLocation();
+                        SaveTower(RegenLocation, player, type);
+                        new RegenerationTower().Tower(RegenLocation);
+                        break;
+                    case "Speed":
+                        Location SpeedLocation = block.getLocation();
+                        SaveTower(SpeedLocation, player, type);
+                        new SpeedTower().Tower(SpeedLocation);
+                        break;
                 }
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void SaveTower(Location l, Player player, String type) {
 
         Files f = new Files(p, "islands.yml");
@@ -177,7 +161,7 @@ public class BlockPlace implements Listener {
                     for (int yy = minY; yy <= maxY; yy++) {
                         for (int zz = minZ; zz <= maxZ; zz++) {
                             Block block = Bukkit.getServer().getWorld(L1.getWorld().getName()).getBlockAt(xx, yy, zz);
-                            f.getConfig().set("island." + island + ".towers." + id + ".terrain." + blockCount + ".type", block.getTypeId());
+                            f.getConfig().set("island." + island + ".towers." + id + ".terrain." + blockCount + ".type", block.getType().getId());
                             f.getConfig().set("island." + island + ".towers." + id + ".terrain." + blockCount + ".data", block.getData());
                             blockCount++;
                         }

@@ -1,9 +1,9 @@
 package com.Stranded.commands.tabComplete;
 
-import com.Stranded.Files;
 import com.Stranded.Main;
-import com.Stranded.commands.CmdManager;
 import com.Stranded.commands.War;
+import com.Stranded.commands.CmdManager;
+import com.Stranded.commands.WarIsland;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -15,14 +15,12 @@ import java.util.List;
 
 public class WarTabComplete implements TabCompleter {
 
+    private static List<String> War = new ArrayList<>();
     private Main p;
 
     public WarTabComplete(Main main) {
         p = main;
     }
-
-    private static List<String> War = new ArrayList<>();
-
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
@@ -48,11 +46,8 @@ public class WarTabComplete implements TabCompleter {
 
     private void fillTabComplete(String[] args, Player player) {
 
-        Files islands = new Files(p, "islands.yml");
-
         for (CmdManager command : new War(p).actions) {
             War.add(command.getName());
         }
-
     }
 }

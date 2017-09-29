@@ -1,11 +1,11 @@
 package com.Stranded.towers.effects;
 
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class HungerEffect {
-    public static void eff(Player player, int lvl) {
+    public static void eff(Entity entity, int lvl) {
 
         int strength = 0;
         int length = 1;
@@ -30,8 +30,9 @@ public class HungerEffect {
             length = 200;
             strength = 1;
         }
-        player.sendMessage("you just got hunger " + (strength + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, length, strength, false, false));
+        entity.sendMessage("you just got hunger " + (strength + 1) + " for " + length / 20 + " seconds");
+
+        new EffectSupplier(entity, new PotionEffect(PotionEffectType.HUNGER, length, strength, false, false));
 
     }
 }

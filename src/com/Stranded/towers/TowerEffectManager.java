@@ -3,6 +3,7 @@ package com.Stranded.towers;
 import com.Stranded.Main;
 import com.Stranded.towers.effects.*;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 class TowerEffectManager {
@@ -13,7 +14,7 @@ class TowerEffectManager {
         p = main;
     }
 
-    void Effects(String effect, int lvl, Player closestEnemy, Player closestFriendly, Location l) {
+    void Effects(String effect, int lvl, Entity closestEnemy, Entity closestFriendly, Location l) {
 
         switch (effect) {
             case "Tnt":

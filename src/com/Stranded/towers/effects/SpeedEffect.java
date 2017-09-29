@@ -1,12 +1,13 @@
 package com.Stranded.towers.effects;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class SpeedEffect {
 
-    public static void eff(Player player, int lvl) {
+    public static void eff(Entity entity, int lvl) {
 
         int strength = 0;
         int length = 1;
@@ -17,8 +18,9 @@ public class SpeedEffect {
 
         length = i(lvl, length);
 
-        player.sendMessage("you just got speed " + (strength + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, length, strength, false, false));
+        entity.sendMessage("you just got speed " + (strength + 1) + " for " + length / 20 + " seconds");
+
+        new EffectSupplier(entity, new PotionEffect(PotionEffectType.SPEED, length, strength, false, false));
 
     }
     public static int i(int lvl, int length) {

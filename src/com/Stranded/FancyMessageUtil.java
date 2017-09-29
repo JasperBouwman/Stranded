@@ -43,7 +43,7 @@ public class FancyMessageUtil {
         return str.substring(0, str.length() - 1);
     }
 
-    public void asweasfd(Player player) {
+    public void sendMessage(Player player) {
 
         try {
             String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
@@ -67,93 +67,32 @@ public class FancyMessageUtil {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
     }
 
-    @SuppressWarnings("unused")
-    public void sendMessage(Player player) {
-
-        boolean b = false;
-        if (Bukkit.getServer().getWorld(player.getWorld().getName()).getGameRuleValue("sendCommandFeedback").equals("true")) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "false");
-            b = true;
-        }
-
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + player.getName() + " [\"\"," + removeLastChar(message) + "]");
-        if (b) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "true");
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void sendTitle(Player player) {
-        boolean b = false;
-        if (Bukkit.getServer().getWorld(player.getWorld().getName()).getGameRuleValue("sendCommandFeedback").equals("true")) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "false");
-            b = true;
-        }
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " title [\"\"," + removeLastChar(message) + "]");
-        if (b) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "true");
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void sendSubtitle(Player player) {
-        boolean b = false;
-        if (Bukkit.getServer().getWorld(player.getWorld().getName()).getGameRuleValue("sendCommandFeedback").equals("true")) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "false");
-            b = true;
-        }
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " subtitle [\"\"," + removeLastChar(message) + "]");
-        if (b) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "true");
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void sendActionbar(Player player) {
-        boolean b = false;
-        if (Bukkit.getServer().getWorld(player.getWorld().getName()).getGameRuleValue("sendCommandFeedback").equals("true")) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "false");
-            b = true;
-        }
-        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "title " + player.getName() + " actionbar [\"\"," + removeLastChar(message) + "]");
-        if (b) {
-            Bukkit.getServer().getWorld(player.getWorld().getName()).setGameRuleValue("sendCommandFeedback", "true");
-        }
-    }
-
-    @SuppressWarnings("unused")
     public final void clearMessage() {
         message = "";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color) {
         message += "{\"text\":\"" + text + "\",\"color\":\"" + color.toString().toLowerCase() + "\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color, Attributes attribute1) {
         message += "{\"text\":\"" + text + "\",\"color\":\"" + color.toString().toLowerCase() + "\",\"" + attribute1 + "\":\"true\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color, Attributes attribute1,
                               Attributes attribute2) {
         message += "{\"text\":\"" + text + "\",\"color\":\"" + color.toString().toLowerCase() + "\",\"" + attribute1 + "\":\"true\",\"" +
                 attribute2 + "\":\"true\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color, Attributes attribute1,
                               Attributes attribute2, Attributes attribute3) {
         message += "{\"text\":\"" + text + "\",\"color\":\"" + color.toString().toLowerCase() + "\",\"" + attribute1 + "\":\"true\",\"" +
                 attribute2 + "\":\"true\",\"" + attribute3 + "\":\"true\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color, Attributes attribute1,
                               Attributes attribute2, Attributes attribute3, Attributes attribute4) {
 
@@ -161,14 +100,12 @@ public class FancyMessageUtil {
                 attribute2 + "\":\"true\",\"" + attribute3 + "\":\"true\",\"" + attribute4 + "\":\"true\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addText(String text, Colors color, Attributes attribute1,
                               Attributes attribute2, Attributes attribute3, Attributes attribute4, Attributes attribute5) {
         message += "{\"text\":\"" + text + "\",\"color\":\"" + color.toString().toLowerCase() + "\",\"" + attribute1 + "\":\"true\",\"" +
                 attribute2 + "\":\"true\",\"" + attribute3 + "\":\"true\",\"" + attribute4 + "\":\"true\",\"" + attribute5 + "\":\"true\"},";
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String[] hoverText, Colors[] hoverColor) {
 
         message = removeLastChar(removeLastChar(message));
@@ -188,7 +125,6 @@ public class FancyMessageUtil {
 
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String[] hoverText, Colors[] hoverColor,
                                Attributes[] attribute1) {
 
@@ -210,7 +146,6 @@ public class FancyMessageUtil {
         message = removeLastChar(str.toString()) + "]}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String[] hoverText, Colors[] hoverColor,
                                Attributes[] attribute1, Attributes[] attribute2) {
 
@@ -234,7 +169,6 @@ public class FancyMessageUtil {
         message = removeLastChar(str.toString()) + "]}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String[] hoverText, Colors[] hoverColor,
                                Attributes[] attribute1, Attributes[] attribute2, Attributes[] attribute3) {
 
@@ -260,7 +194,6 @@ public class FancyMessageUtil {
         message = removeLastChar(str.toString()) + "]}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String text, String[] hoverText, Colors[] hoverColor,
                                Attributes[] attribute1, Attributes[] attribute2, Attributes[] attribute3, Attributes[] attribute4) {
 
@@ -288,7 +221,6 @@ public class FancyMessageUtil {
         message = removeLastChar(str.toString()) + "]}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addHover(String[] hoverText, Colors[] hoverColor,
                                Attributes[] attribute1, Attributes[] attribute2, Attributes[] attribute3, Attributes[] attribute4, Attributes[] attribute5) {
 
@@ -318,19 +250,16 @@ public class FancyMessageUtil {
         message = removeLastChar(str.toString()) + "]}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addUrl(String url) {
         message = removeLastChar(removeLastChar(message));
         message += ",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + url + "\"}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addCommand(String command) {
         message = removeLastChar(removeLastChar(message));
         message += ",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"" + command + "\"}},";
     }
 
-    @SuppressWarnings("unused")
     public final void addSuggest(String suggestion) {
         message = removeLastChar(removeLastChar(message));
         message += ",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + suggestion + "\"}},";

@@ -1,4 +1,4 @@
-package com.Stranded.commands.war;
+package com.Stranded.commands.warIsland;
 
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
@@ -27,14 +27,17 @@ public class Edit extends CmdManager {
 
         Files f = new Files(p, "warIslands.yml");
 
-        if (args.length == 2) {
-            if (f.getConfig().contains("warIslands.island." + args[1])) {
-                Location l = (Location) f.getConfig().get("warIslands.island." + args[1] + ".L2");
-                l.setY(l.getBlockY() + 5);
-                player.teleport(l);
-                return;
+        if (args.length == 3) {
+            if (f.getConfig().contains("warIslands.motherIsland.island." + args[1])) {
+                if (f.getConfig().contains("warIslands.motherIsland.island." + args[1] + "." + args[2])) {
+                    Location l = (Location) f.getConfig().get("warIslands.island." + args[1] + "." + args[2] + ".spawn.blue");
+                    player.teleport(l);
+                } else {
+                    player.sendMessage("this war id doesn't exist");
+                }
+            } else {
+                player.sendMessage("this war theme doesn't exist");
             }
-            player.sendMessage("this war island doesn't exist");
         } else {
             player.sendMessage("wrong use");
         }

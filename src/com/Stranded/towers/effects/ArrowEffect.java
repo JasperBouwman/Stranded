@@ -4,16 +4,16 @@ import com.Stranded.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
 public class ArrowEffect implements Runnable {
 
-    private Player player;
+    private Entity entity;
 
-    public void eff(Main p, Player pl, int lvl) {
+    public void eff(Main p, Entity pl, int lvl) {
 
-        player = pl;
+        entity = pl;
 
         int amount = 1;
 
@@ -46,8 +46,8 @@ public class ArrowEffect implements Runnable {
 
     @Override
     public void run() {
-        Location l1 = new Location(player.getLocation().getWorld(), player.getLocation().getX(), player.getLocation().getY() + 5, player.getLocation().getZ());
-        Location l2 = player.getLocation();
+        Location l1 = new Location(entity.getLocation().getWorld(), entity.getLocation().getX(), entity.getLocation().getY() + 5, entity.getLocation().getZ());
+        Location l2 = entity.getLocation();
 
         double dX = l1.getX() - l2.getX();
         double dY = l1.getY() - l2.getY();
@@ -60,8 +60,8 @@ public class ArrowEffect implements Runnable {
 
         Vector vector = new Vector(X, Z, Y);
 
-        Arrow arrow = player.getWorld().spawn(new Location(player.getLocation().getWorld(), player.getLocation().getX(),
-                player.getLocation().getY() + 4, player.getLocation().getZ()), Arrow.class);
+        Arrow arrow = entity.getWorld().spawn(new Location(entity.getLocation().getWorld(), entity.getLocation().getX(),
+                entity.getLocation().getY() + 4, entity.getLocation().getZ()), Arrow.class);
 
         arrow.setVelocity(vector);
     }

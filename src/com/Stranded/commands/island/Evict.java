@@ -32,18 +32,35 @@ public class Evict extends CmdManager {
             player.sendMessage("you are not the owner of this island, so you can't evict someone");
             return;
         }
-
         ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + p.getConfig().getString("island." + player.getName()) + ".members");
-
 
         if (args.length == 2) {
             if (list.contains(args[1])) {
+
+                Files warData = new Files(p, "warData.yml");
+                if (p.getConfig().getStringList("playersInWar").contains(args[1])) {
+                    player.sendMessage("you can't evict this player while he is in a war");
+                    return;
+                }
+                if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()))) {
+                    if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()) + ".players." + args[1])) {
+                        player.sendMessage("you can't evict this player, this player is pending for a war");
+                        return;
+                    }
+                }
+                if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()))) {
+                    if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()) + ".players." + args[1])) {
+                        player.sendMessage("you can't evict this player, this player is pending for a war");
+                        return;
+                    }
+                }
+
                 list.remove(args[1]);
                 f.getConfig().set("island." + p.getConfig().getString("island." + player.getName()) + ".members", list);
                 f.saveConfig();
 
                 player.sendMessage("player successfully evicted");
-
+                //todo remove all (towers, xp, inv)
                 if (Bukkit.getPlayerExact(args[1]) != null) {
 
                     Files pluginData = new Files(p, "pluginData.yml");

@@ -9,7 +9,7 @@ import org.bukkit.block.Sign;
 public class WitherTower {
 
     @SuppressWarnings("deprecation")
-    public void Tower(Location l) {
+    public static void Tower(Location l) {
 
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l).setType(Material.OBSIDIAN);
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX() + 1, l.getBlockY(), l.getBlockZ()).setType(Material.OBSIDIAN);

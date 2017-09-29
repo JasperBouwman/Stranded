@@ -23,6 +23,12 @@ public class Home extends CmdManager {
             player.sendMessage("your aren't in an island");
             return;
         }
+
+        if (p.getConfig().getStringList("playersInWar").contains(player.getName())) {
+            player.sendMessage("you can't go to home while you are in a war");
+            return;
+        }
+
         Files f = new Files(p, "islands.yml");
         Location l = (Location) f.getConfig().get("island." + p.getConfig().getString("island." + player.getName()) + ".home");
 

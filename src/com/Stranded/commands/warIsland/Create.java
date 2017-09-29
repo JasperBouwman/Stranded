@@ -1,26 +1,23 @@
-package com.Stranded.commands.war;
+package com.Stranded.commands.warIsland;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import com.Stranded.nexus.InventoryEvent;
-import com.Stranded.worldGeneration.IslandGeneration;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
-public class Add extends CmdManager {
-
+public class Create extends CmdManager {
     private static boolean loop = false;
-    private Location L1S;
-    private Location L2S;
 
     public static boolean wandStuff(PlayerInteractEvent e, Main p) {
         Files f = new Files(p, "warIslands.yml");
@@ -83,7 +80,7 @@ public class Add extends CmdManager {
 
     @Override
     public String getName() {
-        return "add";
+        return "create";
     }
 
     @Override
@@ -94,14 +91,9 @@ public class Add extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
-        if (!player.hasPermission("Stranded.createWarIsland")) {
-            player.sendMessage("you don't have permission");
-            return;
-        }
-
         Files f = new Files(p, "warIslands.yml");
 
-        //war generate <name> <min> <max>
+        //war generate <theme> <min> <max>
 
         if (args.length != 4) {
             if (args.length == 1) {
@@ -129,20 +121,21 @@ public class Add extends CmdManager {
         if (!f.getConfig().contains("warIslands.offset." + player.getName() + ".X")) {
             player.sendMessage("you don't have a valid offset for a war Island, missing: First selection");
             return;
-        } else if (!f.getConfig().contains("warIslands.offset." + player.getName() + ".X")) {
+        } else if (!f.getConfig().contains("warIslands.offset." + player.getName() + ".Z")) {
             player.sendMessage("you don't have a valid offset for a war Island, missing: Second selection");
             return;
         }
 
-//        if (!f.getConfig().getString("warIslands.offset." + player.getName() + ".X.world").equals(f.getConfig().getString("warIslands.offset." + player.getName() + ".Z.world"))) {
-//            player.sendMessage("the selections aren't in the same world, that must be");
-//            return;
-//        }
+        if (!((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getWorld().getName()
+                .equals(((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z")).getWorld().getName())) {
 
-        if (f.getConfig().contains("warIslands.island." + args[1])) {
-            player.sendMessage("this name is already in use");
-            return;
+            if (!((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getWorld().getName()
+                    .equals("War")) {
+                player.sendMessage("the selections aren't in the world 'War', that must be");
+                return;
+            }
         }
+
         int max;
         int min;
         try {
@@ -158,99 +151,97 @@ public class Add extends CmdManager {
             return;
         }
 
-        f.getConfig().set("warIslands.island." + args[1] + ".maxPlayers", max);
-        f.getConfig().set("warIslands.island." + args[1] + ".minPlayers", min);
-        f.getConfig().set("warIslands.island." + args[1] + ".L1", L1S);
-        f.getConfig().set("warIslands.island." + args[1] + ".L2", L2S);
+        if (max < min) {
+            player.sendMessage("the max value is smaller than the min value, this isn't right");
+            return;
+        }
+
+        if (args[1].equalsIgnoreCase("random")) {
+            player.sendMessage("please do not use this theme name, this is used for players to choose a random theme");
+            return;
+        }
+
+        int id = 0;
+        while (true) {
+            if (!f.getConfig().contains("warIslands.island." + args[1] + "." + id)) {
+                break;
+            } else {
+                id++;
+            }
+        }
+
+        Location blueSpawn = (Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X");
+        Location redSpawn = (Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z");
+
+
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".spawn.blue", blueSpawn);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".spawn.red", redSpawn);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".maxPlayers", max);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".minPlayers", min);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".inUse", false);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".armorStand.blue", spawnArmorstand(blueSpawn, "§9"));
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".armorStand.red", spawnArmorstand(redSpawn, "§c"));
+
+        Vector v = getVector(blueSpawn, redSpawn);
+
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.blue", spawnNexus(blueSpawn, v));
+        v = v.multiply(-1);
+        f.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.red", spawnNexus(redSpawn, v));
+
+        f.getConfig().set("warIslands.offset." + player.getName(), null);
+
         f.saveConfig();
 
-        copyIsland(player);
+    }
+
+    private Vector getVector(Location blue, Location red) {
+        return red.toVector().subtract(blue.toVector());
+    }
+
+    private String spawnNexus(Location l, Vector vector) {
+
+        l.setY(l.getY() - 1);
+
+        Villager v = l.getWorld().spawn(l, Villager.class);
+
+        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        list.add(v.getUniqueId().toString());
+        p.getConfig().set("nexus.uuid", list);
+        p.saveConfig();
+
+        v.setCustomNameVisible(false);
+        v.setProfession(Villager.Profession.NITWIT);
+        v.setAI(false);
+        v.isSilent();
+        v.setAdult();
+        v.setCanPickupItems(false);
+        v.setCollidable(true);
+
+        l.setDirection(vector);
+
+        v.teleport(l);
+        return v.getUniqueId().toString();
+    }
+
+    private String spawnArmorstand(Location l, String color) {
+        l.setX(l.getX() + 0.5);
+        l.setZ(l.getZ() + 0.5);
+        l.setY(l.getY() + 2);
+
+        ArmorStand a = l.getWorld().spawn(l, ArmorStand.class);
+
+        a.setCustomName(color + "Health: 20");
+        a.setArms(false);
+        a.setBasePlate(false);
+        a.setSmall(true);
+        a.setVisible(false);
+        a.setCanPickupItems(false);
+        a.setGravity(false);
+        a.setInvulnerable(true);
+        a.setCustomNameVisible(true);
+
+        return a.getUniqueId() + "";
 
     }
 
-    private void copyIsland(Player player) {
-
-        Files f = new Files(p, "warIslands.yml");
-
-        //get locations for copy
-        Location L1 = (Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X");
-        Location L2 = (Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z");
-
-        HashMap<Integer, Block> blockSet = new HashMap<>();
-        int blockCount = 1;
-
-        int minX = Math.min(L1.getBlockX(), L2.getBlockX());
-        int minY = Math.min(L1.getBlockY(), L2.getBlockY());
-        int minZ = Math.min(L1.getBlockZ(), L2.getBlockZ());
-        int maxX = Math.max(L1.getBlockX(), L2.getBlockX());
-        int maxY = Math.max(L1.getBlockY(), L2.getBlockY());
-        int maxZ = Math.max(L1.getBlockZ(), L2.getBlockZ());
-
-        //copy island
-        for (int xx = minX; xx <= maxX; xx++) {
-            for (int yy = minY; yy <= maxY; yy++) {
-                for (int zz = minZ; zz <= maxZ; zz++) {
-
-                    Block block = player.getWorld().getBlockAt(xx, yy, zz);
-
-                    blockSet.put(blockCount, block);
-
-                    blockCount++;
-                }
-            }
-        }
-
-        //set data for the final place of the island
-        int x = f.getConfig().getInt("warIslands.nextLocation.X");
-        int z = f.getConfig().getInt("warIslands.nextLocation.Z");
-        int y = Math.min(((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getBlockY(),
-                ((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z")).getBlockY());
-
-        int offsetX = Math.abs(((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getBlockX() -
-                ((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z")).getBlockX());
-        int offsetY = Math.abs(((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getBlockY() -
-                ((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z")).getBlockY());
-        int offsetZ = Math.abs(((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".X")).getBlockZ() -
-                ((Location) f.getConfig().get("warIslands.offset." + player.getName() + ".Z")).getBlockZ());
-
-        int x2 = x + offsetX;
-        int y2 = y + offsetY;
-        int z2 = z + offsetZ;
-
-        blockCount = 1;
-
-        L1S = new Location(Bukkit.getWorld("War"), x, y, z);
-        L2S = new Location(Bukkit.getWorld("War"), x2, y2, z2);
-
-        //place the island
-        for (int xx = x; xx <= x2; xx++) {
-            for (int yy = y; yy <= y2; yy++) {
-                for (int zz = z; zz <= z2; zz++) {
-                    Block block = Bukkit.getServer().getWorld("War").getBlockAt(xx, yy, zz);
-                    IslandGeneration.setBlock(blockSet.get(blockCount), block);
-                    blockCount++;
-                }
-            }
-        }
-
-        //set other data
-        if (f.getConfig().getInt("warIslands.nextLocation.nextZ") < offsetZ + 1000) {
-            f.getConfig().set("warIslands.nextLocation.nextZ", offsetZ + 1000);
-            f.saveConfig();
-            player.sendMessage("z is bigger");
-        }
-        if (x2 > 300000) {
-            f.getConfig().set("warIslands.nextLocation.X", 300000);
-            f.getConfig().set("warIslands.nextLocation.Z", f.getConfig().getInt("warIslands.nextLocation.nextZ"));
-            f.saveConfig();
-            player.sendMessage("x2 > 300000");
-        } else {
-            f.getConfig().set("warIslands.nextLocation.X", f.getConfig().getInt("warIslands.nextLocation.X") + offsetX + 1000);
-            f.saveConfig();
-            player.sendMessage("x = " + f.getConfig().getInt("warIslands.nextLocation.X") + " + " + offsetX + " + 1000");
-        }
-
-        player.teleport(new Location(Bukkit.getWorld("War"), x, y, z));
-
-    }
 }

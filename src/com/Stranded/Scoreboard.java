@@ -1,135 +1,207 @@
 package com.Stranded;
 
+import com.Stranded.worldGeneration.DefaultIslandGenerator;
+import net.minecraft.server.v1_12_R1.IChatBaseComponent;
+import net.minecraft.server.v1_12_R1.PacketPlayOutPlayerListHeaderFooter;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 class Scoreboard {
 
-    private static int pvp;
-    private static int walk;
-    private static int block;
-    private static int health;
-    private static int maxOnline;
-    private static int serverOnline;
-    private static String island;
-    private static String islandLvl;
-    private static ArrayList<String> islandCount;
-    private static ArrayList<String> islandOnline;
-    private static String line1;
-    private static String line2;
-    private static String line3;
-    private static String line4;
-    private static String line5;
-    private static String line6;
-    private static String line7;
-    private static String line8;
-    private static String line9;
-    private static String line10;
-    private static String line11;
-    private static String line12;
-    private static String line13;
-    private static String line14;
-    private static String line15;
-
-    private static String rep(String s, Player online, int walk, int pvp, int block, int health, int serverOnline, ArrayList<String> islandOnline, ArrayList<String> islandCount,
-                              String island, String islandLvl, int maxOnline) {
+    private static String rep(String s, Player online, long walk, long pvp, long block, long fly, int health, int serverOnline, ArrayList<String> islandOnline, ArrayList<String> islandCount,
+                              String island, String islandLvl, int maxOnline, int ping) {
         return s.replaceAll("%player%", online.getName())
                 .replaceAll("%walk%", walk + "")
                 .replaceAll("%pvp%", pvp + "")
                 .replaceAll("%mining%", block + "")
+                .replaceAll("%fly%", fly + "")
                 .replaceAll("%health%", health + "")
                 .replaceAll("%islandonline%", islandOnline.size() + "")
                 .replaceAll("%island%", island)
                 .replaceAll("%islandlvl%", islandLvl)
                 .replaceAll("%online%", serverOnline + "")
                 .replaceAll("%maxonline%", maxOnline + "")
-                .replaceAll("%islandcount%", islandCount.size() + "");
+                .replaceAll("%islandcount%", islandCount.size() + "")
+                .replaceAll("%world%", online.getWorld().getName())
+                .replaceAll("%ping%", ping + "");
 
     }
 
-    private static void setData(Main p, Player player) {
+    private static void setTabList(Player player, Main p) {
+        PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+        IChatBaseComponent header = IChatBaseComponent.ChatSerializer.a("{\"text\":\"hei fggt\"}");
+        IChatBaseComponent footer = IChatBaseComponent.ChatSerializer.a("{\"text\":\"lol\"}");
+        try {
+            Field a = packet.getClass().getDeclaredField("a");
+            a.setAccessible(true);
+            a.set(packet, header);
+            Field b = packet.getClass().getDeclaredField("b");
+            b.setAccessible(true);
+            b.set(packet, footer);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 
-        Files save = new Files(p, "playerData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
 
-        walk = save.getConfig().getInt("walk." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.walking.amplifier");
-        block = save.getConfig().getInt("BlockBreak." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.mining.amplifier");
-        pvp = save.getConfig().getInt("HitKill." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier");
-        health = (int) player.getHealth();
-        island = "n/a";
-        serverOnline = Bukkit.getOnlinePlayers().size();
 
-        islandLvl = "0";
+    }
 
-        Files isf = new Files(p, "islands.yml");
+    static void scores(Main p) {
 
-        islandOnline = new ArrayList<>();
-        islandCount = new ArrayList<>();
 
-        if (p.getConfig().contains("island." + player.getName())) {
-            island = p.getConfig().getString("island." + player.getName());
-
-            islandOnline.add(player.getName());
-            for (String players : p.getConfig().getConfigurationSection("island").getKeys(false)) {
-                Player pl = Bukkit.getPlayerExact(players);
-                if (pl != null) {
-                    if (p.getConfig().getString("island." + pl.getName()).equals(island) && !pl.getName().equals(player.getName())) {
-                        islandOnline.add(players);
-                    }
+        if (Bukkit.getWorld("Islands") != null) {
+            Files islands = new Files(p, "islands.yml");
+            if (islands.getConfig().contains("islandData.islandTypesCopied")) {
+                if (!islands.getConfig().getBoolean("islandData.islandTypesCopied")) {
+                    Bukkit.broadcastMessage("the default islands are now loading in the server");
+                    new DefaultIslandGenerator(p);
                 }
-                if (p.getConfig().getString("island." + players).equals(island)) {
-                    islandCount.add(players);
-                }
+            } else {
+                Bukkit.broadcastMessage("the default islands are now loading in the server 2");
+                new DefaultIslandGenerator(p);
             }
-            if (isf.getConfig().contains("island." + island + ".lvl")) {
-                islandLvl = isf.getConfig().getString("island." + island + ".lvl");
-            }
-
         }
 
-        maxOnline = Bukkit.getMaxPlayers();
+
+        Files pd = new Files(p, "pluginData.yml");
+
+        for (Player online : Bukkit.getOnlinePlayers()) {
+
+            Files save = new Files(p, "playerData.yml");
+            Files pluginData = new Files(p, "pluginData.yml");
+
+            if (save.getConfig().contains("scoreboard." + online.getName())) {
+                if (save.getConfig().getInt("scoreboard." + online.getName()) == 0) {
+                    continue;
+                } else if (save.getConfig().getInt("scoreboard." + online.getName()) > 1) {
+
+                    if (save.getConfig().getInt("scoreboard." + online.getName()) == 24) {
+                        save.getConfig().set("scoreboard." + online.getName(), 0);
+                        save.saveConfig();
+
+                        com.Stranded.commands.island.Scoreboard.removeScoreboard(online);
+                        continue;
+                    } else {
+                        save.getConfig().set("scoreboard." + online.getName(), save.getConfig().getInt("scoreboard." + online.getName()) + 1);
+                        save.saveConfig();
+                    }
+                }
+            }
+
+            ScoreboardManager manager = Bukkit.getScoreboardManager();
+
+            org.bukkit.scoreboard.Scoreboard board = manager.getNewScoreboard();
+
+            String name = "§2§o§nStranded";
+
+            if (pd.getConfig().getString("plugin.scoreboard.default.name").length() <= 16) {
+                name = pd.getConfig().getString("plugin.scoreboard.default.name");
+            }
+
+            Objective objective = board.registerNewObjective(name, "dummy");
+
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+            long walk = save.getConfig().getLong("walk." + online.getName()) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
+            long block = save.getConfig().getLong("BlockBreak." + online.getName()) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
+            long pvp = save.getConfig().getLong("HitKill." + online.getName()) / pluginData.getConfig().getLong("plugin.scoreboard.pvp.amplifier");
+            long fly = save.getConfig().getLong("fly." + online.getName()) / pluginData.getConfig().getLong("plugin.scoreboard.flying.amplifier");
+            int health = (int) online.getHealth();
+            String island = "n/a";
+            int serverOnline = Bukkit.getOnlinePlayers().size();
+
+            String islandLvl = "0";
+
+            Files isf = new Files(p, "islands.yml");
+
+            ArrayList<String> islandOnline = new ArrayList<>();
+            ArrayList<String> islandCount = new ArrayList<>();
+
+            if (p.getConfig().contains("island." + online.getName())) {
+                island = p.getConfig().getString("island." + online.getName());
+
+                islandOnline.add(online.getName());
+                for (String player : p.getConfig().getConfigurationSection("island").getKeys(false)) {
+                    Player pl = Bukkit.getPlayerExact(player);
+                    if (pl != null) {
+                        if (p.getConfig().getString("island." + pl.getName()).equals(island) && !pl.getName().equals(online.getName())) {
+                            islandOnline.add(player);
+                        }
+                    }
+                    if (p.getConfig().getString("island." + player).equals(island)) {
+                        islandCount.add(player);
+                    }
+                }
+                if (isf.getConfig().contains("island." + island + ".lvl")) {
+                    islandLvl = isf.getConfig().getString("island." + island + ".lvl");
+                }
+
+            }
+
+            int ping = 0;
+
+            try {String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+
+                Object nmsPlayer = online.getClass().getMethod("getHandle").invoke(online);
+                Object pingObject = nmsPlayer.getClass().getField("ping").get(nmsPlayer);
+                ping = (int) pingObject;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            int maxOnline = Bukkit.getMaxPlayers();
+
+            String line1 = rep(pd.getConfig().getString("plugin.scoreboard.default.line1"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line2 = rep(pd.getConfig().getString("plugin.scoreboard.default.line2"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line3 = rep(pd.getConfig().getString("plugin.scoreboard.default.line3"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line4 = rep(pd.getConfig().getString("plugin.scoreboard.default.line4"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line5 = rep(pd.getConfig().getString("plugin.scoreboard.default.line5"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line6 = rep(pd.getConfig().getString("plugin.scoreboard.default.line6"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line7 = rep(pd.getConfig().getString("plugin.scoreboard.default.line7"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line8 = rep(pd.getConfig().getString("plugin.scoreboard.default.line8"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line9 = rep(pd.getConfig().getString("plugin.scoreboard.default.line9"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line10 = rep(pd.getConfig().getString("plugin.scoreboard.default.line10"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line11 = rep(pd.getConfig().getString("plugin.scoreboard.default.line11"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line12 = rep(pd.getConfig().getString("plugin.scoreboard.default.line12"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line13 = rep(pd.getConfig().getString("plugin.scoreboard.default.line13"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line14 = rep(pd.getConfig().getString("plugin.scoreboard.default.line14"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+            String line15 = rep(pd.getConfig().getString("plugin.scoreboard.default.line15"), online, walk, pvp, block, fly, health,
+                    serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline, ping);
+
+            setData(objective, line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, line12, line13, line14, line15);
+
+            online.setScoreboard(board);
+            setTabList(online, p);
+        }
     }
 
-    private static void setLines(Files pd, Player online) {
-        line1 = rep(pd.getConfig().getString("plugin.scoreboard.default.line1"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line2 = rep(pd.getConfig().getString("plugin.scoreboard.default.line2"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line3 = rep(pd.getConfig().getString("plugin.scoreboard.default.line3"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line4 = rep(pd.getConfig().getString("plugin.scoreboard.default.line4"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line5 = rep(pd.getConfig().getString("plugin.scoreboard.default.line5"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line6 = rep(pd.getConfig().getString("plugin.scoreboard.default.line6"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line7 = rep(pd.getConfig().getString("plugin.scoreboard.default.line7"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line8 = rep(pd.getConfig().getString("plugin.scoreboard.default.line8"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line9 = rep(pd.getConfig().getString("plugin.scoreboard.default.line9"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line10 = rep(pd.getConfig().getString("plugin.scoreboard.default.line10"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line11 = rep(pd.getConfig().getString("plugin.scoreboard.default.line11"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line12 = rep(pd.getConfig().getString("plugin.scoreboard.default.line12"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line13 = rep(pd.getConfig().getString("plugin.scoreboard.default.line13"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line14 = rep(pd.getConfig().getString("plugin.scoreboard.default.line14"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-        line15 = rep(pd.getConfig().getString("plugin.scoreboard.default.line15"), online, walk, pvp, block, health,
-                serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline);
-    }
+    private static void setData(Objective objective, String line1, String line2, String line3, String line4,
+                                String line5, String line6, String line7, String line8, String line9, String line10,
+                                String line11, String line12, String line13, String line14, String line15) {
 
-    private static void setScores(Objective objective) {
         try {
             Score score1 = objective.getScore("§1§r" + line1);
             Score score2 = objective.getScore("§2§r" + line2);
@@ -206,24 +278,4 @@ class Scoreboard {
         }
     }
 
-    static void scores(Main p) {
-        Files pd = new Files(p, "pluginData.yml");
-
-        String name = "§2§o§nStranded";
-        if (pd.getConfig().getString("plugin.scoreboard.default.name").length() <= 16) {
-            name = pd.getConfig().getString("plugin.scoreboard.default.name");
-        }
-
-        ScoreboardManager manager = Bukkit.getScoreboardManager();
-        org.bukkit.scoreboard.Scoreboard board = manager.getNewScoreboard();
-        Objective objective = board.registerNewObjective(name, "dummy");
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            setData(p, online);
-            setLines(pd, online);
-            setScores(objective);
-            online.setScoreboard(board);
-        }
-    }
 }

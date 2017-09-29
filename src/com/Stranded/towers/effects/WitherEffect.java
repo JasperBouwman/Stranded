@@ -1,11 +1,16 @@
 package com.Stranded.towers.effects;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Cow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.UUID;
+
 public class WitherEffect {
-    public static void eff(Player player, int lvl) {
+    public static void eff(Entity entity, int lvl) {
 
         int strength = 0;
         int length = 1;
@@ -29,8 +34,10 @@ public class WitherEffect {
         } else if (lvl == 0) {
             length = 140;
         }
-        player.sendMessage("you just got wither " + (strength + 1) + " for " + length / 20 + " seconds");
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, length, strength, false, false));
+        entity.sendMessage("you just got wither " + (strength + 1) + " for " + length / 20 + " seconds");
+
+        new EffectSupplier(entity, new PotionEffect(PotionEffectType.WITHER, length, strength, false, false));
 
     }
+
 }

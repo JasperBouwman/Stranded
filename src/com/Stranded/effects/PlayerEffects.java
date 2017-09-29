@@ -15,10 +15,8 @@ public class PlayerEffects implements Runnable {
     }
 
     public void Effects() {
-
         Bukkit.getScheduler().scheduleSyncRepeatingTask(p, this, 20, 20);
     }
-
 
     @Override
     public void run() {
@@ -59,8 +57,11 @@ public class PlayerEffects implements Runnable {
                             .addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999, 0, true, false));
 
                 } else if (l == 100) {
-                    //todo
-
+                    Bukkit.getServer().getPlayerExact(s)
+                            .addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 1, true, false));
+                    Bukkit.getServer().getPlayerExact(s)
+                            .addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999, 1, true, false));
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 999999, 0));
                 }
             }
         }
@@ -100,8 +101,10 @@ public class PlayerEffects implements Runnable {
                             new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 0, true, false));
 
                 } else if (l == 100) {
-                    //todo
-
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(
+                            new PotionEffect(PotionEffectType.FAST_DIGGING, 999999, 3, true, false));
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(
+                            new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 1, true, false));
                 }
             }
         }
@@ -144,8 +147,12 @@ public class PlayerEffects implements Runnable {
                             new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 0, true, false));
 
                 } else if (l == 100) {
-                    //todo
-
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(
+                            new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999, 1, true, false));
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(
+                            new PotionEffect(PotionEffectType.REGENERATION, 999999, 1, true, false));
+                    Bukkit.getServer().getPlayerExact(s).addPotionEffect(
+                            new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 999999, 1, true, false));
                 }
             }
         }

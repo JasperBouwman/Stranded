@@ -10,7 +10,7 @@ import org.bukkit.entity.EnderCrystal;
 public class RegenerationTower {
 
     @SuppressWarnings("deprecation")
-    public void Tower(Location l) {
+    public static void Tower(Location l) {
 
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l).setTypeIdAndData(Material.RED_SANDSTONE.getId(), (byte) 0, true);
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX() + 1, l.getBlockY(), l.getBlockZ()).setTypeIdAndData(Material.RED_SANDSTONE.getId(), (byte) 0, true);

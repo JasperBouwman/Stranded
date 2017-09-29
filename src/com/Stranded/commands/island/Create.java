@@ -2,8 +2,8 @@ package com.Stranded.commands.island;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
-import com.Stranded.worldGeneration.IslandGeneration;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.worldGeneration.IslandGeneration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -11,6 +11,16 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 
 public class Create extends CmdManager {
+
+    private static void islandDataCheck(Main p) {
+        Files f = new Files(p, "islands.yml");
+        if (!f.getConfig().contains("islandData.default")) {
+            int l = -200000;
+            f.getConfig().set("islandData.default.X", l);
+            f.getConfig().set("islandData.default.Z", l);
+            f.saveConfig();
+        }
+    }
 
     @Override
     public String getName() {
@@ -24,6 +34,18 @@ public class Create extends CmdManager {
 
     @Override
     public void run(String[] args, Player player) {
+        if (Bukkit.getWorld("Islands") != null) {
+            Files islands = new Files(p, "islands.yml");
+            if (!islands.getConfig().contains("islandData.islandTypesCopied")) {
+                if (!islands.getConfig().getBoolean("islandData.islandTypesCopied")) {
+                   player.sendMessage("pls wait, default islands are not generated yet");
+                    return;
+                }
+            } else {
+                player.sendMessage("pls wait, default islands are not generated yet");
+                return;
+            }
+        }
         if (args.length == 1) {
             player.sendMessage("pls enter a name and a island type");
         } else if (args.length == 2) {
@@ -135,16 +157,6 @@ public class Create extends CmdManager {
 
         } else {
             player.sendMessage("wrong use");
-        }
-    }
-
-    private static void islandDataCheck(Main p) {
-        Files f = new Files(p, "islands.yml");
-        if (!f.getConfig().contains("islandData.default")) {
-            int l = -200000;
-            f.getConfig().set("islandData.default.X", l);
-            f.getConfig().set("islandData.default.Z", l);
-            f.saveConfig();
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.Stranded.commands;
 
 import com.Stranded.Main;
+import com.Stranded.PlayerList;
+import com.Stranded.UpdateTabList;
 import com.Stranded.worldGeneration.Generator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -8,7 +10,6 @@ import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class Edit implements CommandExecutor {
@@ -33,12 +34,24 @@ public class Edit implements CommandExecutor {
 
         if (args.length == 0) {
 
-            int ping = ((CraftPlayer) player).getHandle().ping;
-            player.sendMessage(ping + "");
+            new UpdateTabList(player, p);
 
         }
 
+
         if (args.length == 1) {
+
+            if (args[0].equalsIgnoreCase("test")) {
+                PlayerList list = PlayerList.getPlayerList(player);
+                list.updateSlot(2, "lol");
+                return false;
+            }
+            if (args[0].equalsIgnoreCase("rem")) {
+                PlayerList list = PlayerList.getPlayerList(player);
+                list.addExistingPlayer(3, Bukkit.getOfflinePlayer("7he_4ch3r"));
+                return false;
+            }
+
             try {
                 World w = Bukkit.getWorld(args[0]);
                 player.teleport(w.getSpawnLocation());

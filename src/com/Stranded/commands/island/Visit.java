@@ -26,6 +26,11 @@ public class Visit extends CmdManager {
             return;
         }
 
+        if (p.getConfig().getStringList("playersInWar").contains(player.getName())) {
+            player.sendMessage("you can't visit an island while you are in a war");
+            return;
+        }
+
         if (f.getConfig().contains("island." + args[1])) {
             Location l = (Location) f.getConfig().get("island." + args[1] + ".home");
 

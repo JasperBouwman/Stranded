@@ -9,7 +9,7 @@ import org.bukkit.block.Sign;
 public class HasteTower {
 
     @SuppressWarnings("deprecation")
-    public void Tower(Location l) {
+    public static void Tower(Location l) {
 
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l).setTypeIdAndData(Material.GOLD_BLOCK.getId(), (byte) 0, true);
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX() + 1, l.getBlockY(), l.getBlockZ()).setTypeIdAndData(Material.GOLD_BLOCK.getId(), (byte) 0, true);

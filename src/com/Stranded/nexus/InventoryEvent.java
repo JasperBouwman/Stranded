@@ -139,9 +139,9 @@ public class InventoryEvent implements Listener {
 
             if (e.getRawSlot() < 9) {
                 if (meta.getDisplayName().equals("§3Confirm")) {
-                    player.sendMessage("place the tower somewhere on the ground when in war");
 
-                    player.setLevel(player.getLevel() - Integer.parseInt(inv.getItem(4).getItemMeta().getLore().get(0).replace("cost: ", "")));
+
+
 
                     ItemStack buy = new ItemStack(inv.getItem(4));
                     ItemMeta buyMeta = buy.getItemMeta();
@@ -153,8 +153,20 @@ public class InventoryEvent implements Listener {
 
                     e.setCancelled(true);
 
+                    boolean isSpaceLeft = false;
+                    for (ItemStack is : player.getInventory().getStorageContents()) {
+                        if (is == null) {
+                            isSpaceLeft = true;
+                            break;
+                        }
+                    }
+                    if (!isSpaceLeft) {
+                        player.sendMessage("there is no more space left in your inventory");
+                        return;
+                    }
                     openMainInv(player);
-
+                    player.sendMessage("place the tower somewhere on the ground when in war or in your island");
+                    player.setLevel(player.getLevel() - Integer.parseInt(inv.getItem(4).getItemMeta().getLore().get(0).replace("cost: ", "")));
                     player.getInventory().addItem(buy);
 
                 } else if (meta.getDisplayName().equals("§cCancel")) {

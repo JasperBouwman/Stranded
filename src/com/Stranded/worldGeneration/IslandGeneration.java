@@ -2,13 +2,14 @@ package com.Stranded.worldGeneration;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.entity.Villager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class IslandGeneration {
 
@@ -42,7 +43,7 @@ public class IslandGeneration {
                     for (int yy = minY; yy <= maxY; yy++) {
                         for (int zz = minZ; zz <= maxZ; zz++) {
 
-                            Block block = Bukkit.getServer().getWorld(l.getWorld().getName()).getBlockAt(new Location(l.getWorld(), xx, yy, zz));
+                            Block block = new Location(l.getWorld(), xx, yy, zz).getBlock();
 
                             blocks.put(BlockCount, block);
 
@@ -67,18 +68,19 @@ public class IslandGeneration {
         int maxZ = Math.max(L1.getBlockZ(), L2.getBlockZ());
 
         int BlockCount = 1;
+        boolean nexus = true;
 
         for (int xx = minX; xx <= maxX; xx++) {
             for (int yy = minY; yy <= maxY; yy++) {
                 for (int zz = minZ; zz <= maxZ; zz++) {
 
-                    Block block = Bukkit.getServer().getWorld(l.getWorld().getName()).getBlockAt(new Location(l.getWorld(), xx, yy, zz));
+                    Block block = new Location(l.getWorld(), xx, yy, zz).getBlock();
 
                     setBlock(blocks.get(BlockCount), block);
 
-                    if (block.getType().equals(Material.BEDROCK)) {
-                        nexusLocation = spawnNexus(block.getLocation());
-
+                    if (nexus && block.getType().equals(Material.BEDROCK)) {
+                        nexusLocation = spawnNexus(block.getLocation(), p);
+                        nexus = false;
                         block.setType(Material.AIR);
                     }
 
@@ -86,14 +88,24 @@ public class IslandGeneration {
                 }
             }
         }
+
+        if (nexus) {
+            nexusLocation = spawnNexus(new Location(l.getWorld(), maxX, maxY, maxZ), p);
+        }
+
     }
 
-    private static Location spawnNexus(Location l) {
+    private static Location spawnNexus(Location l, Main p) {
 
         l.setX(l.getX() + 0.5);
         l.setZ(l.getZ() + 0.5);
 
         Villager v = l.getWorld().spawn(l, Villager.class);
+
+        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        list.add(v.getUniqueId().toString());
+        p.getConfig().set("nexus.uuid", list);
+        p.saveConfig();
 
         v.setCustomName("§2Nexus");
         v.setCustomNameVisible(true);
@@ -109,7 +121,7 @@ public class IslandGeneration {
         return v.getLocation();
     }
 
-    public static void setBlock(Block blockFrom, Block blockTo) {
+    private static void setBlock(Block blockFrom, Block blockTo) {
 
         blockTo.setType(blockFrom.getType());
         blockTo.setData(blockFrom.getData());
@@ -338,10 +350,7 @@ public class IslandGeneration {
                 toShulkerBox.setLock(fromShulkerBox.getLock());
                 toShulkerBox.getInventory().setContents(fromShulkerBox.getInventory().getContents());
                 toShulkerBox.update();
-
                 break;
-            default:
-                return;
         }
     }
 }

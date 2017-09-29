@@ -35,6 +35,8 @@ public class Confirm extends CmdManager {
 
                 ArrayList<String> list1 = (ArrayList<String>) f.getConfig().getStringList("island." + p.getConfig().getString("island." + player.getName()) + ".members");
 
+                //todo remove all (towers, xp, inv)
+
                 for (String s : list1) {
                     if (Bukkit.getPlayerExact(s) != null && !s.equals(player.getName())) {
                         Bukkit.getPlayerExact(s).sendMessage("you island is removed by the owner");

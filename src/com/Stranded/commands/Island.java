@@ -37,6 +37,8 @@ public class Island implements CommandExecutor {
         actions.add(new Home());
         actions.add(new Move());
         actions.add(new Visit());
+        actions.add(new Scoreboard());
+        actions.add(new Ignore());
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {

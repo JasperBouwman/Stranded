@@ -18,6 +18,7 @@ plugin:
       # %null% this is no line
       # %player% will display the player name
       # %online% will display the online players
+      # %world% will display the world that the player is in
       # %maxonline% get the max players
       # %island% will display the island name you're on
       # %islandonline% will display the amount of online people of your island

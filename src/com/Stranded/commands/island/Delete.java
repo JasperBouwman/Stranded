@@ -2,6 +2,7 @@ package com.Stranded.commands.island;
 
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.commands.war.util.WarUtil;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -28,6 +29,17 @@ public class Delete extends CmdManager {
         }
         if (!f.getConfig().getString("island." + p.getConfig().getString("island." + player.getName()) + ".owner").equals(player.getName())) {
             player.sendMessage("you are not the owner of this island, so you can't delete this island");
+            return;
+        }
+
+        int testWar = WarUtil.testIfIsInWar(p, player);
+
+        if (testWar == 1) {
+            player.sendMessage("you can't delete your island when your island is pending for a war");
+            return;
+        }
+        if (testWar == 2) {
+            player.sendMessage("you can't delete your island when your island is in a war");
             return;
         }
 

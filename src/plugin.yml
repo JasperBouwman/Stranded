@@ -9,7 +9,11 @@ commands:
   edit:
     description: test
   war:
-    description: testas
+    description: start a war
   island:
-    description: get item
+    description: island
     aliases: [i]
+  warisland:
+    description: war islands
+  tower:
+    description: get your towers

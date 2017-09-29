@@ -2,9 +2,7 @@ package com.Stranded;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,7 +28,7 @@ public class Files {
     public void reloadConfig() {
         fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
 
-        // Look for defaults in the jar
+        //Look for defaults in the jar
 //        InputStream defConfigStream = plugin.getResource(fileName);
 //        if (defConfigStream != null) {
 //            @SuppressWarnings("deprecation")

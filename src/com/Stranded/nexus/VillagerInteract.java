@@ -33,9 +33,9 @@ public class VillagerInteract implements Listener {
         Player player = e.getPlayer();
 
         if (e.getRightClicked() instanceof Villager) {
-            if (e.getRightClicked().getName().equals("§2Nexus")) {
+            ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+            if (list.contains(e.getRightClicked().getUniqueId().toString())) {
 
-//                Inventory(player);
                 player.openInventory(inv("main", e.getPlayer()));
 
                 e.setCancelled(true);
@@ -73,7 +73,7 @@ public class VillagerInteract implements Listener {
 
                 ArrayList<String> lore = new ArrayList<>();
 
-                double y = Math.sinh((x + 35)/20);
+                double y = Math.sinh((x + 35) / 20);
                 if (x < 100) {
                     lore.add("to lvl " + (int) (x + 1));
                     lore.add("cost: " + (int) y);
@@ -95,43 +95,4 @@ public class VillagerInteract implements Listener {
 
         return inv;
     }
-
-//    private void Inventory(Player player) {
-//
-//        Inventory inv = Bukkit.createInventory(null, 9, "§2Nexus");
-//
-//        ArrayList<String> list = new ArrayList<>();
-//        list.add("Regeneration");
-//        list.add("Haste");
-//        list.add("Speed");
-//        inv.setItem(0, newItemStack(Material.DIAMOND_BLOCK, 1, 0, "§3Friendly Towers", list));
-//        inv.setItem(1, newItemStack(Material.DIAMOND_BLOCK, 1, 0, "§3Friendly Towers", list));
-//        inv.setItem(2, newItemStack(Material.DIAMOND_BLOCK, 1, 0, "§3Friendly Towers", list));
-//        inv.setItem(3, newItemStack(Material.DIAMOND_BLOCK, 1, 0, "§3Friendly Towers", list));
-//        ArrayList<String> list1 = new ArrayList<>();
-//        list1.add("TNT");
-//        list1.add("Slowness");
-//        list1.add("Hunger");
-//        list1.add("Wither");
-//        list1.add("Arrow");
-//        inv.setItem(5, newItemStack(Material.REDSTONE_BLOCK, 1, 0, "§4Enemy Towers", list1));
-//        inv.setItem(6, newItemStack(Material.REDSTONE_BLOCK, 1, 0, "§4Enemy Towers", list1));
-//        inv.setItem(7, newItemStack(Material.REDSTONE_BLOCK, 1, 0, "§4Enemy Towers", list1));
-//        inv.setItem(8, newItemStack(Material.REDSTONE_BLOCK, 1, 0, "§4Enemy Towers", list1));
-//
-//        player.openInventory(inv);
-//    }
-
-//    private ItemStack newItemStack(Material m, int b, int a, String displayName, ArrayList<String> list) {
-//        ItemStack is = new ItemStack(m, (byte) b, (short) a);
-//        ItemMeta im = is.getItemMeta();
-//        if (displayName != null) {
-//            im.setDisplayName(displayName);
-//        }
-//        if (list != null) {
-//            im.setLore(list);
-//        }
-//        is.setItemMeta(im);
-//        return is;
-//    }
 }

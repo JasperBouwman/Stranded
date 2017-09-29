@@ -1,16 +1,14 @@
 package com.Stranded.towers.effects;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.util.Vector;
 
 public class TntEffect {
+    public static void eff(Entity entity, Location l) {
 
-    public static void eff(Player player, Location l) {
-
-//        Location l1 = l;
-        Location l2 = player.getLocation();
+        Location l2 = entity.getLocation();
 
         double dX = l.getX() - l2.getX();
         double dY = l.getY() - l2.getY();
@@ -23,7 +21,7 @@ public class TntEffect {
 
         Vector vector = new Vector(X, Z, Y);
 
-        TNTPrimed tnt = player.getWorld().spawn(new Location(l.getWorld(), l.getX(), l.getY() + 4, l.getZ()), TNTPrimed.class);
+        TNTPrimed tnt = entity.getWorld().spawn(new Location(l.getWorld(), l.getX(), l.getY() + 4, l.getZ()), TNTPrimed.class);
 
         tnt.setVelocity(vector);
 

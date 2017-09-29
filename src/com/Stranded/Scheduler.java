@@ -13,15 +13,13 @@ public class Scheduler implements java.lang.Runnable {
     }
 
     void startRun() {
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(p, this, 20, 20);
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(p, this, 10, 10);
     }
 
     @Override
     public void run() {
 
         playerHide(p);
-
         scores(p);
-
     }
 }

@@ -9,7 +9,7 @@ import org.bukkit.block.Sign;
 public class TntTower {
 
     @SuppressWarnings("deprecation")
-    public void Tower(Location l) {
+    public static void Tower(Location l) {
 
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l).setType(Material.NETHER_BRICK);
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX() + 1, l.getBlockY(), l.getBlockZ()).setType(Material.NETHER_BRICK);

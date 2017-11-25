@@ -2,7 +2,9 @@ package com.Stranded.events;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
+import com.Stranded.Scoreboard;
 import com.Stranded.commands.war.util.EndWar;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,12 +23,15 @@ public class LogOffEvent implements Listener {
     @EventHandler
     @SuppressWarnings("unused")
     public void logoff(PlayerQuitEvent e) {
-
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            Scoreboard.scores(this.p, p);
+        }
         ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("respawn.teleport");
 
-        if (list.contains(e.getPlayer().getName())) {
-            list.remove(e.getPlayer().getName());
+        if (list.contains(e.getPlayer().getUniqueId().toString())) {
+            list.remove(e.getPlayer().getUniqueId().toString());
             p.getConfig().set("respawn.teleport", list);
+            p.saveConfig();
         }
 
         Files warData = new Files(p, "warData.yml");
@@ -34,14 +39,14 @@ public class LogOffEvent implements Listener {
         Player player = e.getPlayer();
 
         ArrayList<String> playersInWar = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
-        if (playersInWar.contains(player.getName())) {
+        if (playersInWar.contains(player.getUniqueId().toString())) {
 
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
-                if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(player.getName())) {
+                if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(player.getUniqueId().toString())) {
                     EndWar.testPlayers(p, warID, "blue");
                     return;
                 }
-                if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(player.getName())) {
+                if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(player.getUniqueId().toString())) {
                     EndWar.testPlayers(p, warID, "red");
                     return;
                 }

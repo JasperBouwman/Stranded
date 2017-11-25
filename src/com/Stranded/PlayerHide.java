@@ -5,15 +5,15 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
-class PlayerHide {
+public class PlayerHide {
 
-    static void playerHide(Main p) {
+    public PlayerHide(Main p) {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             Files f = new Files(p, "islands.yml");
-            if (p.getConfig().contains("island." + player.getName())) {
+            if (p.getConfig().contains("island." + player.getUniqueId().toString())) {
                 if (player.getWorld().getName().equals("Islands")) {
-                    ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + p.getConfig().getString("island." + player.getName()) + ".members");
+                    ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + p.getConfig().getString("island." + player.getUniqueId().toString()) + ".members");
 
                     for (Player player2 : Bukkit.getOnlinePlayers()) {
                         if (!list.contains(player2.getName())) {

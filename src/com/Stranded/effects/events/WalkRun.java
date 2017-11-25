@@ -2,6 +2,8 @@ package com.Stranded.effects.events;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
+import com.Stranded.Scoreboard;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,9 +11,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class WalkRun implements Listener {
 
@@ -24,45 +29,81 @@ public class WalkRun implements Listener {
         p = instance;
     }
 
+
+    private void revertUsage(Player player, Files playerData) {
+        if (playerData.getConfig().contains("flying.players." + player.getUniqueId().toString())) {
+
+            ItemStack is = player.getInventory().getChestplate();
+
+            List<Short> durability = playerData.getConfig().getShortList("flying.players." + player.getUniqueId().toString());
+            is.setDurability(durability.get(0));
+            playerData.getConfig().set("flying.players." + player.getUniqueId().toString(), null);
+            playerData.saveConfig();
+        }
+    }
+
     @EventHandler
     @SuppressWarnings("unused")
     public void walk(PlayerMoveEvent e) {
 
-        Files save = new Files(p, "playerData.yml");
+        Files playerData = new Files(p, "playerData.yml");
         Files pluginData = new Files(p, "pluginData.yml");
 
         Player player = e.getPlayer();
+        String uuid = player.getUniqueId().toString();
         try {
             if (X.get(player) != player.getLocation().getBlockX() ||
                     Z.get(player) != player.getLocation().getBlockZ() ||
                     Y.get(player) != player.getLocation().getBlockY()) {
 
                 if (player.isGliding()) {
+                    int amplifier = pluginData.getConfig().getInt("plugin.scoreboard.flying.amplifier");
+                    if (playerData.getConfig().getLong("fly." + uuid) / amplifier != 100) {
+                        long oldScore = playerData.getConfig().getLong("fly." + uuid);
+                        playerData.getConfig().set("fly." + uuid, oldScore + 1);
+                        playerData.saveConfig();
+                        if (oldScore / amplifier != oldScore + 1 / amplifier) {
+                            Scoreboard.scores(p, player);
+                        }
+                    } else if (playerData.getConfig().getLong("fly." + uuid) / amplifier == 100) {
+                        if (!playerData.getConfig().contains("flying.players." + uuid)) {
+                            if (player.getInventory().getChestplate().getType().equals(Material.ELYTRA)) {
+                                ArrayList<Short> list = new ArrayList<>();
+                                list.add(player.getInventory().getChestplate().getDurability());
+                                playerData.getConfig().set("flying.players." + uuid, list);
+                                playerData.saveConfig();
+                            }
+                        }
 
-                    if (save.getConfig().getLong("fly." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.flying.amplifier") != 100) {
-                        save.getConfig().set("fly." + player.getName(), save.getConfig().getLong("fly." + player.getName()) + 1);
-                        save.saveConfig();
                     }
-
-
                     return;
+                } else {
+                    revertUsage(player, playerData);
                 }
-                if (save.getConfig().getLong("walk." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.walking.amplifier") != 100) {
+
+
+                int amplifier = pluginData.getConfig().getInt("plugin.scoreboard.walking.amplifier");
+                if (playerData.getConfig().getLong("walk." + uuid) / amplifier != 100) {
 
                     if (X.get(player) != player.getLocation().getBlockX() ||
                             Z.get(player) != player.getLocation().getBlockZ()) {
-
-                        save.getConfig().set("walk." + player.getName(), save.getConfig().getLong("walk." + player.getName()) + 1);
-                        save.saveConfig();
-                        if (save.getConfig().getDouble("walk." + player.getName()) / pluginData.getConfig().getDouble("plugin.scoreboard.walking.amplifier") == 20) {
+                        long oldScore = playerData.getConfig().getLong("walk." + uuid);
+                        playerData.getConfig().set("walk." + uuid, oldScore + 1);
+                        playerData.saveConfig();
+                        if (oldScore / amplifier != (oldScore + 1) / amplifier) {
+                            Scoreboard.scores(p, player);
+                        }
+                        if ((oldScore + 1) == 20 * amplifier) {
                             player.sendMessage("slowness is removed");
                             player.removePotionEffect(PotionEffectType.SLOW);
 
                         }
                     }
-                } else if (save.getConfig().getLong("walk." + player.getName()) / pluginData.getConfig().getInt("plugin.scoreboard.walking.amplifier") == 100) {
+                } else if (playerData.getConfig().getLong("walk." + uuid) / amplifier == 100) {
+
                     Location l = player.getLocation();
-                    if (player.getInventory().getBoots().getType().toString().endsWith("BOOTS") && !new Location(l.getWorld(), X.get(player), l.getY() - 1, Z.get(player)).getBlock().getType().equals(Material.STATIONARY_WATER)) {
+                    if (player.getInventory().getBoots().getType().toString().endsWith("BOOTS") &&
+                            !new Location(l.getWorld(), X.get(player), l.getY() - 1, Z.get(player)).getBlock().getType().equals(Material.STATIONARY_WATER)) {
 
                         l.setY(l.getY() - 1);
                         int x = l.getBlockX();

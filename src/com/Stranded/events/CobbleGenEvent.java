@@ -1,64 +1,119 @@
 package com.Stranded.events;
 
+import com.Stranded.Main;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 
-import java.util.Random;
+import java.util.*;
 
 public class CobbleGenEvent implements Listener {
 
-    @EventHandler
-    @SuppressWarnings({"unused", "deprecation"})
-    public void onFromTo(BlockFromToEvent event) {
-        int id = event.getBlock().getTypeId();
-        if (id >= 8 && id <= 11) {
-            Block b = event.getToBlock();
-            int toID = b.getTypeId();
-            if (toID == 0) {
-                if (generatesCobble(id, b)) {
-                    Random pick = new Random();
-                    int chance = 0;
-                    for (int counter = 1; counter <= 1; counter++) {
-                        chance = 1 + pick.nextInt(100);
-                    }
+    private static final List<BlockFace> FACES = Arrays.asList(BlockFace.SELF, BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
+    private Main p;
 
-                    double cobble = 50; // 50
-                    double stone = cobble + 5; // 55
-                    double coal = stone + 20; // 75
-                    double iron = coal + 12; // 87
-                    double gold = iron + 5; // 92
-                    double redstone = gold + 3; // 95
-                    double emerald = redstone + 1; // 96
-                    double diamond = emerald + 1; // 97
-                    double lapis = diamond + 3; //100
+    public CobbleGenEvent(Main main) {
+        p = main;
+    }
 
-                    if (chance > 0 && chance <= cobble) b.setType(Material.COBBLESTONE);
-                    if (chance > cobble && chance <= stone) b.setType(Material.STONE);
-                    if (chance > stone && chance <= coal) b.setType(Material.COAL_ORE);
-                    if (chance > coal && chance <= iron) b.setType(Material.IRON_ORE);
-                    if (chance > iron && chance <= gold) b.setType(Material.GOLD_ORE);
-                    if (chance > gold && chance <= redstone) b.setType(Material.REDSTONE_ORE);
-                    if (chance > redstone && chance <= emerald) b.setType(Material.DIAMOND_ORE);
-                    if (chance > emerald && chance <= diamond) b.setType(Material.EMERALD_ORE);
-                    if (chance > diamond && chance <= lapis) b.setType(Material.LAPIS_ORE);
+    private void setRandomBlock(Block block) {
+
+        double cobble = 50;
+        double stone = cobble + 5;
+        double ironOre = stone + 10;
+        double coalOre = ironOre + 10;
+        double goldOre = coalOre + 6;
+        double lapisOre = goldOre + 3;
+        double diamondOre = lapisOre + 1;
+        double redstoneOre = diamondOre + 3;
+        double emeraltOre = redstoneOre + 1;
+
+        Random r = new Random();
+        double randomDouble = r.nextInt((int) emeraltOre);
+        double randomInt = r.nextInt((int) emeraltOre);
+
+        randomDouble += randomInt / 100;
+
+        if (randomDouble > emeraltOre)
+            randomDouble = emeraltOre;
+
+        if (randomDouble <= cobble) block.setType(Material.COBBLESTONE);
+        else if (randomDouble <= stone) block.setType(Material.STONE);
+        else if (randomDouble <= ironOre) block.setType(Material.IRON_ORE);
+        else if (randomDouble <= coalOre) block.setType(Material.COAL_ORE);
+        else if (randomDouble <= goldOre) block.setType(Material.GOLD_ORE);
+        else if (randomDouble <= lapisOre) block.setType(Material.LAPIS_ORE);
+        else if (randomDouble <= diamondOre) block.setType(Material.DIAMOND_ORE);
+        else if (randomDouble <= redstoneOre) block.setType(Material.REDSTONE_ORE);
+        else if (randomDouble <= emeraltOre) block.setType(Material.EMERALD_ORE);
+
+
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @SuppressWarnings("unused")
+    public void onCleanStoneGen(BlockFromToEvent e) {
+
+        final Block to = e.getToBlock();
+        final Material prev = to.getType();
+
+        p.getServer().getScheduler().runTask(p, () -> {
+
+                    if (((prev.equals(Material.WATER)) || (prev.equals(Material.STATIONARY_WATER))) && (to.getType().equals(Material.STONE))) {
+//                    to.setType(prev);
+
+                        setRandomBlock(to);
 
                     }
                 }
+        );
+
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @SuppressWarnings("unused")
+    public void onCobbleGen(BlockFromToEvent e) {
+
+        Block b = e.getBlock();
+        if ((b.getType().equals(Material.WATER)) || (b.getType().equals(Material.STATIONARY_WATER)) || (b.getType().equals(Material.LAVA)) || (b.getType().equals(Material.STATIONARY_LAVA))) {
+
+            Block toBlock = e.getToBlock();
+            if ((toBlock.getType().equals(Material.AIR)) && (generatesCobble(b, toBlock))) {
+
+                final List<Block> prevBlock = new ArrayList<>();
+                final List<Material> prevMat = new ArrayList<>();
+                for (BlockFace face : FACES) {
+                    Block r = toBlock.getRelative(face);
+                    prevBlock.add(r);
+                    prevMat.add(r.getType());
+                }
+
+                p.getServer().getScheduler().runTask(p, () -> {
+
+                    Iterator<Block> blockIt = prevBlock.iterator();
+                    Iterator<Material> matIt = prevMat.iterator();
+                    while ((blockIt.hasNext()) && (matIt.hasNext())) {
+                        Block block = blockIt.next();
+                        Material material = matIt.next();
+                        if ((block.getType().equals(Material.COBBLESTONE)) && (!block.getType().equals(material))) {
+                            setRandomBlock(block);
+                        }
+                    }
+                });
             }
         }
-    private final BlockFace[] faces = new BlockFace[] { BlockFace.SELF, BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
+    }
 
-    @SuppressWarnings("deprecation")
-    private boolean generatesCobble(int id, Block b) {
-        int mirrorID1 = (id == 8 || id == 9 ? 10 : 8);
-        int mirrorID2 = (id == 8 || id == 9 ? 11 : 9);
-        for (BlockFace face : faces) {
-            Block r = b.getRelative(face, 1);
-            if (r.getTypeId() == mirrorID1 || r.getTypeId() == mirrorID2) {
+    private boolean generatesCobble(Block block, Block toBlock) {
+        Material mirrorID1 = (block.getType().equals(Material.WATER)) || (block.getType().equals(Material.STATIONARY_WATER)) ? Material.LAVA : Material.WATER;
+        Material mirrorID2 = (block.getType().equals(Material.WATER)) || (block.getType().equals(Material.STATIONARY_WATER)) ? Material.STATIONARY_LAVA : Material.STATIONARY_WATER;
+        for (BlockFace face : FACES) {
+            Block r = toBlock.getRelative(face);
+            if ((r.getType().equals(mirrorID1)) || (r.getType().equals(mirrorID2))) {
                 return true;
             }
         }

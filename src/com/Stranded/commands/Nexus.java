@@ -1,5 +1,6 @@
 package com.Stranded.commands;
 
+import com.Stranded.Files;
 import com.Stranded.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,19 +21,41 @@ public class Nexus implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+
+        //nexus
+        //nexus <island>
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("you must be a player to use this");
             return false;
         }
         Player player = (Player) sender;
 
-        spawnNexus(player);
+        if (!player.hasPermission("Stranded.spawnNexus")) {
+            player.sendMessage("y u no permission");
+            return false;
+        }
+        if (args.length == 0) {
+            spawnNexus(player);
+        } else if (args.length == 1) {
+            Files islands = new Files(p, "islands.yml");
+            if (islands.getConfig().contains("island." + args[0])) {
+                islands.getConfig().set("island." + args[0] + ".UUID", spawnNexus(player));
+                islands.saveConfig();
+                player.sendMessage("nexus spawned");
+            } else {
+                player.sendMessage("this island doesn't exist");
+            }
+
+        } else {
+            player.sendMessage("Usage: /nexus <island> or /nexus");
+        }
 
         return false;
 
     }
 
-    private void spawnNexus(Player player) {
+    private String spawnNexus(Player player) {
 
         Villager v = player.getLocation().getWorld().spawn(player.getLocation(), Villager.class);
 
@@ -49,5 +72,7 @@ public class Nexus implements CommandExecutor {
         v.setAdult();
         v.setCanPickupItems(false);
         v.setCollidable(true);
+
+        return v.getUniqueId().toString();
     }
 }

@@ -10,6 +10,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,14 @@ public class WarTabComplete implements TabCompleter {
     }
 
     private void clearTabComplete() {
-        War.clear();
+        for (Field f : this.getClass().getDeclaredFields()) {
+            if (f.getType() == List.class) {
+                try {
+                    ((List<String>) f.get(f)).clear();
+                } catch (IllegalAccessException e) {
+                }
+            }
+        }
     }
 
     private void fillTabComplete(String[] args, Player player) {

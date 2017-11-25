@@ -1,8 +1,7 @@
 package com.Stranded.commands;
 
 import com.Stranded.Main;
-import com.Stranded.commands.warIsland.Create;
-import com.Stranded.commands.warIsland.Delete;
+import com.Stranded.commands.warIsland.*;
 import com.Stranded.commands.warIsland.Edit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,6 +22,15 @@ public class WarIsland implements CommandExecutor {
         actions.add(new Edit());
         actions.add(new Create());
         actions.add(new Delete());
+        actions.add(new Wand());
+        actions.add(new Download());
+        actions.add(new Export());
+        actions.add(new Import());
+        actions.add(new Upload());
+        actions.add(new Pos1());
+        actions.add(new Pos2());
+        actions.add(new Pos());
+        actions.add(new Box());
     }
 
     @Override
@@ -35,7 +43,7 @@ public class WarIsland implements CommandExecutor {
 
         Player player = (Player) commandSender;
 
-        if (!player.hasPermission("Stranded.createWarIsland")) {
+        if (!player.hasPermission("Stranded.WarIsland")) {
             player.sendMessage("you don't have permission");
             return false;
         }

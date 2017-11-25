@@ -101,7 +101,7 @@ public class Generator extends ChunkGenerator {
                 }
                 setBlock(x, 0, z, chunk, Material.BEDROCK); //set lowest layer to bedrock
 
-                for (int y =(int) maxHeight + 1; y <= 64; y++) {
+                for (int y =(int) maxHeight + 1; y <= 62; y++) {
                     setBlock(x, y, z, chunk, Material.WATER); //set the water
                 }
             }

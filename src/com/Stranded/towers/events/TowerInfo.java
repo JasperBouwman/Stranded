@@ -4,6 +4,8 @@ class TowerInfo {
 
     static String getTowerInfo(String s, String lvl) {
 
+        //todo set tower upgrade max lvl
+
         if (s.startsWith("Speed lvl: ")) {
             switch (lvl) {
                 case "1":

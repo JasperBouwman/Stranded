@@ -95,7 +95,7 @@ public class IslandGeneration {
 
     }
 
-    private static Location spawnNexus(Location l, Main p) {
+    public static Location spawnNexus(Location l, Main p) {
 
         l.setX(l.getX() + 0.5);
         l.setZ(l.getZ() + 0.5);
@@ -121,6 +121,15 @@ public class IslandGeneration {
         return v.getLocation();
     }
 
+    @SuppressWarnings("unused")
+    private static void setBlock(Block blockFrom, Block blockTo, boolean setBiome) {
+        setBlock(blockFrom, blockTo);
+        if (setBiome) {
+            blockTo.setBiome(blockFrom.getBiome());
+        }
+    }
+
+    @SuppressWarnings("deprecation")
     private static void setBlock(Block blockFrom, Block blockTo) {
 
         blockTo.setType(blockFrom.getType());

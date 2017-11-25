@@ -1,8 +1,6 @@
 package com.Stranded.commands;
 
 import com.Stranded.Main;
-import com.Stranded.PlayerList;
-import com.Stranded.UpdateTabList;
 import com.Stranded.worldGeneration.Generator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -32,25 +30,8 @@ public class Edit implements CommandExecutor {
             return false;
         }
 
-        if (args.length == 0) {
-
-            new UpdateTabList(player, p);
-
-        }
-
-
         if (args.length == 1) {
 
-            if (args[0].equalsIgnoreCase("test")) {
-                PlayerList list = PlayerList.getPlayerList(player);
-                list.updateSlot(2, "lol");
-                return false;
-            }
-            if (args[0].equalsIgnoreCase("rem")) {
-                PlayerList list = PlayerList.getPlayerList(player);
-                list.addExistingPlayer(3, Bukkit.getOfflinePlayer("7he_4ch3r"));
-                return false;
-            }
 
             try {
                 World w = Bukkit.getWorld(args[0]);

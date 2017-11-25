@@ -6,14 +6,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
+import static com.Stranded.worldGeneration.warIsland.ImportWarIsland.*;
+
 public class DefaultIslandGenerator {
 
     public DefaultIslandGenerator(Main p) {
+
+        Files islands = new Files(p, "islands.yml");
+        islands.getConfig().set("islandData.islandTypesCopied", true);
+        islands.saveConfig();
 
         Location L1 = new Location(Bukkit.getWorld("Islands"), -200987, 54, -200013);
         Location L2 = new Location(Bukkit.getWorld("Islands"), -201013, 75, -199726);
@@ -72,12 +79,125 @@ public class DefaultIslandGenerator {
                 }
             }
         }
-
-        Files islands = new Files(p, "islands.yml");
-        islands.getConfig().set("islandData.islandTypesCopied", true);
         Bukkit.broadcastMessage("done with copying default islands");
-        islands.saveConfig();
+    }
 
+
+    public DefaultIslandGenerator(Main p, boolean nothing) {
+
+        Files defaultIslands = new Files(p, "defaultIslands1.yml");
+
+        int y = defaultIslands.getConfig().getInt("island.y");
+
+        int totalWidth = defaultIslands.getConfig().getInt("island.width");
+        int totalHeight = defaultIslands.getConfig().getInt("island.height");
+        int totalLength = defaultIslands.getConfig().getInt("island.length");
+        int width = totalWidth;
+        int height = totalHeight;
+        int length = totalLength;
+
+//        Location temp = player.getLocation().clone();
+        Location temp = new Location(Bukkit.getWorld("Islands"), -200987, 54, -200013);
+        temp.setY(y);
+
+        for (String blocksID : defaultIslands.getConfig().getConfigurationSection("island.region.blocks").getKeys(false)) {
+
+            String BlockSet = defaultIslands.getConfig().getString("island.region.blocks." + blocksID);
+
+            for (String blockData : getBlocks(BlockSet)) {
+
+                int repeat = 0;
+
+                if (hasRepeat(blockData)) {
+                    repeat = getRepeat(blockData);
+                }
+
+                Material m = getMaterial(blockData);
+
+                for (int loop = 0; loop <= repeat; loop++) {
+
+                    if (m.equals(Material.STRUCTURE_VOID)) {
+                        length--;
+                        if (length == -1) {
+                            height--;
+                            length = totalLength;
+                        }
+                        if (height == -1) {
+                            width--;
+                            height = totalHeight;
+                        }
+                        continue;
+                    }
+
+                    Location l = getLocation(temp, width, height, length);
+
+                    if (!l.getBlock().getType().equals(m)) {
+                        l.getBlock().setType(m);
+                    }
+                    l.getBlock().setData(getData(blockData));
+
+                    if (hasExtraData(blockData)) {
+                        int extraDataID = getExtraDataID(blockData);
+
+                        if (extraDataID >= 0) {
+
+                            switch (m) {
+                                case BREWING_STAND:
+
+                                    BrewingStand brewingStand = (BrewingStand) l.getBlock().getState();
+
+                                    int time = defaultIslands.getConfig().getInt("island.region.extraData." + extraDataID + ".brewingStand.brewingTime");
+                                    int level = defaultIslands.getConfig().getInt("island.region.extraData." + extraDataID + ".brewingStand.fuelLevel");
+                                    String customName = defaultIslands.getConfig().getString("island.region.extraData." + extraDataID + ".brewingStand.customName");
+                                    ArrayList<ItemStack> content = (ArrayList<ItemStack>) defaultIslands.getConfig().get("island.region.extraData." + extraDataID + ".brewingStand.inventory");
+                                    String lock = defaultIslands.getConfig().getString("island.region.extraData." + extraDataID + ".brewingStand.lock");
+
+                                    brewingStand.setBrewingTime(time);
+                                    brewingStand.setFuelLevel(level);
+                                    brewingStand.setCustomName(customName);
+                                    brewingStand.setLock(lock);
+                                    int i = 0;
+                                    for (ItemStack is : content) {
+                                        brewingStand.getInventory().setItem(i, is);
+                                        i++;
+                                    }
+                                    break;
+                                case CHEST:
+                                case TRAPPED_CHEST:
+
+                                    Chest chest = (Chest) l.getBlock().getState();
+
+                                    customName = defaultIslands.getConfig().getString("island.region.extraData." + extraDataID + ".chest.customName");
+                                    content = ((ArrayList<ItemStack>) defaultIslands.getConfig().get("island.region.extraData." + extraDataID + ".chest.inventory"));
+                                    lock = defaultIslands.getConfig().getString("island.region.extraData." + extraDataID + ".chest.lock");
+                                    chest.setCustomName(customName);
+                                    chest.setLock(lock);
+
+                                    if (chest.getInventory().getSize() >= content.size()) {
+                                        i = 0;
+                                        for (ItemStack is : content) {
+                                            chest.getInventory().setItem(i, is);
+                                            i++;
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+
+                    length--;
+                    if (length == -1) {
+                        height--;
+                        length = totalLength;
+                    }
+                    if (height == -1) {
+                        width--;
+                        height = totalHeight;
+                    }
+
+                }
+            }
+        }
     }
 
 }

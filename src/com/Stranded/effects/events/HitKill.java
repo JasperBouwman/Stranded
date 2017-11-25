@@ -2,8 +2,7 @@ package com.Stranded.effects.events;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Entity;
+import com.Stranded.Scoreboard;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,16 +22,22 @@ public class HitKill implements Listener {
     @SuppressWarnings("unused")
     public void onEntityHit(EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player) {
-            Files save = new Files(p, "playerData.yml");
+            Files playerData = new Files(p, "playerData.yml");
             Files pluginData = new Files(p, "pluginData.yml");
-            if (save.getConfig().getLong("HitKill." + e.getDamager().getName()) / pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier") != 100) {
+            int amplifier = pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier");
+            if (playerData.getConfig().getLong("HitKill." + e.getDamager().getName()) / amplifier != 100) {
                 Player player = (Player) e.getDamager();
-                save.getConfig().set("HitKill." + player.getName(), save.getConfig().getLong("HitKill." + player.getName()) + 1);
-                save.saveConfig();
-            } else if (save.getConfig().getLong("HitKill." + e.getDamager().getName()) / pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier") == 100) {
+                String uuid = player.getUniqueId().toString();
+                long oldScore = playerData.getConfig().getLong("HitKill." + uuid);
+                playerData.getConfig().set("HitKill." + uuid, +1);
+                playerData.saveConfig();
+                if (oldScore / amplifier != oldScore + 1 / amplifier) {
+                    Scoreboard.scores(p, player);
+                }
+            } else if (playerData.getConfig().getLong("HitKill." + e.getDamager().getName()) / pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier") == 100) {
                 LivingEntity damaged = (LivingEntity) e.getEntity();
                 double damage = e.getDamage();
-                double y = damage*damage/40;
+                double y = damage * damage / 40;
                 damaged.setHealth(damaged.getHealth() - y);
             }
         }
@@ -41,15 +46,18 @@ public class HitKill implements Listener {
     @EventHandler
     @SuppressWarnings("unused")
     public void onEntityKill(EntityDeathEvent e) {
-
-
         if (e.getEntity().getKiller() != null && e.getEntity().getKiller() instanceof Player) {
-            Files save = new Files(p, "playerData.yml");
+            Files playerData = new Files(p, "playerData.yml");
             Files pluginData = new Files(p, "pluginData.yml");
-            if (save.getConfig().getLong("HitKill." + e.getEntity().getKiller().getName()) / pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier") != 100) {
+            int amplifier = pluginData.getConfig().getInt("plugin.scoreboard.pvp.amplifier");
+            if (playerData.getConfig().getLong("HitKill." + e.getEntity().getKiller().getUniqueId().toString()) / amplifier != 100) {
                 Player killer = e.getEntity().getKiller();
-                save.getConfig().set("HitKill." + killer.getName(), save.getConfig().getLong("HitKill." + killer.getName()) + 1);
-                save.saveConfig();
+                long oldScore = playerData.getConfig().getLong("HitKill." + killer.getUniqueId().toString());
+                playerData.getConfig().set("HitKill." + killer.getUniqueId().toString(), oldScore + 1);
+                playerData.saveConfig();
+                if (oldScore / amplifier != oldScore + 1 / amplifier) {
+                    Scoreboard.scores(p, e.getEntity().getKiller());
+                }
             }
         }
     }

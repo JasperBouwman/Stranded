@@ -18,5 +18,8 @@ public class WorldGenerate {
         WorldCreator WG2 = new WorldCreator("War");
         WG2.generator(g);
         Bukkit.getServer().createWorld(WG2);
+
+        Bukkit.getWorld("War").setGameRuleValue("doMobSpawning", "false");
+
     }
 }

@@ -39,6 +39,7 @@ public class Island implements CommandExecutor {
         actions.add(new Visit());
         actions.add(new Scoreboard());
         actions.add(new Ignore());
+        actions.add(new Transfer());
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -80,6 +81,7 @@ public class Island implements CommandExecutor {
         return false;
     }
 
+    @SuppressWarnings("All")
     private void openBook(ItemStack book, Player player) {
 
         int slot = player.getInventory().getHeldItemSlot();

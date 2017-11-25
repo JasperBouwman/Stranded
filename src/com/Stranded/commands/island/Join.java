@@ -1,11 +1,15 @@
 package com.Stranded.commands.island;
 
 import com.Stranded.Files;
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.commands.stranded.Reload;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Join extends CmdManager {
 
@@ -21,72 +25,86 @@ public class Join extends CmdManager {
 
     @Override
     public void run(String[] args, Player player) {
-        if (p.getConfig().contains("invited." + player.getName() + ".island")) {
+
+        //island join
+
+        String uuid = player.getUniqueId().toString();
+
+        if (p.getConfig().contains("invited." + uuid)) {
 
             Files warData = new Files(p, "warData.yml");
 
-            if (p.getConfig().getStringList("playersInWar").contains(player.getName())) {
-                player.sendMessage("you can't join an island while you are in a war");
+            if (p.getConfig().getStringList("playersInWar").contains(uuid)) {
+                player.sendMessage(ChatColor.RED + "You can't join an island while you are in a war");
                 return;
             }
-            if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()))) {
-                if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()) + ".players." + player.getName())) {
-                    player.sendMessage("you can't join your island while you are pending for a war");
+            if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + uuid))) {
+                if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + uuid) + ".players." + uuid)) {
+                    player.sendMessage(ChatColor.RED + "You can't leave your island while you are pending for a war");
                     return;
                 }
             }
-            if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()))) {
-                if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()) + ".players." + player.getName())) {
-                    player.sendMessage("you can't join your island while you are pending for a war");
+            if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + uuid))) {
+                if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + uuid) + ".players." + uuid)) {
+                    player.sendMessage(ChatColor.RED + "You can't leave your island while you are pending for a war");
                     return;
                 }
             }
 
-            Files f = new Files(p, "islands.yml");
+            Files islands = new Files(p, "islands.yml");
 
-            String islandNew = p.getConfig().getString("invited." + player.getName() + ".newIsland");
-            ArrayList<String> nw = (ArrayList<String>) f.getConfig().getStringList("island." + islandNew + ".members");
-            player.sendMessage("you now joined " + islandNew);
+            String islandNew = p.getConfig().getString("invited." + uuid + ".newIsland");
+            ArrayList<String> nw = (ArrayList<String>) islands.getConfig().getStringList("island." + islandNew + ".members");
+            player.sendMessage(ChatColor.GREEN + "You joined " + islandNew);
 
             for (String s : nw) {
-                if (Bukkit.getPlayerExact(s) != null) {
-                    Bukkit.getPlayerExact(s).sendMessage(player.getName() + " joined your island");
+                if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
+                    Bukkit.getPlayer(UUID.fromString(s)).sendMessage(ChatColor.DARK_BLUE + player.getName() + ChatColor.BLUE + " Joined your island");
                 }
             }
-            //todo remove all (towers, xp, inv)
-            if (p.getConfig().contains("island." + player.getName())) {
-                String islandOld = p.getConfig().getString("island." + player.getName());
-                ArrayList<String> old = (ArrayList<String>) f.getConfig().getStringList("island." + islandOld + ".members");
-                if (old.contains(player.getName())) {
-                    old.remove(player.getName());
-                    f.getConfig().set("island." + islandOld + ".members", old);
+
+            Main.resetPlayerData(uuid, p);
+
+            com.Stranded.Scoreboard.scores(p, player);
+
+            com.Stranded.Scoreboard.updateIslandScoreboard(p, islandNew);
+
+            if (p.getConfig().contains("island." + uuid)) {
+                String islandOld = p.getConfig().getString("island." + uuid);
+                ArrayList<String> old = (ArrayList<String>) islands.getConfig().getStringList("island." + islandOld + ".members");
+                if (old.contains(uuid)) {
+                    old.remove(uuid);
+                    islands.getConfig().set("island." + islandOld + ".members", old);
 
                     for (String s : old) {
-                        if (Bukkit.getPlayerExact(s) != null) {
-                            Bukkit.getPlayerExact(s).sendMessage(player.getName() + " left your island");
+                        if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
+                            Bukkit.getPlayer(UUID.fromString(s)).sendMessage(ChatColor.DARK_RED + player.getName() + ChatColor.RED + " left your island");
+                            com.Stranded.Scoreboard.scores(p, Bukkit.getPlayer(UUID.fromString(s)));
                         }
                     }
                     if (old.size() == 0) {
-                        f.getConfig().set("island." + islandOld, null);
+                        islands.getConfig().set("island." + islandOld, null);
                     }
                 }
-                p.getConfig().set("island." + player.getName(), islandNew);
+                p.getConfig().set("island." + uuid, islandNew);
             }
-            ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("invitedList");
-            list.remove(player.getName());
-            p.getConfig().set("invitedList", list);
-            p.saveConfig();
-            Bukkit.getScheduler().cancelTask(f.getConfig().getInt("invited." + player.getName() + ".pendingID"));
 
-            p.getConfig().set("invited." + player.getName(), null);
-            p.getConfig().set("island." + player.getName(), islandNew);
-            nw.add(player.getName());
-            f.getConfig().set("island." + islandNew + ".members", nw);
-            f.saveConfig();
+            p.saveConfig();
+            Bukkit.getScheduler().cancelTask(islands.getConfig().getInt("invited." + uuid + ".pendingID"));
+            Main.reloadHolds -= 1;
+            if (Main.reloadPending && Main.reloadHolds == 0) {
+                Reload.reload(p);
+            }
+
+            p.getConfig().set("invited." + uuid, null);
+            p.getConfig().set("island." + uuid, islandNew);
+            nw.add(uuid);
+            islands.getConfig().set("island." + islandNew + ".members", nw);
+            islands.saveConfig();
             p.saveConfig();
             return;
 
         }
-        player.sendMessage("you aren't invited for anything");
+        player.sendMessage(ChatColor.RED + "You aren't invited to join an island");
     }
 }

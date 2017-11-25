@@ -1,15 +1,18 @@
 package com.Stranded.commands;
 
-import com.Stranded.FancyMessageUtil;
 import com.Stranded.Main;
 import com.Stranded.commands.war.Accept;
 import com.Stranded.commands.war.Ready;
 import com.Stranded.commands.war.Start;
-import org.bukkit.Location;
+import com.Stranded.lootTable.LootBox;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +30,28 @@ public class War implements CommandExecutor {
         actions.add(new Ready());
     }
 
+    private double pi(long accuracy) {
+        double pi = 0;
+        boolean b = true;
+        for (long i = 1; i < accuracy; i = i + 2) {
+            if (b) {
+                pi += 4D / i;
+            } else {
+                pi -= 4D / i;
+            }
+            b = !b;
+        }
+        return pi;
+    }
+
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        //war
+        //war start <war theme> [playerNames...]
+        //war accept <island2>
+        //war accept <island1> [players...]
+        //war ready
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("I don't know what you are!");
             return false;
@@ -35,22 +59,19 @@ public class War implements CommandExecutor {
 
         Player player = (Player) sender;
 
+        if (Main.reloadPending) {
+            player.sendMessage("the server is trying to reload, please wait just a second to let the server reload");
+            return false;
+        }
+
         if (args.length == 0) {
+            new Thread(() -> Main.println(pi(Long.MAX_VALUE) + "")).start();
+            Main.println("some text");
+            return false;
+        }
 
-            Location l = player.getLocation();
-            player.sendMessage(" " + l.getWorld().getName() + "\n " + l.getX() + "\n " + l.getY() + "\n " + l.getZ());
-
-            FancyMessageUtil fm = new FancyMessageUtil();
-            fm.addText("hover\n", FancyMessageUtil.Colors.AQUA);
-            fm.addHover(new String[]{"hover", "\nhover", "\nhover"}, new FancyMessageUtil.Colors[]{FancyMessageUtil.Colors.DARK_PURPLE, FancyMessageUtil.Colors.GREEN, FancyMessageUtil.Colors.BLUE}, new FancyMessageUtil.Attributes[]{FancyMessageUtil.Attributes.BOLD, FancyMessageUtil.Attributes.ITALIC, FancyMessageUtil.Attributes.UNDERLINE});
-            fm.addText("command\n", FancyMessageUtil.Colors.RED);
-            fm.addCommand("/say hai");
-            fm.addText("url\n", FancyMessageUtil.Colors.DARK_BLUE);
-            fm.addUrl("https://google.com");
-            fm.addText("suggestion", FancyMessageUtil.Colors.DARK_GRAY);
-            fm.addSuggest("suggested");
-
-            fm.sendMessage(player);
+        if (args.length == 1) {
+            player.openInventory(new LootBox(p, args[0]).getLootBox(LootBox.lootBoxSize.SMALL));
 
             return false;
         }

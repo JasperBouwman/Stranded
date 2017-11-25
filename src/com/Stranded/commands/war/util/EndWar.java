@@ -2,12 +2,14 @@ package com.Stranded.commands.war.util;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
-import com.Stranded.towers.TowerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.UUID;
+
+import static com.Stranded.towers.RemoveTower.removeWarTower;
 
 public class EndWar {
     private String warWinMsg;
@@ -15,35 +17,31 @@ public class EndWar {
     private String warLoseMsg;
     private String warLoseMsgOffline;
 
-    private ArrayList<String> islandWin;
-    private ArrayList<String> islandLose;
-    private String islandWinName;
-    private String islandLoseName;
-    private Files warData;
-
     public static void testPlayers(Main p, String warID, String side) {
 
         Files warData = new Files(p, "warData.yml");
         Files warIslands = new Files(p, "warIslands.yml");
 
-        String theme = warData.getConfig().getString("war.war." + warID + ".warIsland");
+        String theme = (String) warData.getConfig().getConfigurationSection("war.war." + warID + ".warIsland").getKeys(false).toArray()[0];
         int warIslandID = warData.getConfig().getInt("war.war." + warID + ".warIsland." + theme);
 
-        int min = warIslands.getConfig().getInt("warIslands.island" + theme + "." + warIslandID + ".minPlayers");
+        int min = warIslands.getConfig().getInt("warIslands.island." + theme + "." + warIslandID + ".minPlayers");
         int playersCount = 0;
 
         for (String players : warData.getConfig().getStringList("war.war." + warID + "." + side + ".players")) {
-            if (Bukkit.getPlayerExact(players) != null) {
+            if (Bukkit.getPlayer(UUID.fromString(players)) != null) {
                 playersCount++;
             }
         }
-        if (playersCount < min) {
-            new EndWar().endWar(p, warID, 1, side.equals("blue") ? "blue" : "red");
+
+        if (playersCount <= min) {
+            new EndWar().endWar(p, warID, 1, side.equals("blue") ? "red" : "blue");
+            return;
         }
-        if (playersCount == min) {
+        if (playersCount == min + 1) {
             for (String players : warData.getConfig().getStringList("war.war." + warID + "." + side + ".players")) {
-                if (Bukkit.getPlayerExact(players) != null) {
-                    Bukkit.getPlayerExact(players).sendMessage("nobody can leave anymore, your island has reached the minimum amount of players for this island");
+                if (Bukkit.getPlayer(UUID.fromString(players)) != null) {
+                    Bukkit.getPlayer(UUID.fromString(players)).sendMessage("nobody can leave anymore, your island has reached the minimum amount of players for this island");
                 }
             }
         }
@@ -55,53 +53,45 @@ public class EndWar {
         * 1: to few players
         * 2: nexus killed
         */
+        Files warData = new Files(p, "warData.yml");
 
         if (reason == 1) {
             initReason1();
-            if (islandWin.equals("blue")) {
-                this.islandWin = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".blue.players");
-                this.islandLose = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".red.players");
-                this.islandWinName = warData.getConfig().getString("war.war." + warID + ".blue.islandName");
-                this.islandLoseName = warData.getConfig().getString("war.war." + warID + ".red.islandName");
-            } else if (islandWin.equals("red")) {
-                this.islandWin = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".red.players");
-                this.islandLose = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".blue.players");
-                this.islandWinName = warData.getConfig().getString("war.war." + warID + ".red.islandName");
-                this.islandLoseName = warData.getConfig().getString("war.war." + warID + ".blue.islandName");
-            }
         } else if (reason == 2) {
             initReason2();
-            if (islandWin.equals("blue")) {
-                this.islandWin = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".blue.players");
-                this.islandLose = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".red.players");
-                this.islandWinName = warData.getConfig().getString("war.war." + warID + ".blue.islandName");
-                this.islandLoseName = warData.getConfig().getString("war.war." + warID + ".red.islandName");
-            } else if (islandWin.equals("red")) {
-                this.islandWin = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".red.players");
-                this.islandLose = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + ".blue.players");
-                this.islandWinName = warData.getConfig().getString("war.war." + warID + ".red.islandName");
-                this.islandLoseName = warData.getConfig().getString("war.war." + warID + ".blue.islandName");
-            }
         }
 
+        String islandWinSide;
+        String islandLoseSide;
 
-        this.warData = new Files(p, "warData.yml");
+        if (islandWin.equals("blue")) {
+            islandWinSide = islandWin;
+            islandLoseSide = "red";
+        } else {
+            islandWinSide = islandWin;
+            islandLoseSide = "blue";
+        }
+
+        ArrayList<String> islandWinPlayerList = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + "." + islandWinSide + ".players");
+        ArrayList<String> islandLosePlayerList = (ArrayList<String>) warData.getConfig().getStringList("war.war." + warID + "." + islandLoseSide + ".players");
+        String islandWinName = warData.getConfig().getString("war.war." + warID + "." + islandWinSide + ".islandName");
+        String islandLoseName = warData.getConfig().getString("war.war." + warID + "." + islandLoseSide + ".islandName");
+
         Files islands = new Files(p, "islands.yml");
         Files warIslands = new Files(p, "warIslands.yml");
-
-        String islandWinName = p.getConfig().getString("island." + this.islandWinName);
-        String islandLoseName = p.getConfig().getString("island." + this.islandLoseName);
 
         Location islandWinLocation = (Location) islands.getConfig().get("island." + islandWinName + ".home");
         Location islandLoseLocation = (Location) islands.getConfig().get("island." + islandLoseName + ".home");
 
-        for (String s : this.islandWin) {
+        double wonXp = islands.getConfig().getDouble("island." + islandLoseName + ".nexusLvl") * 0.75 + 1;
 
-            if (Bukkit.getPlayerExact(s) != null) {
-                Player player = Bukkit.getPlayer(s);
+        for (String s : islandWinPlayerList) {
 
-                player.sendMessage(warWinMsg.replace("%islandLoseName%", islandLoseName));
-                player.setLevel(player.getLevel() + 30);
+            if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
+                Player player = Bukkit.getPlayer(UUID.fromString(s));
+
+                player.sendMessage(warWinMsg.replace("%islandLoseName%", islandLoseName).replace("%wonXp%", wonXp + ""));
+                player.setLevel((int) wonXp);
                 player.teleport(islandWinLocation);
             } else {
 
@@ -111,10 +101,10 @@ public class EndWar {
             }
         }
 
-        for (String s : islandLose) {
+        for (String s : islandLosePlayerList) {
 
-            if (Bukkit.getPlayerExact(s) != null) {
-                Player player = Bukkit.getPlayer(s);
+            if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
+                Player player = Bukkit.getPlayer(UUID.fromString(s));
 
                 player.sendMessage(warLoseMsg.replace("%islandWinName%", islandWinName));
                 player.teleport(islandLoseLocation);
@@ -123,41 +113,50 @@ public class EndWar {
                 p.saveConfig();
             }
         }
+        for (String side : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers").getKeys(false)) {
+            for (String towerID : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers." + side).getKeys(false)) {
 
-        for (String towerID : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers.blue").getKeys(false)) {
-            TowerManager.removeWarTower(warData, warID, towerID, "blue");
-        }
-        for (String towerID : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers.red").getKeys(false)) {
-            TowerManager.removeWarTower(warData, warID, towerID, "red");
+                if (side.equals(islandWinName)) {
+                    removeWarTower(p, warData, warID, towerID, side, "half");
+                } else {
+                    removeWarTower(p, warData, warID, towerID, side, "null");
+                }
+            }
         }
 
-        String theme = warData.getConfig().getString("war.war." + warID + ".warIsland");
+        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+        list.removeAll(islandLosePlayerList);
+        list.removeAll(islandWinPlayerList);
+        p.getConfig().set("playersInWar", list);
+        p.saveConfig();
+
+        String theme = (String) warData.getConfig().getConfigurationSection("war.war." + warID + ".warIsland").getKeys(false).toArray()[0];
         String warIslandID = warData.getConfig().getString("war.war." + warID + ".warIsland." + theme);
         warIslands.getConfig().set("warIslands.island." + theme + "." + warIslandID + ".inUse", false);
 
         warData.getConfig().set("war.war." + warID, null);
-
+        warData.saveConfig();
     }
 
     private void initReason1() {
         this.warWinMsg = "your island just won the war against %islandLoseName%\n" +
-                "you win 30 xp and you can retrieve your towers at half of their lvl using /towers\n" +
+                "you win %wonXp% xp and you can retrieve your towers at half of their lvl using /tower\n" +
                 "the other island had to few players to play with";
         this.warWinMsgOffline = "your island had won the war against %islandLoseName%\n" +
-                "you can retrieve your towers at half of their lvl using /towers\n" +
+                "you can retrieve your towers at half of their lvl using /tower\n" +
                 "the other island had to few players to play with";
 
         this.warLoseMsg = "your island just lost the war against %islandWinName%\n" +
-                "you didn't win any xp and you can retrieve your towers at lvl 0 using /towers\n" +
+                "you didn't win any xp and you can retrieve your towers at lvl 0 using /tower\n" +
                 "your island had to few players to play with";
         this.warLoseMsgOffline = "your island had lost the war against %islandWinName%\n" +
-                "you can retrieve your towers at lvl 0 using /towers\n" +
+                "you can retrieve your towers at lvl 0 using /tower\n" +
                 "your island had to few players to play with";
     }
 
     private void initReason2() {
         this.warWinMsg = "your island just won the war against %islandLoseName%\n" +
-                "you win 30 xp and you can retrieve your towers at their lvl using /towers";
+                "you win %wonXp% xp and you can retrieve your towers at their lvl using /towers";
         this.warWinMsgOffline = "your island had won the war against %islandLoseName%\n" +
                 "you can retrieve your towers at their lvl using /towers";
 

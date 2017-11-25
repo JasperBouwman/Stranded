@@ -17,3 +17,17 @@ commands:
     description: war islands
   tower:
     description: get your towers
+  gamble:
+    description: gamble bitch
+  stranded:
+    description: main server command
+  chat:
+    description: chat with your island members
+  loottable:
+    description: deal with lootTables
+  chatfilter:
+    description: customize chat with filters
+  reply:
+    description: reply to other people
+  trade:
+    description: safe strade

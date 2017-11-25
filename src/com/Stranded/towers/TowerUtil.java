@@ -26,8 +26,12 @@ public class TowerUtil {
                 for (String towerID : islands.getConfig().getConfigurationSection("island." + island + ".towers").getKeys(false)) {
                     Location loc = (Location) islands.getConfig()
                             .get("island." + island + ".towers." + towerID + ".location");
-                    if (l.distance(loc) < maxDistance) {
-                        return true;
+
+                    if (loc.getWorld().equals(l.getWorld())) {
+
+                        if (l.distance(loc) < maxDistance) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -41,8 +45,11 @@ public class TowerUtil {
                     // get location of tower
                     Location loc = (Location) warData.getConfig()
                             .get("war.war." + warID + ".towers." + side + "." + towerID + ".location");
-                    if (l.distance(loc) < maxDistance) {
-                        return true;
+
+                    if (loc.getWorld().equals(l.getWorld())) {
+                        if (l.distance(loc) < maxDistance) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -56,8 +63,11 @@ public class TowerUtil {
                     // get location of tower
                     Location loc = (Location) warData.getConfig()
                             .get("war.war." + warID + ".towers." + side + "." + towerID + ".location");
-                    if (l.distance(loc) < maxDistance) {
-                        return true;
+
+                    if (loc.getWorld().equals(l.getWorld())) {
+                        if (l.distance(loc) < maxDistance) {
+                            return true;
+                        }
                     }
                 }
             }

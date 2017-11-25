@@ -2,6 +2,7 @@ package com.Stranded.events;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
+import com.Stranded.Scoreboard;
 import com.Stranded.commands.war.util.EndWar;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -31,12 +32,19 @@ public class DamageEvent implements Listener {
         if (listNexus.contains(e.getEntity().getUniqueId().toString()) && e.getEntity() instanceof Villager) {
             e.setCancelled(true);
         }
+        if (e.getEntity() instanceof Player) {
+            Scoreboard.scores(p, (Player) e.getEntity());
+        }
     }
-
 
     @EventHandler
     @SuppressWarnings("unused")
     public void onEntityHit(EntityDamageByEntityEvent e) {
+
+        if (e.getEntity() instanceof Player) {
+            Scoreboard.scores(p, (Player) e.getEntity());
+            return;
+        }
 
         ArrayList<String> listNexus = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
 
@@ -49,9 +57,8 @@ public class DamageEvent implements Listener {
             e.setCancelled(true);
 
             Villager v = (Villager) e.getEntity();
-            if (!v.getWorld().getName().equals("War")) {
-                //todo
-                //return;
+            if (!v.getWorld().equals(Bukkit.getWorld("War"))) {
+                return;
             }
             Files warData = new Files(p, "warData.yml");
             Files warIslands = new Files(p, "warIslands.yml");

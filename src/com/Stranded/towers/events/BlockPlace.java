@@ -4,8 +4,8 @@ import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.war.util.WarUtil;
 import com.Stranded.islandBorder.BorderUtils;
+import com.Stranded.towers.Tower;
 import com.Stranded.towers.TowerUtil;
-import com.Stranded.towers.models.*;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -65,16 +65,9 @@ public class BlockPlace implements Listener {
     public void BlockEvent(BlockPlaceEvent e) {
 
         Player player = e.getPlayer();
+        String uuid = player.getUniqueId().toString();
         Block block = e.getBlock();
         Material is = block.getType();
-
-        if (!p.getConfig().contains("island." + player.getName())) {
-            e.setCancelled(true);
-            player.sendMessage("you aren't in an island");
-            return;
-        }
-
-
 
         ItemMeta im;
 
@@ -84,7 +77,14 @@ public class BlockPlace implements Listener {
             return;
         }
         if (is.equals(Material.WOOL)) {
-            if (im.getDisplayName().equals("§4Enemy Tower")) {
+            if (im.getDisplayName().equals("§4Enemy Tower") || im.getDisplayName().equals("§3Friendly Tower")) {
+
+
+                if (!p.getConfig().contains("island." + uuid)) {
+                    e.setCancelled(true);
+                    player.sendMessage("you aren't in an island");
+                    return;
+                }
 
                 if (test(player, block)) {
                     e.setCancelled(true);
@@ -97,108 +97,121 @@ public class BlockPlace implements Listener {
                 }
 
                 List<String> lore = im.getLore();
-                String type = "";
-                for (String s : lore) {
-                    type = s;
+                String type = lore.get(0);
+                int lvl = Tower.MAX_UPGRADE;
+                if (lore.size() == 2) {
+                    try {
+                        lvl = Integer.parseInt(lore.get(1).replace("lvl: ", ""));
+                    } catch (NumberFormatException ignore) {
+                    }
                 }
+
                 e.setCancelled(true);
 
-                switch (type) {
-                    case "TNT":
-                        Location TNTLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(TNTLocation, player, type);
-                        } else {
-                            SaveIslandTower(TNTLocation, player, type);
-                        }
-                        TntTower.Tower(TNTLocation);
-                        break;
-                    case "Slowness":
-                        Location SlowLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(SlowLocation, player, type);
-                        } else {
-                            SaveIslandTower(SlowLocation, player, type);
-                        }
-                        SlowTower.Tower(SlowLocation);
-                        break;
-                    case "Hunger":
-                        Location HungerLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(HungerLocation, player, type);
-                        } else {
-                            SaveIslandTower(HungerLocation, player, type);
-                        }
-                        HungerTower.Tower(HungerLocation);
-                        break;
-                    case "Wither":
-                        Location WitherLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(WitherLocation, player, type);
-                        } else {
-                            SaveIslandTower(WitherLocation, player, type);
-                        }
-                        WitherTower.Tower(WitherLocation);
-                        break;
-                    case "Arrow":
-                        Location ArrowLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(ArrowLocation, player, type);
-                        } else {
-                            SaveIslandTower(ArrowLocation, player, type);
-                        }
-                        ArrowTower.Tower(ArrowLocation);
-                        break;
+                Location location = block.getLocation();
+                if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+                    SaveWarTower(location, player, type);
+                } else {
+                    SaveIslandTower(location, player, type);
                 }
-            } else if (im.getDisplayName().equals("§3Friendly Tower")) {
-
-                if (test(player, block)) {
-                    e.setCancelled(true);
-                    return;
-                }
-
-                if (!im.hasLore()) {
-                    player.sendMessage(ChatColor.RED + "I see what you did there, but please don't");
-                    return;
-                }
-
-                List<String> lore = im.getLore();
-                String type = "";
-                for (String s : lore) {
-                    type = s;
-                }
-                e.setCancelled(true);
-
-                switch (type) {
-                    case "Haste":
-                        Location HasteLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(HasteLocation, player, type);
-                        } else {
-                            SaveIslandTower(HasteLocation, player, type);
-                        }
-                        HasteTower.Tower(HasteLocation);
-                        break;
-                    case "Regeneration":
-                        Location RegenLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(RegenLocation, player, type);
-                        } else {
-                            SaveIslandTower(RegenLocation, player, type);
-                        }
-                        RegenerationTower.Tower(RegenLocation);
-                        break;
-                    case "Speed":
-                        Location SpeedLocation = block.getLocation();
-                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
-                            SaveWarTower(SpeedLocation, player, type);
-                        } else {
-                            SaveIslandTower(SpeedLocation, player, type);
-                        }
-                        SpeedTower.Tower(SpeedLocation);
-                        break;
-                }
+                new Tower(p, player.getUniqueId(), type, lvl).setTower(location);
+//                switch (type) {
+//                    case "TNT":
+//
+//                        TntTower.Tower(location);
+//                        break;
+//                    case "Slowness":
+//                        Location SlowLocation = block.getLocation();
+//                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+//                            SaveWarTower(SlowLocation, player, type);
+//                        } else {
+//                            SaveIslandTower(SlowLocation, player, type);
+//                        }
+//                        SlowTower.Tower(SlowLocation);
+//                        break;
+//                    case "Hunger":
+//                        Location HungerLocation = block.getLocation();
+//                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+//                            SaveWarTower(HungerLocation, player, type);
+//                        } else {
+//                            SaveIslandTower(HungerLocation, player, type);
+//                        }
+//                        HungerTower.Tower(HungerLocation);
+//                        break;
+//                    case "Wither":
+//                        Location WitherLocation = block.getLocation();
+//                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+//                            SaveWarTower(WitherLocation, player, type);
+//                        } else {
+//                            SaveIslandTower(WitherLocation, player, type);
+//                        }
+//                        WitherTower.Tower(WitherLocation);
+//                        break;
+//                    case "Arrow":
+//                        Location ArrowLocation = block.getLocation();
+//                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+//                            SaveWarTower(ArrowLocation, player, type);
+//                        } else {
+//                            SaveIslandTower(ArrowLocation, player, type);
+//                        }
+//                        ArrowTower.Tower(ArrowLocation);
+//                        break;
+//                }
             }
+//            else if () {
+//
+//                if (test(player, block)) {
+//                    e.setCancelled(true);
+//                    return;
+//                }
+//
+//                if (!im.hasLore()) {
+//                    player.sendMessage(ChatColor.RED + "I see what you did there, but please don't");
+//                    return;
+//                }
+//
+//                List<String> lore = im.getLore();
+//                String type = lore.get(0);
+//                e.setCancelled(true);
+//
+//
+//                Location location = block.getLocation();
+//                if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+//                    SaveWarTower(location, player, type);
+//                } else {
+//                    SaveIslandTower(location, player, type);
+//                }
+//                new Tower(player, type).setTower(location);
+////                switch (type) {
+////                    case "Haste":
+////                        Location HasteLocation = block.getLocation();
+////                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+////                            SaveWarTower(HasteLocation, player, type);
+////                        } else {
+////                            SaveIslandTower(HasteLocation, player, type);
+////                        }
+////                        HasteTower.Tower(HasteLocation);
+////                        break;
+////                    case "Regeneration":
+////                        Location RegenLocation = block.getLocation();
+////                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+////                            SaveWarTower(RegenLocation, player, type);
+////                        } else {
+////                            SaveIslandTower(RegenLocation, player, type);
+////                        }
+////                        RegenerationTower.Tower(RegenLocation);
+////                        break;
+////                    case "Speed":
+////                        Location SpeedLocation = block.getLocation();
+////                        if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+////                            SaveWarTower(SpeedLocation, player, type);
+////                        } else {
+////                            SaveIslandTower(SpeedLocation, player, type);
+////                        }
+////                        SpeedTower.Tower(SpeedLocation);
+////                        break;
+////                }
+//            }
         }
     }
 
@@ -207,7 +220,9 @@ public class BlockPlace implements Listener {
 
         Files islands = new Files(p, "islands.yml");
 
-        String island = p.getConfig().getString("island." + player.getName());
+        String uuid = player.getUniqueId().toString();
+
+        String island = p.getConfig().getString("island." + uuid);
         int id = 0;
         boolean loop = true;
 
@@ -224,7 +239,7 @@ public class BlockPlace implements Listener {
             }
             if (!islands.getConfig().contains("island." + island + ".towers." + id)) {
                 islands.getConfig().set("island." + island + ".towers." + id + ".location", l);
-                islands.getConfig().set("island." + island + ".towers." + id + ".owner", player.getName());
+                islands.getConfig().set("island." + island + ".towers." + id + ".owner", uuid);
                 islands.getConfig().set("island." + island + ".towers." + id + ".timeout", timeout);
                 islands.getConfig().set("island." + island + ".towers." + id + ".timer", timeout);
 
@@ -254,6 +269,8 @@ public class BlockPlace implements Listener {
                 islands.getConfig().set("island." + island + ".towers." + id + ".terrain." + 27 + ".data", 0);
                 islands.saveConfig();
 
+                islands.saveConfig();
+
                 loop = false;
             } else {
                 id++;
@@ -262,7 +279,7 @@ public class BlockPlace implements Listener {
     }
 
     private void setSaveWarTowerData(Player player, Files warData) {
-        this.island = p.getConfig().getString("island." + player.getName());
+        this.island = p.getConfig().getString("island." + player.getUniqueId().toString());
         this.warID = "";
         this.side = "";
 
@@ -303,7 +320,7 @@ public class BlockPlace implements Listener {
             }
             if (!warData.getConfig().contains("island." + island + ".towers." + id)) {
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".location", l);
-                warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".owner", player.getName());
+                warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".owner", player.getUniqueId().toString());
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".timeout", timeout);
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".timer", timeout);
 

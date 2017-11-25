@@ -9,10 +9,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.logging.Level;
 
 public class Files {
+
     private final String fileName;
     private final JavaPlugin plugin;
 
@@ -21,20 +21,28 @@ public class Files {
 
     public Files(JavaPlugin plugin, String fileName) {
         this.plugin = plugin;
-        this.fileName = fileName;
-        this.configFile = new File(plugin.getDataFolder(), fileName);
+        this.fileName = fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml");
+        this.configFile = new File(plugin.getDataFolder(), fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml"));
     }
 
-    public void reloadConfig() {
-        fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
+    public Files(JavaPlugin plugin, String extraPath, String fileName) {
+        this.plugin = plugin;
+        this.fileName = fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml");
+        this.configFile = new File(plugin.getDataFolder() + extraPath, fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml"));
+    }
 
-        //Look for defaults in the jar
-//        InputStream defConfigStream = plugin.getResource(fileName);
-//        if (defConfigStream != null) {
-//            @SuppressWarnings("deprecation")
-//            YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-//            fileConfiguration.setDefaults(defConfig);
-//        }
+    public void setWarIsland() {
+        this.configFile = new File(plugin.getDataFolder() + "/warIslands/" + fileName);
+        fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
+    }
+
+    public boolean isWarIsland() {
+        File f = new File(plugin.getDataFolder() + "/warIslands/" + fileName);
+        return f.exists();
+    }
+
+    private void reloadConfig() {
+        fileConfiguration = YamlConfiguration.loadConfiguration(configFile);
     }
 
     public FileConfiguration getConfig() {
@@ -54,7 +62,7 @@ public class Files {
         }
     }
 
-    public void saveDefaultConfig() {
+    void saveDefaultConfig() {
         if (!configFile.exists()) {
             this.plugin.saveResource(fileName, false);
 
@@ -64,12 +72,13 @@ public class Files {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void placeDefaultIslands() {
 
-        Files defaultIslands = new Files(plugin , "defaultIslands.yml");
+        Files defaultIslands = new Files(plugin, "defaultIslands.yml");
 
-        Location L1 = new Location(Bukkit.getServer().getWorld("Islands"),-201013,54,-200013);
-        Location L2 = new Location(Bukkit.getServer().getWorld("Islands"),-200987,75,-199726);
+        Location L1 = new Location(Bukkit.getServer().getWorld("Islands"), -201013, 54, -200013);
+        Location L2 = new Location(Bukkit.getServer().getWorld("Islands"), -200987, 75, -199726);
 
         int minX = Math.min(L1.getBlockX(), L2.getBlockX());
         int minY = Math.min(L1.getBlockY(), L2.getBlockY());
@@ -95,15 +104,15 @@ public class Files {
         }
     }
 
-    public void loadConfig() {
-        fileConfiguration = getConfig();
-        fileConfiguration.options().copyDefaults(true);
-
-        if (new File(plugin.getDataFolder() + "/config.yml").exists()) {
-            System.out.println("[" + plugin + "]" + "config.yml loaded.");
-        } else {
-            saveDefaultConfig();
-            System.out.println("[" + plugin + "]" + "config.yml created and loaded.");
-        }
-    }
+//    public void loadConfig() {
+//        fileConfiguration = getConfig();
+//        fileConfiguration.options().copyDefaults(true);
+//
+//        if (new File(plugin.getDataFolder() + "/config.yml").exists()) {
+//            System.out.println("[" + plugin + "]" + "config.yml loaded.");
+//        } else {
+//            saveDefaultConfig();
+//            System.out.println("[" + plugin + "]" + "config.yml created and loaded.");
+//        }
+//    }
 }

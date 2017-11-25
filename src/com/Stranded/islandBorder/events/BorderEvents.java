@@ -10,7 +10,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.*;
 
-import static com.Stranded.commands.warIsland.Create.wandStuff;
+import static com.Stranded.commands.warIsland.Wand.wandStuff;
 
 public class BorderEvents implements Listener {
 
@@ -88,7 +88,7 @@ public class BorderEvents implements Listener {
     public void onPistonPistonExtend(BlockPistonExtendEvent e) {
 
         for (Block b : e.getBlocks()) {
-            if (BorderUtils.border(b.getLocation(), p)) {
+            if (BorderUtils.border(b.getLocation(), p, e.getDirection(), false)) {
                 e.setCancelled(true);
                 return;
             }
@@ -99,11 +99,10 @@ public class BorderEvents implements Listener {
     @SuppressWarnings("unused")
     public void onPistonPistonRetract(BlockPistonRetractEvent e) {
         for (Block b : e.getBlocks()) {
-            if (BorderUtils.border(b.getLocation(), p)) {
+            if (BorderUtils.border(b.getLocation(), p, e.getDirection(), true)) {
                 e.setCancelled(true);
                 return;
             }
         }
     }
-
 }

@@ -9,7 +9,7 @@ import org.bukkit.block.Sign;
 public class SlowTower {
 
     @SuppressWarnings("deprecation")
-    public static void Tower(Location l) {
+    public static void Tower(Location l, String lvl) {
 
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l).setTypeIdAndData(Material.PURPUR_BLOCK.getId(), (byte) 1, true);
         Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX() + 1, l.getBlockY(), l.getBlockZ()).setTypeIdAndData(Material.PURPUR_BLOCK.getId(), (byte) 1, true);
@@ -44,7 +44,7 @@ public class SlowTower {
         Block b = Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX(), l.getBlockY() + 1, l.getBlockZ() - 2);
         Sign s = (Sign) b.getState();
         s.setLine(0, "§4Enemy Tower");
-        s.setLine(1, "Slow lvl: 1");
+        s.setLine(1, "Slow lvl: " + lvl);
         s.setLine(2, "Upgrade cost:");
         s.setLine(3, "15");
         s.update();
@@ -53,7 +53,7 @@ public class SlowTower {
         Block b1 = Bukkit.getWorld(l.getWorld().getName()).getBlockAt(l.getBlockX(), l.getBlockY() + 1, l.getBlockZ() + 2);
         Sign s1 = (Sign) b1.getState();
         s1.setLine(0, "§4Enemy Tower");
-        s1.setLine(1, "Slow lvl: 1");
+        s1.setLine(1, "Slow lvl: " + lvl);
         s1.setLine(2, "Upgrade cost:");
         s1.setLine(3, "15");
         s1.update();

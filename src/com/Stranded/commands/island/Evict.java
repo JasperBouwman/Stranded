@@ -1,12 +1,16 @@
 package com.Stranded.commands.island;
 
 import com.Stranded.Files;
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.playerUUID.PlayerUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Evict extends CmdManager {
     @Override
@@ -22,65 +26,100 @@ public class Evict extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
-        Files f = new Files(p, "islands.yml");
+        //island evict <player name>
 
-        if (!p.getConfig().contains("island." + player.getName())) {
-            player.sendMessage("you aren't in an island");
+        String uuid = player.getUniqueId().toString();
+
+        Files islands = new Files(p, "islands.yml");
+
+        if (!p.getConfig().contains("island." + uuid)) {
+            player.sendMessage(ChatColor.RED + "You can only use this when you're in an island");
             return;
         }
-        if (!f.getConfig().getString("island." + p.getConfig().getString("island." + player.getName()) + ".owner").equals(player.getName())) {
-            player.sendMessage("you are not the owner of this island, so you can't evict someone");
+
+        String island = p.getConfig().getString("island." + uuid);
+
+        if (!islands.getConfig().getString("island." + island + ".owner").equals(uuid)) {
+            player.sendMessage(ChatColor.RED + "You are not the owner of this island, so you can't evict someone");
             return;
         }
-        ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + p.getConfig().getString("island." + player.getName()) + ".members");
+        ArrayList<String> list = (ArrayList<String>) islands.getConfig().getStringList("island." + island + ".members");
 
         if (args.length == 2) {
-            if (list.contains(args[1])) {
+
+            String evictPlayerUUID = PlayerUUID.getPlayerUUID(args[1], p);
+
+            if (evictPlayerUUID == null) {
+                ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[1], p);
+                if (tempPlayers.size() > 1) {
+                    player.sendMessage("the player '" + args[1] + "' is not found, but there are more players found with the same name (not case sensitive)");
+                    return;
+                } else if (tempPlayers.size() == 0) {
+                    player.sendMessage("there is no player found with this name");
+                    return;
+                } else {
+                    evictPlayerUUID = tempPlayers.get(0);
+                }
+            }
+
+            if (evictPlayerUUID == null) {
+                player.sendMessage(ChatColor.RED + "This player isn't found, please make sure that you gave the right player name. this is case sensitive");
+                return;
+            }
+
+            String evictPlayerName = PlayerUUID.getPlayerName(evictPlayerUUID, p);
+
+            if (list.contains(evictPlayerUUID)) {
 
                 Files warData = new Files(p, "warData.yml");
-                if (p.getConfig().getStringList("playersInWar").contains(args[1])) {
-                    player.sendMessage("you can't evict this player while he is in a war");
+                if (p.getConfig().getStringList("playersInWar").contains(evictPlayerUUID)) {
+                    player.sendMessage(ChatColor.RED + "You can't evict " + evictPlayerName + " while he is in a war");
                     return;
                 }
-                if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()))) {
-                    if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + player.getName()) + ".players." + args[1])) {
-                        player.sendMessage("you can't evict this player, this player is pending for a war");
+                if (warData.getConfig().contains("war.pending.island1." + island)) {
+                    if (warData.getConfig().contains("war.pending.island1." + island + ".players." + evictPlayerUUID)) {
+                        player.sendMessage(ChatColor.RED + "You can't evict " + evictPlayerName + ", this player is pending for a war");
                         return;
                     }
                 }
-                if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()))) {
-                    if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()) + ".players." + args[1])) {
-                        player.sendMessage("you can't evict this player, this player is pending for a war");
+                if (warData.getConfig().contains("war.pending.island2." + island)) {
+                    if (warData.getConfig().contains("war.pending.island2." + island + ".players." + evictPlayerUUID)) {
+                        player.sendMessage(ChatColor.RED + "You can't evict " + evictPlayerName + ", this player is pending for a war");
                         return;
                     }
                 }
 
-                list.remove(args[1]);
-                f.getConfig().set("island." + p.getConfig().getString("island." + player.getName()) + ".members", list);
-                f.saveConfig();
+                list.remove(evictPlayerUUID);
+                islands.getConfig().set("island." + island + ".members", list);
+                islands.saveConfig();
 
-                player.sendMessage("player successfully evicted");
-                //todo remove all (towers, xp, inv)
-                if (Bukkit.getPlayerExact(args[1]) != null) {
+                player.sendMessage(ChatColor.GREEN + args[1] + " successfully evicted");
+
+                Player evictPlayer = PlayerUUID.getPlayerExact(args[1], p);
+
+                if (evictPlayer != null) {
+
+                    Main.resetPlayerData(evictPlayerUUID, p);
+                    com.Stranded.Scoreboard.updateIslandScoreboard(p, island);
+                    com.Stranded.Scoreboard.scores(p, evictPlayer);
 
                     Files pluginData = new Files(p, "pluginData.yml");
                     Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
 
-                    Bukkit.getPlayerExact(args[1]).sendMessage("you where removed by the owner from this island");
-                    Bukkit.getPlayerExact(args[1]).teleport(l);
+                    evictPlayer.sendMessage(ChatColor.RED + "You where removed by the owner from this island");
+                    evictPlayer.teleport(l);
                 } else {
+                    String offlineUUID = PlayerUUID.getPlayerUUID(evictPlayerUUID, p);
                     ArrayList<String> listOnline = (ArrayList<String>) p.getConfig().getStringList("online.evict");
-                    listOnline.add(args[1]);
+                    listOnline.add(offlineUUID);
                     p.getConfig().set("online.evict", listOnline);
                     p.saveConfig();
                 }
-
             } else {
-                player.sendMessage("this player isn't in your island");
+                player.sendMessage(ChatColor.RED + "This player isn't in your island");
             }
         } else {
-            player.sendMessage("wrong use");
+            player.sendMessage(ChatColor.RED + "Usage: /island evict <player>");
         }
-
     }
 }

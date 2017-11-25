@@ -2,10 +2,13 @@ package com.Stranded.commands.island;
 
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.playerUUID.PlayerUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class Info extends CmdManager {
 
@@ -21,24 +24,31 @@ public class Info extends CmdManager {
 
     @Override
     public void run(String[] args, Player player) {
-        if (p.getConfig().contains("island." + player.getName())) {
+
+        //island info
+
+        String uuid = player.getUniqueId().toString();
+
+        if (p.getConfig().contains("island." + uuid)) {
             Files f = new Files(p, "islands.yml");
 
-            String island = p.getConfig().getString("island." + player.getName());
+            String island = p.getConfig().getString("island." + uuid);
             int lvl = f.getConfig().getInt("island." + island + ".lvl");
             int spc = (19 + 6 * lvl) * (19 + 6 * lvl);
 
-            player.sendMessage("Island Info:");
-            player.sendMessage("island owner: " + f.getConfig().getString("island." + island + ".owner"));
-            player.sendMessage("island level: " + lvl);
-            player.sendMessage("island surface: " + spc + " (" + (19 + 6 * lvl) + "*" + (19 + 6 * lvl) + ")");
+            player.sendMessage(ChatColor.DARK_BLUE + "Island Info:");
+            player.sendMessage(ChatColor.BLUE + "Island owner: " + ChatColor.DARK_AQUA + PlayerUUID.getPlayerName(f.getConfig().getString("island." + island + ".owner"), p));
+            player.sendMessage(ChatColor.BLUE + "Island level: " + ChatColor.DARK_AQUA + lvl);
+            player.sendMessage(ChatColor.BLUE + "Island surface: " + ChatColor.DARK_AQUA + spc + " (" + (19 + 6 * lvl) + "*" + (19 + 6 * lvl) + ")");
+            player.sendMessage(ChatColor.BLUE + "Nexus level: " + ChatColor.DARK_AQUA + f.getConfig().getString("island." + island + ".nexusLvl"));
 
             ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + island + ".members");
 
             StringBuilder members = new StringBuilder();
             int swap = 0;
             for (String pl : list) {
-                if (Bukkit.getPlayer(pl) != null) {
+                Player tmpPlayer = PlayerUUID.getPlayer(UUID.fromString(pl));
+                if (tmpPlayer != null) {
                     if (swap == 0) {
                         members.append("§2");
                         swap++;
@@ -46,6 +56,7 @@ public class Info extends CmdManager {
                         members.append("§a");
                         swap = 0;
                     }
+                    members.append(tmpPlayer.getName());
                 } else {
                     if (swap == 0) {
                         members.append("§4");
@@ -54,54 +65,13 @@ public class Info extends CmdManager {
                         members.append("§c");
                         swap = 0;
                     }
+                    members.append(PlayerUUID.getPlayerName(pl, p));
                 }
-                members.append(pl);
                 members.append("§r ");
             }
-            player.sendMessage("members:\n" + members.toString());
+            player.sendMessage(ChatColor.BLUE + "Members:\n" + members.toString());
         } else {
-            player.sendMessage("your aren't in an island");
+            player.sendMessage(ChatColor.RED + "You can't get your island info while you aren't in an island");
         }
     }
-
-//    public static void info(Player player, Main p) {
-//        if (p.getConfig().contains("island." + player.getName())) {
-//            Files f = new Files(p, "islands.yml");
-//
-//            String island = p.getConfig().getString("island." + player.getName());
-//            int lvl = f.getConfig().getInt("island." + island + ".lvl");
-//            int spc = ((lvl - 1) * 6 + 25) ^ 2;
-//
-//            player.sendMessage("Island Info:");
-//            player.sendMessage("island level: " + lvl);
-//            player.sendMessage("island surface: " + spc);
-//
-//            ArrayList<String> list = (ArrayList<String>) f.getConfig().getStringList("island." + island + ".members");
-//
-//            String members = "";
-//            int swap = 0;
-//            for (String pl : list) {
-//                if (Bukkit.getPlayer(pl) != null) {
-//                    if (swap == 0) {
-//                        members = members + "§2" + pl + "§r  ";
-//                        swap++;
-//                    } else {
-//                        members = members + "§a" + pl + "§r  ";
-//                        swap = 0;
-//                    }
-//                } else {
-//                    if (swap == 0) {
-//                        members = members + "§4" + pl + "§r  ";
-//                        swap++;
-//                    } else {
-//                        members = members + "§c" + pl + "§r  ";
-//                        swap = 0;
-//                    }
-//                }
-//            }
-//            player.sendMessage("member:\n" + members);
-//        } else {
-//            player.sendMessage("your arn't in an island");
-//        }
-//    }
 }

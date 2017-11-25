@@ -27,11 +27,8 @@ public class DeathEvent implements Listener {
     @SuppressWarnings("unused")
     public void entityDeath(EntityDeathEvent e) {
         if (e.getEntity() instanceof Villager) {
-            Bukkit.broadcastMessage("test");
             ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
-            Bukkit.broadcastMessage("test " + e.getEntity().getUniqueId());
             if (list.contains(e.getEntity().getUniqueId().toString())) {
-                Bukkit.broadcastMessage("test2");
                 list.remove(e.getEntity().getUniqueId().toString());
                 p.getConfig().set("nexus.uuid", list);
                 p.saveConfig();
@@ -48,32 +45,33 @@ public class DeathEvent implements Listener {
         Files warData = new Files(p, "warData.yml");
         Files warIslands = new Files(p, "warIslands.yml");
         Player player = e.getEntity().getPlayer();
+        String playerUUID = player.getUniqueId().toString();
 
         ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
-        if (list.contains(player.getName())) {
+        if (list.contains(playerUUID)) {
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
-                if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(player.getName())) {
+                if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(playerUUID)) {
                     String uuid = warData.getConfig().getString("war.war." + warID + ".blue.ArmorStandUUID");
                     ArmorStand as = (ArmorStand) Bukkit.getEntity(UUID.fromString(uuid));
                     if (as == null) {
                         return;
                     }
                     int health = Integer.parseInt(as.getName().replace("§9Health: ", ""));
-                    health -= 2;
+                    health -= 3;
                     as.setCustomName("§9Health: " + health);
                     if (health < 1) {
                         new EndWar().endWar(p, warID, 2, "blue");
                     }
                     return;
                 }
-                if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(player.getName())) {
+                if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(playerUUID)) {
                     String uuid = warData.getConfig().getString("war.war." + warID + ".red.ArmorStandUUID");
                     ArmorStand as = (ArmorStand) Bukkit.getEntity(UUID.fromString(uuid));
                     if (as == null) {
                         return;
                     }
                     int health = Integer.parseInt(as.getName().replace("§cHealth: ", ""));
-                    health -= 2;
+                    health -= 3;
                     as.setCustomName("§cHealth: " + health);
                     if (health < 1) {
                         new EndWar().endWar(p, warID, 2, "red");

@@ -1,19 +1,22 @@
 package com.Stranded.commands.war.util;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
+import com.Stranded.GettingFiles;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class WarUtil {
 
-    public static boolean testIfIsInWarWithComments(Main p, Player player) {
+    public static boolean testIfIsInWarWithComments(Player player) {
 
         String uuid = player.getUniqueId().toString();
 
-        Files warData = new Files(p, "warData.yml");
-        String ownIslandName = p.getConfig().getString("island." + uuid);
+        Files warData = getFiles("warData.yml");
+        Files config = getFiles("config.yml");
+        String ownIslandName = config.getConfig().getString("island." + uuid);
 
         if (warData.getConfig().contains("war.pending.island1." + ownIslandName)) {
             player.sendMessage("your island is already trying to start a war");
@@ -38,14 +41,14 @@ public class WarUtil {
         return false;
     }
 
-    public static int testIfIsInWar(Main p, Player player) {
-        String ownIslandName = p.getConfig().getString("island." + player.getUniqueId().toString());
-        return testIfIsInWar(p, ownIslandName);
+    public static int testIfIsInWar(Player player) {
+        String ownIslandName = getFiles("config.yml").getConfig().getString("island." + player.getUniqueId().toString());
+        return testIfIsInWar(ownIslandName);
     }
 
-    public static int testIfIsInWar(Main p, String island) {
+    public static int testIfIsInWar(String island) {
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
         if (warData.getConfig().contains("war.pending.island1." + island)) {
             return 1;
@@ -66,25 +69,30 @@ public class WarUtil {
         return 0;
     }
 
-    public static int testIfPlayerIsInWar(Main p, Player player) {
+    public static boolean testIfPlayerIsInWarFast(Player player) {
+        Files config = getFiles("config.yml");
+        return config.getConfig().getStringList("playersInWar").contains(player.getUniqueId().toString());
+    }
+
+    public static int testIfPlayerIsInWar(Player player) {
 
         String uuid = player.getUniqueId().toString();
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
+        Files config = getFiles("config.yml");
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
         if (list.contains(uuid)) {
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
                 if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(uuid)) {
-                   return  1;
+                    return 1;
                 }
                 if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(uuid)) {
-                   return 1;
+                    return 1;
                 }
             }
         }
         return 0;
     }
-
 
 }

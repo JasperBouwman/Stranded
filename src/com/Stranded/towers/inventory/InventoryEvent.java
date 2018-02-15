@@ -1,5 +1,6 @@
 package com.Stranded.towers.inventory;
 
+import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.towers.Tower;
 import com.Stranded.towers.inventory.ownTowers.InvFilteredTowers;
@@ -15,7 +16,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -23,6 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.Stranded.GettingFiles.getFiles;
 
 public class InventoryEvent implements Listener {
 
@@ -55,6 +57,7 @@ public class InventoryEvent implements Listener {
 
         Player player = (Player) e.getWhoClicked();
         Inventory inv = e.getInventory();
+        Files config = getFiles("config.yml");
 
         ItemStack item = e.getCurrentItem();
         if (item == null) {
@@ -89,10 +92,10 @@ public class InventoryEvent implements Listener {
             }
             if (item.equals(InvTowers.allTowers)) {
                 InvMyTowers.openInv(p, player);
-                p.getConfig().set("tower." + player.getUniqueId().toString() + ".page", 0);
+                config.getConfig().set("tower." + player.getUniqueId().toString() + ".page", 0);
             } else {
-                InvFilteredTowers.openInv(p, player, item);
-                p.getConfig().set("tower." + player.getUniqueId().toString() + ".page", 0);
+                InvFilteredTowers.openInv(player, item);
+                config.getConfig().set("tower." + player.getUniqueId().toString() + ".page", 0);
             }
         }
 
@@ -109,14 +112,14 @@ public class InventoryEvent implements Listener {
                             if (e.getCursor().getAmount() == 1) {
                                 if (isTower(e.getCursor())) {
                                     player.sendMessage("tower is added");
-                                    Tower t = new Tower(p, player.getName());
+                                    Tower t = new Tower(player.getName());
                                     t.saveTower(e.getCursor());
                                     e.setCursor(new ItemStack(Material.AIR));
                                     inv.setItem(rawSlot, new ItemStack(Material.AIR));
                                     if (!inv.getTitle().equals("All Towers")) {
                                         String title = inv.getTitle().replace("Towers, Filter: ", "");
 
-                                        InvFilteredTowers.openInv(p, player, toItemStack(Material.WOOL, 0, title));
+                                        InvFilteredTowers.openInv(player, toItemStack(Material.WOOL, 0, title));
                                     } else {
                                         InvMyTowers.openInv(p, player);
                                     }
@@ -140,19 +143,19 @@ public class InventoryEvent implements Listener {
                     break;
                 case MOVE_TO_OTHER_INVENTORY:
                     if (isTower(item) && inInv) {
-                        new Tower(p, player.getName()).removeTower(item);
+                        new Tower(player.getName()).removeTower(item);
                     } else if (!isTower(item) || inInv) {
                         e.setCancelled(true);
                     } else {
                         if (e.getCurrentItem().getAmount() == 1) {
-                            new Tower(p, player.getName()).saveTower(item);
+                            new Tower(player.getName()).saveTower(item);
 
                             if (!inv.getTitle().equals("All Towers")) {
                                 String title = inv.getTitle().replace("Towers, Filter: ", "");
 
                                 player.getInventory().setItem(e.getSlot(), new ItemStack(Material.AIR));
 
-                                InvFilteredTowers.openInv(p, player, toItemStack(Material.WOOL, 0, title));
+                                InvFilteredTowers.openInv(player, toItemStack(Material.WOOL, 0, title));
                             } else {
 
                                 player.getInventory().setItem(e.getSlot(), new ItemStack(Material.AIR));
@@ -166,24 +169,24 @@ public class InventoryEvent implements Listener {
                     break;
                 case PICKUP_ALL:
                     if (inInv && isTower(item)) {
-                        new Tower(p, player.getName()).removeTower(item);
+                        new Tower(player.getName()).removeTower(item);
                     } else if (inInv) {
                         if (rawSlot == inv.getSize() - 1) {
 
                             int page = 0;
-                            if (p.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
-                                page = p.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
+                            if (config.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
+                                page = config.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
                             }
 
                             player.sendMessage("page " + (page + 1));
 
-                            p.getConfig().set("tower." + player.getUniqueId().toString() + ".page", page + 1);
-                            p.saveConfig();
+                            config.getConfig().set("tower." + player.getUniqueId().toString() + ".page", page + 1);
+                            config.saveConfig();
 
                             if (!inv.getTitle().equals("All Towers")) {
                                 String title = inv.getTitle().replace("Towers, Filter: ", "");
 
-                                InvFilteredTowers.openInv(p, player, toItemStack(Material.WOOL, 0, title));
+                                InvFilteredTowers.openInv(player, toItemStack(Material.WOOL, 0, title));
                             } else {
                                 InvMyTowers.openInv(p, player);
                             }
@@ -192,8 +195,8 @@ public class InventoryEvent implements Listener {
                         } else if (rawSlot == inv.getSize() - 9) {
 
                             int page = 0;
-                            if (p.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
-                                page = p.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
+                            if (config.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
+                                page = config.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
                             }
                             if (page == 0) {
                                 e.setCancelled(true);
@@ -201,13 +204,13 @@ public class InventoryEvent implements Listener {
                             }
                             player.sendMessage("page " + (page - 1));
 
-                            p.getConfig().set("tower." + player.getUniqueId().toString() + ".page", page - 1);
-                            p.saveConfig();
+                            config.getConfig().set("tower." + player.getUniqueId().toString() + ".page", page - 1);
+                            config.saveConfig();
 
                             if (!inv.getTitle().equals("All Towers")) {
                                 String title = inv.getTitle().replace("Towers, Filter: ", "");
 
-                                InvFilteredTowers.openInv(p, player, toItemStack(Material.WOOL, 0, title));
+                                InvFilteredTowers.openInv(player, toItemStack(Material.WOOL, 0, title));
                             } else {
                                 InvMyTowers.openInv(p, player);
                             }
@@ -364,7 +367,6 @@ public class InventoryEvent implements Listener {
         inv.setItem(8, cancel);
 
         player.openInventory(inv);
-
     }
 
     private boolean isTower(ItemStack is) {
@@ -372,9 +374,7 @@ public class InventoryEvent implements Listener {
             if (is.hasItemMeta()) {
                 if (is.getItemMeta().hasDisplayName()) {
                     if (is.getItemMeta().getDisplayName().equals("§3Friendly Tower") || is.getItemMeta().getDisplayName().equals("§4Enemy Tower")) {
-                        if (is.getItemMeta().hasLore()) {
-                            return true;
-                        }
+                        return is.getItemMeta().hasLore();
                     }
                 }
             }

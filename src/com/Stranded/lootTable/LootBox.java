@@ -194,14 +194,14 @@ public class LootBox {
 
     private int getInt(int max, int min, String chance) {
 
-        if (max < min) {
+        if (max < 0) {
             return 0;
+        }
+        if (max < min) {
+            return min;
         }
         if (max == min) {
             return max;
-        }
-        if (max < 0) {
-            return 0;
         }
 
         ArrayList<Integer> list = new ArrayList<>();
@@ -233,21 +233,20 @@ public class LootBox {
                 break;
             case "equal":
             default:
-                for (int i = min; i <= max; i++) {
-                    list.add(i);
-                }
-                break;
+                return roundNumber((new Random().nextDouble() * (max - min) + min));
         }
         return list.get(new Random().nextInt(list.size()));
+    }
+
+    private int roundNumber(double d) {
+        return d - ((int) d) < 0.5 ? (int) d : (int) (d + 1);
     }
 
     @SuppressWarnings("unused")
     public enum lootBoxSize {
         SMALL(27),
         LARGE(54);
-
         int size;
-
         lootBoxSize(int i) {
             this.size = i;
         }

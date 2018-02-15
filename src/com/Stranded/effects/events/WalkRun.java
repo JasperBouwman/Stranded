@@ -18,17 +18,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class WalkRun implements Listener {
 
-    private Main p;
     private HashMap<Player, Integer> X = new HashMap<>();
     private HashMap<Player, Integer> Y = new HashMap<>();
     private HashMap<Player, Integer> Z = new HashMap<>();
-
-    public WalkRun(Main instance) {
-        p = instance;
-    }
-
 
     private void revertUsage(Player player, Files playerData) {
         if (playerData.getConfig().contains("flying.players." + player.getUniqueId().toString())) {
@@ -46,8 +42,8 @@ public class WalkRun implements Listener {
     @SuppressWarnings("unused")
     public void walk(PlayerMoveEvent e) {
 
-        Files playerData = new Files(p, "playerData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
+        Files playerData = getFiles("playerData.yml");
+        Files pluginData = getFiles("pluginData.yml");
 
         Player player = e.getPlayer();
         String uuid = player.getUniqueId().toString();
@@ -63,7 +59,7 @@ public class WalkRun implements Listener {
                         playerData.getConfig().set("fly." + uuid, oldScore + 1);
                         playerData.saveConfig();
                         if (oldScore / amplifier != oldScore + 1 / amplifier) {
-                            Scoreboard.scores(p, player);
+                            Scoreboard.scores(player);
                         }
                     } else if (playerData.getConfig().getLong("fly." + uuid) / amplifier == 100) {
                         if (!playerData.getConfig().contains("flying.players." + uuid)) {
@@ -91,7 +87,7 @@ public class WalkRun implements Listener {
                         playerData.getConfig().set("walk." + uuid, oldScore + 1);
                         playerData.saveConfig();
                         if (oldScore / amplifier != (oldScore + 1) / amplifier) {
-                            Scoreboard.scores(p, player);
+                            Scoreboard.scores(player);
                         }
                         if ((oldScore + 1) == 20 * amplifier) {
                             player.sendMessage("slowness is removed");

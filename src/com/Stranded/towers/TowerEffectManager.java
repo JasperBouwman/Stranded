@@ -15,6 +15,7 @@ class TowerEffectManager {
 
     void Effects(String effect, int lvl, Entity closestEnemy, Entity closestFriendly, Location l) {
 
+        //towersData
         switch (effect) {
             case "Tnt":
                 if (closestEnemy == null) {
@@ -53,6 +54,7 @@ class TowerEffectManager {
                 HasteEffect.eff(closestFriendly, lvl);
                 break;
             case "Regeneration":
+            case "Regen":
                 if (closestFriendly == null) {
                     return;
                 }

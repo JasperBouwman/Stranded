@@ -1,5 +1,6 @@
 package com.Stranded.commands.lootTable.edit.editPool;
 
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import com.Stranded.lootTable.LootTable;
 import org.bukkit.Bukkit;
@@ -57,18 +58,16 @@ public class AddItem extends CmdManager {
                     return;
                 }
             case 7:
-                Material material = Bukkit.getUnsafe().getMaterialFromInternalName(args[6]); //todo test material
+                Material material = Bukkit.getUnsafe().getMaterialFromInternalName(args[6]);
 
-                if (amountMax > material.getMaxStackSize()) {
-                    if (!setAmount) {
-                        player.sendMessage("the max stack size of the material " + material.toString().toLowerCase() + " is " +
-                                material.getMaxStackSize() + ", but you used " + amountMax + " and this is to high");
-                        return;
-                    } else {
-                        amountMax = material.getMaxStackSize();
-                    }
+                if (material.toString().equals("AIR") && !args[6].equalsIgnoreCase("air")) {
+                    player.sendMessage(args[6] + " is not found as an material, this is now set to AIR");
                 }
 
+                if (Main.containsSpecialCharacter(args[5])) {
+                    player.sendMessage("Your name can not contains any special characters");
+                    return;
+                }
                 boolean item = addItem(lootTable, poolName, args[5], material, damage, chanceMax, chanceMin, chance, amountMax, amountMin, amountChance);
                 if (item) {
                     player.sendMessage("successfully added");
@@ -112,7 +111,9 @@ public class AddItem extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
+                    case "lower":
                         amountChance = s[2].toLowerCase();
                         break;
                     default:
@@ -145,7 +146,9 @@ public class AddItem extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
+                    case "lower":
                         chance = s[2].toLowerCase();
                         break;
                     default:

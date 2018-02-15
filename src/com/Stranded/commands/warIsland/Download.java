@@ -25,7 +25,7 @@ public class Download extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
-        //warIsland download <pasteBinCode>
+        //warIsland download <file> <pasteBinCode>
 
         if (args.length == 3) {
 
@@ -52,7 +52,6 @@ public class Download extends CmdManager {
             File f = new File(p.getDataFolder() + "/warIslands", pasteName);
 
             try {
-
                 FileWriter fw = new FileWriter(f);
                 PrintWriter pw = new PrintWriter(fw);
 

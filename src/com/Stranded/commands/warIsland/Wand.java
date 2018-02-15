@@ -12,11 +12,14 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static com.Stranded.Permissions.hasPermission;
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Wand extends CmdManager {
     private static boolean loop = false;
 
-    public static boolean wandStuff(PlayerInteractEvent e, Main p) {
-        Files warIslands = new Files(p, "warIslands.yml");
+    public static boolean wandStuff(PlayerInteractEvent e) {
+        Files warIslands = getFiles("warIslands.yml");
         Player player = e.getPlayer();
         String uuid = player.getUniqueId().toString();
         if (player.getInventory().getItemInMainHand().equals(InventoryEvent.newItemStack(Material.STICK, 0, "War Island Selector"))) {
@@ -108,8 +111,7 @@ public class Wand extends CmdManager {
 
         //warIsland wand
 
-        if (!player.hasPermission("stranded.wand")) {
-            player.sendMessage("y u no has permission");
+        if (!hasPermission(player, "Stranded.warIsland.create")) {
             return;
         }
 

@@ -3,6 +3,7 @@ package com.Stranded.commands.warIsland.edit;
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.entity.Player;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class MaxPlayers extends CmdManager {
     @Override
@@ -19,7 +20,7 @@ public class MaxPlayers extends CmdManager {
     public void run(String[] args, Player player) {
         //warIsland edit <theme> <war island ID> maxPlayers <integer>
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         if (args.length == 4) {
 

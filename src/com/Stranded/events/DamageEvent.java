@@ -1,5 +1,6 @@
 package com.Stranded.events;
 
+import static com.Stranded.GettingFiles.getFiles;
 import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.Scoreboard;
@@ -28,12 +29,13 @@ public class DamageEvent implements Listener {
     @EventHandler
     @SuppressWarnings("unused")
     public void onEntityDamage(EntityDamageEvent e) {
-        ArrayList<String> listNexus = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        Files config = getFiles("config.yml");
+        ArrayList<String> listNexus = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
         if (listNexus.contains(e.getEntity().getUniqueId().toString()) && e.getEntity() instanceof Villager) {
             e.setCancelled(true);
         }
         if (e.getEntity() instanceof Player) {
-            Scoreboard.scores(p, (Player) e.getEntity());
+            Scoreboard.scores((Player) e.getEntity());
         }
     }
 
@@ -42,11 +44,12 @@ public class DamageEvent implements Listener {
     public void onEntityHit(EntityDamageByEntityEvent e) {
 
         if (e.getEntity() instanceof Player) {
-            Scoreboard.scores(p, (Player) e.getEntity());
+            Scoreboard.scores((Player) e.getEntity());
             return;
         }
+        Files config = getFiles("config.yml");
 
-        ArrayList<String> listNexus = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        ArrayList<String> listNexus = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
 
         if (listNexus.contains(e.getEntity().getUniqueId().toString()) && e.getEntity() instanceof Villager) {
 
@@ -60,9 +63,9 @@ public class DamageEvent implements Listener {
             if (!v.getWorld().equals(Bukkit.getWorld("War"))) {
                 return;
             }
-            Files warData = new Files(p, "warData.yml");
-            Files warIslands = new Files(p, "warIslands.yml");
-            ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+            Files warData = getFiles("warData.yml");
+            Files warIslands = getFiles("warIslands.yml");
+            ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
 
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
 

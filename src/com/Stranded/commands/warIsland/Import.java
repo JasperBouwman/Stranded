@@ -11,6 +11,7 @@ import org.bukkit.util.Vector;
 import java.io.File;
 import java.util.Arrays;
 
+import static com.Stranded.GettingFiles.getFiles;
 import static com.Stranded.commands.warIsland.Create.getVector;
 import static com.Stranded.commands.warIsland.Create.spawnArmorstand;
 import static com.Stranded.commands.warIsland.Create.spawnNexus;
@@ -63,51 +64,55 @@ public class Import extends CmdManager {
 
                             WarIslandUtil warIslandUtil = new WarIslandUtil();
 
-                            player.sendMessage("getting file, the larger the file, the longer this take");
+                            player.sendMessage("getting file, the larger the file, the longer this will take");
 
                             if (warIslandUtil.testWarIslandValidation(p, name)) {
                                 player.sendMessage("importing...");
-
                                 try {
-                                    importWarIsland(warIslandUtil.f, player);
+                                    new Thread(() -> {
 
-                                    Files warIslands = new Files(p, "warIslands.yml");
-                                    String theme = warIslandUtil.f.getConfig().getString("warIsland.theme");
+                                        importWarIsland(warIslandUtil.getF(), player);
 
-                                    int id = 0;
-                                    while (true) {
-                                        if (!warIslands.getConfig().contains("warIslands.island." + theme + "." + id)) {
-                                            break;
-                                        } else {
-                                            id++;
+                                        Files warIslands = getFiles("warIslands.yml");
+                                        String theme = warIslandUtil.getF().getConfig().getString("warIsland.theme");
+
+                                        int id = 0;
+                                        while (true) {
+                                            if (!warIslands.getConfig().contains("warIslands.island." + theme + "." + id)) {
+                                                break;
+                                            } else {
+                                                id++;
+                                            }
                                         }
-                                    }
-                                    Location blueSpawn = (Location) warIslandUtil.f.getConfig().get("warIsland.blueSpawn");
-                                    Location redSpawn = (Location) warIslandUtil.f.getConfig().get("warIsland.redSpawn");
-                                    Location first = (Location) warIslandUtil.f.getConfig().get("warIsland.islandSize");
-                                    Location second = (Location) warIslandUtil.f.getConfig().get("warIsland.islandSize");
+                                        Location blueSpawn = (Location) warIslandUtil.getF().getConfig().get("warIsland.blueSpawn");
+                                        Location redSpawn = (Location) warIslandUtil.getF().getConfig().get("warIsland.redSpawn");
+                                        Location first = (Location) warIslandUtil.getF().getConfig().get("warIsland.islandSize");
+                                        Location second = (Location) warIslandUtil.getF().getConfig().get("warIsland.islandSize");
 
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".spawn.blue", blueSpawn);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".spawn.red", redSpawn);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".islandSize.first", first);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".islandSize.second", second);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".maxPlayers", warIslandUtil.f.getConfig().getInt("warIsland.maxPlayers"));
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".minPlayers", warIslandUtil.f.getConfig().getInt("warIsland.minPlayers"));
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".inUse", false);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".armorStand.blue", spawnArmorstand(blueSpawn, "§9"));
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".armorStand.red", spawnArmorstand(redSpawn, "§c"));
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".spawn.blue", blueSpawn);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".spawn.red", redSpawn);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".islandSize.first", first);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".islandSize.second", second);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".maxPlayers", warIslandUtil.getF().getConfig().getInt("warIsland.maxPlayers"));
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".minPlayers", warIslandUtil.getF().getConfig().getInt("warIsland.minPlayers"));
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".inUse", false);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".armorStand.blue", spawnArmorstand(blueSpawn, "§9"));
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".armorStand.red", spawnArmorstand(redSpawn, "§c"));
 
-                                    Vector v = getVector(blueSpawn, redSpawn);
+                                        Vector v = getVector(blueSpawn, redSpawn);
 
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.blue", spawnNexus(blueSpawn, v, p));
-                                    v = v.multiply(-1);
-                                    warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.red", spawnNexus(redSpawn, v, p));
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".nexus.blue", spawnNexus(blueSpawn, v));
+                                        v = v.multiply(-1);
+                                        warIslands.getConfig().set("warIslands.island." + theme + "." + id + ".nexus.red", spawnNexus(redSpawn, v));
+
+                                        warIslands.saveConfig();
+
+                                        player.sendMessage("done importing");
+                                        System.out.println("done importing");
 
 
-                                    warIslands.saveConfig();
+                                    }).start();
 
-                                    player.sendMessage("done importing");
-                                    System.out.println("done importing");
                                 } catch (Exception e) {
                                     player.sendMessage("there went something wrong");
                                 }

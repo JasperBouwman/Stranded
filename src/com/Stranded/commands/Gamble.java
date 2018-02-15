@@ -5,10 +5,13 @@ import com.Stranded.gamble.inv.InvGamble;
 import com.Stranded.gamble.inv.InvItem;
 import com.Stranded.gamble.inv.InvSlots;
 import com.Stranded.gamble.inv.InvStartSlots;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import static com.Stranded.api.ServerMessages.sendWrongUse;
 
 public class Gamble implements CommandExecutor {
 
@@ -28,7 +31,7 @@ public class Gamble implements CommandExecutor {
         //gamble slots <width> <height>
 
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("you must be a player to sue this");
+            commandSender.sendMessage("You must be a player to use this");
             return false;
         }
 
@@ -58,15 +61,13 @@ public class Gamble implements CommandExecutor {
                     return false;
 
                 } catch (NumberFormatException e) {
-                    player.sendMessage("you must use numbers");
+                    player.sendMessage(ChatColor.RED + "You must use numbers");
                 }
             }
 
         } else {
-            player.sendMessage("wrong use");
+            sendWrongUse(player, new String[]{"/gamble [item:slots]", "/gamble "});
         }
-
-
         return false;
     }
 }

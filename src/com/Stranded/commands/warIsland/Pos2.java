@@ -4,6 +4,7 @@ import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Pos2 extends CmdManager {
 
@@ -24,7 +25,7 @@ public class Pos2 extends CmdManager {
 
         if (args.length == 1) {
 
-            Files f = new Files(p, "warIslands.yml");
+            Files f = getFiles("warIslands.yml");
             Location l = player.getLocation();
             String uuid = player.getUniqueId().toString();
 

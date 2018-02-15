@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class LogOffEvent implements Listener {
 
@@ -24,21 +25,24 @@ public class LogOffEvent implements Listener {
     @SuppressWarnings("unused")
     public void logoff(PlayerQuitEvent e) {
         for (Player p : Bukkit.getOnlinePlayers()) {
-            Scoreboard.scores(this.p, p);
+            Scoreboard.scores(p);
         }
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("respawn.teleport");
+
+        Files config = getFiles("config.yml");
+        Files warData = getFiles("warData.yml");
+        Files warIslands = getFiles("warIslands.yml");
+
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("respawn.teleport");
 
         if (list.contains(e.getPlayer().getUniqueId().toString())) {
             list.remove(e.getPlayer().getUniqueId().toString());
-            p.getConfig().set("respawn.teleport", list);
-            p.saveConfig();
+            config.getConfig().set("respawn.teleport", list);
+            config.saveConfig();
         }
 
-        Files warData = new Files(p, "warData.yml");
-        Files warIslands = new Files(p, "warIslands.yml");
         Player player = e.getPlayer();
 
-        ArrayList<String> playersInWar = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+        ArrayList<String> playersInWar = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
         if (playersInWar.contains(player.getUniqueId().toString())) {
 
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {

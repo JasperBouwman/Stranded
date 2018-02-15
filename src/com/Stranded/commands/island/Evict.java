@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Evict extends CmdManager {
     @Override
     public String getName() {
@@ -30,14 +33,15 @@ public class Evict extends CmdManager {
 
         String uuid = player.getUniqueId().toString();
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid) || !config.getConfig().contains("island")) {
             player.sendMessage(ChatColor.RED + "You can only use this when you're in an island");
             return;
         }
 
-        String island = p.getConfig().getString("island." + uuid);
+        String island = config.getConfig().getString("island." + uuid);
 
         if (!islands.getConfig().getString("island." + island + ".owner").equals(uuid)) {
             player.sendMessage(ChatColor.RED + "You are not the owner of this island, so you can't evict someone");
@@ -47,15 +51,15 @@ public class Evict extends CmdManager {
 
         if (args.length == 2) {
 
-            String evictPlayerUUID = PlayerUUID.getPlayerUUID(args[1], p);
+            String evictPlayerUUID = PlayerUUID.getPlayerUUID(args[1]);
 
             if (evictPlayerUUID == null) {
-                ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[1], p);
+                ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[1]);
                 if (tempPlayers.size() > 1) {
-                    player.sendMessage("the player '" + args[1] + "' is not found, but there are more players found with the same name (not case sensitive)");
+                    player.sendMessage(ChatColor.RED + "The player '" + args[1] + "' is not found, but there are more players found with the same name (not case sensitive)");
                     return;
                 } else if (tempPlayers.size() == 0) {
-                    player.sendMessage("there is no player found with this name");
+                    player.sendMessage(ChatColor.RED + "There is no player found with this name");
                     return;
                 } else {
                     evictPlayerUUID = tempPlayers.get(0);
@@ -67,14 +71,16 @@ public class Evict extends CmdManager {
                 return;
             }
 
-            String evictPlayerName = PlayerUUID.getPlayerName(evictPlayerUUID, p);
+            String evictPlayerName = PlayerUUID.getPlayerName(evictPlayerUUID);
 
             if (list.contains(evictPlayerUUID)) {
 
-                Files warData = new Files(p, "warData.yml");
-                if (p.getConfig().getStringList("playersInWar").contains(evictPlayerUUID)) {
-                    player.sendMessage(ChatColor.RED + "You can't evict " + evictPlayerName + " while he is in a war");
-                    return;
+                Files warData = getFiles("warData.yml");
+                if (config.getConfig().contains("playersInWar")) {
+                    if (config.getConfig().getStringList("playersInWar").contains(evictPlayerUUID)) {
+                        player.sendMessage(ChatColor.RED + "You can't evict " + evictPlayerName + " while he is in a war");
+                        return;
+                    }
                 }
                 if (warData.getConfig().contains("war.pending.island1." + island)) {
                     if (warData.getConfig().contains("war.pending.island1." + island + ".players." + evictPlayerUUID)) {
@@ -95,31 +101,32 @@ public class Evict extends CmdManager {
 
                 player.sendMessage(ChatColor.GREEN + args[1] + " successfully evicted");
 
-                Player evictPlayer = PlayerUUID.getPlayerExact(args[1], p);
+                Player evictPlayer = PlayerUUID.getPlayerExact(args[1]);
 
                 if (evictPlayer != null) {
 
-                    Main.resetPlayerData(evictPlayerUUID, p);
-                    com.Stranded.Scoreboard.updateIslandScoreboard(p, island);
-                    com.Stranded.Scoreboard.scores(p, evictPlayer);
+                    Main.resetPlayerData(evictPlayerUUID);
+                    com.Stranded.Scoreboard.updateIslandScoreboard(island);
+                    com.Stranded.Scoreboard.scores(evictPlayer);
 
-                    Files pluginData = new Files(p, "pluginData.yml");
+                    Files pluginData = getFiles("pluginData.yml");
                     Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
 
                     evictPlayer.sendMessage(ChatColor.RED + "You where removed by the owner from this island");
                     evictPlayer.teleport(l);
                 } else {
-                    String offlineUUID = PlayerUUID.getPlayerUUID(evictPlayerUUID, p);
-                    ArrayList<String> listOnline = (ArrayList<String>) p.getConfig().getStringList("online.evict");
+                    String offlineUUID = PlayerUUID.getPlayerUUID(evictPlayerUUID);
+                    ArrayList<String> listOnline = (ArrayList<String>) config.getConfig().getStringList("online.evict");
                     listOnline.add(offlineUUID);
-                    p.getConfig().set("online.evict", listOnline);
-                    p.saveConfig();
+                    config.getConfig().set("online.evict", listOnline);
+                    config.saveConfig();
                 }
             } else {
                 player.sendMessage(ChatColor.RED + "This player isn't in your island");
             }
         } else {
             player.sendMessage(ChatColor.RED + "Usage: /island evict <player>");
+            sendWrongUse(player, new String[]{"/island evict <player>", "/island evict "});
         }
     }
 }

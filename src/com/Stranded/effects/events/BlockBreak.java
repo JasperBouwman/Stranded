@@ -10,19 +10,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class BlockBreak implements Listener {
-
-    private Main p;
-
-    public BlockBreak(Main instance) {
-        p = instance;
-    }
 
     @EventHandler
     @SuppressWarnings("deprecation")
     public void Block(BlockBreakEvent e) {
-        Files playerData = new Files(p, "playerData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
+        Files playerData = getFiles("playerData.yml");
+        Files pluginData = getFiles("pluginData.yml");
+
         Player player = e.getPlayer();
         String uuid = player.getUniqueId().toString();
         int amplifier = pluginData.getConfig().getInt("plugin.scoreboard.mining.amplifier");
@@ -31,7 +28,7 @@ public class BlockBreak implements Listener {
             playerData.getConfig().set("BlockBreak." + uuid, oldScore + 1);
             playerData.saveConfig();
             if (oldScore / amplifier != oldScore + 1 / amplifier) {
-                Scoreboard.scores(p, player);
+                Scoreboard.scores(player);
             }
         } else if (playerData.getConfig().getLong("BlockBreak." + uuid) / pluginData.getConfig().getInt("plugin.scoreboard.walking.amplifier") == 100) {
 

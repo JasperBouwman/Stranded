@@ -1,13 +1,14 @@
 package com.Stranded.commands.lootTable.edit;
 
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import com.Stranded.lootTable.LootTable;
 import org.bukkit.entity.Player;
 
 public class AddPool extends CmdManager {
-    private int chanceMax = 2;
-    private int chanceMin = 0;
-    private String chance = "equal";
+    private int rollsMax = 2;
+    private int rollsMin = 0;
+    private String rolls = "equal";
 
     @Override
     public String getName() {
@@ -22,26 +23,30 @@ public class AddPool extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
-        // lootTable edit <name> addPool <poolName> [chance=1,3,equal]
+        // lootTable edit <name> addPool <poolName> [rolls=1,3,equal]
         String lootTable = args[1];
 
         switch (args.length) {
             case 5:
 
-                if (args[4].toLowerCase().startsWith("chance")) {
-                    if (testChance(args)) {
-                        player.sendMessage("invalid chance argument");
+                if (args[4].toLowerCase().startsWith("rolls")) {
+                    if (testRolls(args)) {
+                        player.sendMessage("invalid rolls argument");
                         return;
                     }
                 } else {
-                    player.sendMessage("wrong chance argument");
+                    player.sendMessage("wrong rolls argument");
                     return;
                 }
 
             case 4:
                 String poolName = args[3];
+                if (Main.containsSpecialCharacter(args[3])) {
+                    player.sendMessage("can not contains any special characters");
+                    return;
+                }
 
-                boolean pool = addPool(lootTable, poolName, chanceMin, chanceMax, chance);
+                boolean pool = addPool(lootTable, poolName, rollsMin, rollsMax, rolls);
                 if (pool) {
                     player.sendMessage("successfully added");
                 } else {
@@ -54,7 +59,7 @@ public class AddPool extends CmdManager {
         }
     }
 
-    private boolean testChance(String[] args) {
+    private boolean testRolls(String[] args) {
         //true=failure
         String[] s = args[4].split(",");
 
@@ -63,20 +68,22 @@ public class AddPool extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
-                        chance = s[2].toLowerCase();
+                    case "lower":
+                        rolls = s[2].toLowerCase();
                         break;
                     default:
                         return true;
                 }
             case 2:
                 try {
-                    chanceMax = Integer.parseInt(s[0].toLowerCase().replace("chance=", ""));
+                    rollsMax = Integer.parseInt(s[0].toLowerCase().replace("rolls=", ""));
                 } catch (NumberFormatException e) {
                     return true;
                 }
                 try {
-                    chanceMin = Integer.parseInt(s[1]);
+                    rollsMin = Integer.parseInt(s[1]);
                 } catch (NumberFormatException e) {
                     return true;
                 }

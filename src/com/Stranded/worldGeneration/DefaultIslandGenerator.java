@@ -12,13 +12,14 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
-import static com.Stranded.worldGeneration.warIsland.ImportWarIsland.*;
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.worldGeneration.regions.GetRegion.*;
 
 public class DefaultIslandGenerator {
 
-    public DefaultIslandGenerator(Main p) {
+    public DefaultIslandGenerator() {
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
         islands.getConfig().set("islandData.islandTypesCopied", true);
         islands.saveConfig();
 
@@ -34,7 +35,7 @@ public class DefaultIslandGenerator {
 
         int BlockCount = 1;
 
-        Files defaultIslands = new Files(p, "defaultIslands.yml");
+        Files defaultIslands = getFiles("defaultIslands.yml");
 
         if (!defaultIslands.getConfig().contains("models")) {
             Bukkit.broadcastMessage("The File 'defaultIslands.yml' is not correct, please download the right file and put it in the folder '/plugins/Stranded'");
@@ -82,8 +83,11 @@ public class DefaultIslandGenerator {
         Bukkit.broadcastMessage("done with copying default islands");
     }
 
+    public DefaultIslandGenerator(Main p) {
 
-    public DefaultIslandGenerator(Main p, boolean nothing) {
+        Files islands = getFiles("islands.yml");
+        islands.getConfig().set("islandData.islandTypesCopied", true);
+        islands.saveConfig();
 
         Files defaultIslands = new Files(p, "defaultIslands1.yml");
 
@@ -96,8 +100,7 @@ public class DefaultIslandGenerator {
         int height = totalHeight;
         int length = totalLength;
 
-//        Location temp = player.getLocation().clone();
-        Location temp = new Location(Bukkit.getWorld("Islands"), -200987, 54, -200013);
+        Location temp = new Location(Bukkit.getWorld("Islands"), -200987, 54, -199726);
         temp.setY(y);
 
         for (String blocksID : defaultIslands.getConfig().getConfigurationSection("island.region.blocks").getKeys(false)) {
@@ -199,5 +202,4 @@ public class DefaultIslandGenerator {
             }
         }
     }
-
 }

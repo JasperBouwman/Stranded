@@ -9,17 +9,24 @@ commands:
 /reply
 /stranded
 /tower
+/trade
 /war
 /warIsland
 
-command                                                                                                                     permission                      description
+extra's                                                                                                                     permission
+get all permissions                                                                                                         Stranded.all
+edit default Islands                                                                                                        Stranded.editIslands
+swear in chat                                                                                                               Stranded.swear
 
+command                                                                                                                     permission                      description
 /chat <message>                                                                                                                                             speak in chat for island members
 /chatFilter                                                                                                                 Stranded.chatFilter             get info about the chatFilter
-/chatFilter add [filterWords...]                                                                                            Stranded.chatFilter.add         add words to chatFilter
-/chatFilter remove [filterWords...]                                                                                         Stranded.chatFilter.remove      remove words from chatFilter
-/chatFilter getFilters                                                                                                      Stranded.chatFilter.get         get chatFilter words
-/chatFilter set <percentage (Integer)>                                                                                      Stranded.chatFilter.set         set chatFilter percentage
+/chatFilter add [filterWords...]                                                                                            Stranded.chatFilter             add words to chatFilter
+/chatFilter remove [filterWords...]                                                                                         Stranded.chatFilter             remove words from chatFilter
+/chatFilter getFilters                                                                                                      Stranded.chatFilter             get chatFilter words
+/chatFilter set <percentage 0/100>                                                                                          Stranded.chatFilter             set chatFilter percentage
+/chatFilter setType <filterType>                                                                                            Stranded.chatFilter             sets filter type
+/chatFilter getType                                                                                                         Stranded.chatFilter             gets filter type
 /edit <world>                                                                                                                                               teleport to <world>
 /gamble                                                                                                                                                     open gamble gui
 /gamble item                                                                                                                                                gamble for a random item
@@ -29,10 +36,10 @@ command                                                                         
 /island confirm                                                                                                                                             confirm island deletion
 /island create <name> <islandType>                                                                                                                          start a island
 /island delete                                                                                                                                              delete your own island
-/island delete <island name> <reason...>                                                                                    Stranded.islandDelete           delete someone els island with a reason
+/island delete <island name> <reason...>                                                                                    Stranded.islandDelete           delete someone els island with a reason (probably for server monitors)
 /island edit <island name>                                                                                                  Stranded.islandEdit             edit default island templates
-/island edit <island name> rename <new name>                                                                                Stranded.islandRename           rename default island template
-/island edit <island name> <enable:disable>                                                                                 Stranded.islandState            enable/disable island templates
+/island edit <island name> rename <new name>                                                                                Stranded.islandEdit             rename default island template
+/island edit <island name> <enable:disable>                                                                                 Stranded.islandEdit             enable/disable island templates
 /island evict <player name>                                                                                                                                 remove player from your island
 /island home                                                                                                                                                teleport to your island nexus
 /island ignore                                                                                                                                              ignore island invite
@@ -52,39 +59,58 @@ command                                                                         
 /lootTable remove <name>                                                                                                    Stranded.lootTable              remove lootTable
 /lootTable rename <name> <newName>                                                                                          Stranded.lootTable              rename lootTable
 /lootTable edit <name> addPool <poolName>                                                                                   Stranded.lootTable              add pool to lootTable
-/lootTable edit <name> addPool <poolName> chance:[max=100,min=0]                                                            Stranded.lootTable              add pool to lootTable with given rollChance 1-100
+/lootTable edit <name> addPool <poolName> [rolls=1,3,equal]                                                                 Stranded.lootTable              add pool to lootTable with given rollChance 1-100
 /lootTable edit <name> removePool <poolName>                                                                                Stranded.lootTable              remove pool from lootTable
 /lootTable edit <name> renamePool <poolName> <newName>                                                                      Stranded.lootTable              rename pool
-/lootTable edit <name> editPool <poolName> editChance max <Integer [<101]>                                                  Stranded.lootTable              edit chance max from pool
-/lootTable edit <name> editPool <poolName> editChance min <Integer [>-1]>                                                   Stranded.lootTable              edit chance min from pool
-/lootTable edit <name> editPool <poolName> editChance chance [equal, low, lower, high, higher]                              Stranded.lootTable              edit chance from pool
+/lootTable edit <name> editPool <poolName> editRolls max <Integer>                                                          Stranded.lootTable              edit rolls max from pool
+/lootTable edit <name> editPool <poolName> editRolls min <Integer>                                                          Stranded.lootTable              edit rolls min from pool
+/lootTable edit <name> editPool <poolName> editRolls chance [equal, low, lower, high, higher]                               Stranded.lootTable              edit chance from pool
 /lootTable edit <name> editPool <poolName> addTower <name> <tower> [chance=1,3,equal] [amount=1,3,equal] [level=1,3,equal]  Stranded.lootTable              add tower in pool
 /lootTable edit <name> editPool <poolName> removeTower <name>                                                               Stranded.lootTable              remove tower from pool
-/lootTable edit <name> editPool <poolName> editTower <name> chance max <Integer [<101]>                                     Stranded.lootTable              edit chance max for towerItem
-/lootTable edit <name> editPool <poolName> editTower <name> chance min <Integer [>-1]>                                      Stranded.lootTable              edit chance min for towerItem
+/lootTable edit <name> editPool <poolName> editTower                                                                        Stranded.lootTable              gets info about tower
+/lootTable edit <name> editPool <poolName> editTower <name> chance max <Integer>                                            Stranded.lootTable              edit chance max for towerItem
+/lootTable edit <name> editPool <poolName> editTower <name> chance min <Integer>                                            Stranded.lootTable              edit chance min for towerItem
 /lootTable edit <name> editPool <poolName> editTower <name> chance chance [equal, low, lower, high, higher]                 Stranded.lootTable              edit chance for towerItem
-/lootTable edit <name> editPool <poolName> editTower <name> amount max <Integer [< maxStack]>                               Stranded.lootTable              edit amount max for towerItem
-/lootTable edit <name> editPool <poolName> editTower <name> amount min <Integer [>-1]>                                      Stranded.lootTable              edit amount max for towerItem
+/lootTable edit <name> editPool <poolName> editTower <name> amount max <Integer>                                            Stranded.lootTable              edit amount max for towerItem
+/lootTable edit <name> editPool <poolName> editTower <name> amount min <Integer>                                            Stranded.lootTable              edit amount max for towerItem
 /lootTable edit <name> editPool <poolName> editTower <name> amount chance [equal, low, lower, high, higher]                 Stranded.lootTable              edit amount chance for towerItem
-/lootTable edit <name> editPool <poolName> editTower <name> level max <Integer [< maxStack]>                                Stranded.lootTable              edit level max for towerItem
-/lootTable edit <name> editPool <poolName> editTower <name> level min <Integer [>-1]>                                       Stranded.lootTable              edit level max for towerItem
+/lootTable edit <name> editPool <poolName> editTower <name> level max <Integer>                                             Stranded.lootTable              edit level max for towerItem
+/lootTable edit <name> editPool <poolName> editTower <name> level min <Integer>                                             Stranded.lootTable              edit level max for towerItem
 /lootTable edit <name> editPool <poolName> editTower <name> level chance [equal, low, lower, high, higher]                  Stranded.lootTable              edit level chance for towerItem
 /lootTable edit <name> editPool <poolName> editTower <name> type <towerType:random>                                         Stranded.lootTable              edit towerType for towerItem
 /lootTable edit <name> editPool <poolName> addItem <name> <material> [chance=1,3,equal] [amount=1,3,equal] [damage=0]       Stranded.lootTable              add item in pool
 /lootTable edit <name> editPool <poolName> removeItem <name>                                                                Stranded.lootTable              remove item from pool
+/lootTable edit <name> editPool <poolName> editItem                                                                         Stranded.lootTable              gets info about item
 /lootTable edit <name> editPool <poolName> editItem <name> material <material>                                              Stranded.lootTable              edit material from item
-/lootTable edit <name> editPool <poolName> editItem <name> chance max <Integer [<101]>                                      Stranded.lootTable              edit chance max for item
-/lootTable edit <name> editPool <poolName> editItem <name> chance min <Integer [<-1]>                                       Stranded.lootTable              edit chance min for item
+/lootTable edit <name> editPool <poolName> editItem <name> chance max <Integer>                                             Stranded.lootTable              edit chance max for item
+/lootTable edit <name> editPool <poolName> editItem <name> chance min <Integer>                                             Stranded.lootTable              edit chance min for item
 /lootTable edit <name> editPool <poolName> editItem <name> chance chance [equal, low, lower, high, higher]                  Stranded.lootTable              edit chance for item
-/lootTable edit <name> editPool <poolName> editItem <name> amount max <Integer [< maxStack]>                                Stranded.lootTable              edit amount max for item
-/lootTable edit <name> editPool <poolName> editItem <name> amount min <Integer [>-1]>                                       Stranded.lootTable              edit amount min for item
+/lootTable edit <name> editPool <poolName> editItem <name> amount max <Integer>                                             Stranded.lootTable              edit amount max for item
+/lootTable edit <name> editPool <poolName> editItem <name> amount min <Integer>                                             Stranded.lootTable              edit amount min for item
 /lootTable edit <name> editPool <poolName> editItem <name> amount chance [equal, low, lower, high, higher]                  Stranded.lootTable              edit amount chance for item
-/lootTable edit <name> editPool <poolName> editItem <name> damage <Integer [<16]>                                           Stranded.lootTable              edit damage for item
+/lootTable edit <name> editPool <poolName> editItem <name> damage <Integer>                                                 Stranded.lootTable              edit damage for item
+/map set <mapTool name> <image name> <width> <height>                                                                       Stranded.map                    set maps
+/map set <mapTool name> <image name> <width> <height> <center:false>                                                        Stranded.map                    set maps
+/map set <mapTool name> <image name> <width> <height> <center:false> <ratio:false>                                          Stranded.map                    set maps
+/map set <maoTool name>                                                                                                     Stranded.map                    set existing maps
+/map get <mapTool name> <image name> <width> <height>                                                                       Stranded.map                    gives maps
+/map get <mapTool name> <image name> <width> <height> <center:false>                                                        Stranded.map                    gives maps
+/map get <mapTool name> <image name> <width> <height> <center:false> <ratio:false>                                          Stranded.map                    gives maps
+/map get <mapTool name>                                                                                                     Stranded.map                    gives existing maps
+/map dimensions <mapTool name>                                                                                              Stranded.map                    gives dimension of mapTool
+/map remove <mapTool name>                                                                                                  Stranded.map                    removes the CustomMapRenderer for all the maps in that mapTool
+/map update <mapTool name>                                                                                                  Stranded.map                    reload the image in the maps
+/map edit <mapTool name> ratio <true:false>                                                                                 Stranded.map                    edits the keepRatio
+/map edit <mapTool name> center <true:false>                                                                                Stranded.map                    edits the keepCentered
 /nexus                                                                                                                      Stranded.spawnNexus             spawn a nexus
 /nexus <island>                                                                                                             Stranded.islandNexus            spawn an island nexus
+/nexus remove                                                                                                               Stranded.killNexus              remove the closest nexus
 /reply <chatID> <message>                                                                                                                                   reply to someone
 /reply reset                                                                                                                Stranded.replyReset             reset replies
 /stranded                                                                                                                                                   get info about this plugin
+/stranded files autoSave [on:off]                                                                                           Stranded.files                  turns off/on auto save for server data {on is in beta}
+/stranded files reload                                                                                                      Stranded.files                  reloads files, without saving them first!
+/stranded files save                                                                                                        Stranded.files                  saves all files
 /stranded reload                                                                                                            Stranded.reload                 reload server without problems from Stranded
 /stranded reload force                                                                                                      Stranded.forceReload            force server reload
 /stranded scoreboard                                                                                                        Stranded.scoreboard             get scoreboard info
@@ -104,42 +130,55 @@ command                                                                         
 /stranded playerEffects flying <amplifier>                                                                                  Stranded.playerEffects          set flying amplifier
 /stranded hub                                                                                                                                               teleport to server hub
 /stranded hub set                                                                                                           Stranded.setHub                 set server hub location
+/stranded MOTD                                                                                                              Stranded.MOTD                   get MOTD info
+/stranded MOTD setPlayer <text...>                                                                                          Stranded.MOTD                   set MOTD if player is known
+/stranded MOTD getPlayer                                                                                                    Stranded.MOTD                   get MOTD if player is known
+/stranded MOTD setIsland <text...>                                                                                          Stranded.MOTD                   set MOTD if player is in a island
+/stranded MOTD getIsland                                                                                                    Stranded.MOTD                   get MOTD if player is in a island
+/stranded MOTD setRandom <text...>                                                                                          Stranded.MOTD                   set MOTD if player is unknown
+/stranded MOTD getRandom                                                                                                    Stranded.MOTD                   get MOTD if player is unknown
+/stranded world <world>                                                                                                     Stranded.worldTP                teleport through worlds spawnPoint
+/stranded world <world> <X> <Y> <Z>                                                                                         Stranded.worldTP                teleport through worlds location
 /tower                                                                                                                                                      open tower gui
 /tower own                                                                                                                                                  open tower gui with own towers
-/tower own [all:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed]                                                                                  open tower gui with given tower type
+/tower own [all:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed:teleport]                                                                         open tower gui with given tower type
 /tower shop                                                                                                                                                 open tower shop
-/tower show [friendly:enemy:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed]                                                                      buy tower with given tower type
+/tower show [friendly:enemy:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed:teleport]                                                             buy tower with given tower type
 /war                                                                                                                                                        get war info
 /war start <war theme> [playerNames...]                                                                                                                     start a war
 /war accept <island2>                                                                                                                                       accept a war to from other island
 /war accept <island1> [players...]                                                                                                                          accept a war
-/war ready                                                                                                                                                  say that you are ready for a war
+/war ready                                                                                                                                                  say that you are ready for a war (war won't get started until everybody has accepted the war)
 /warIsland                                                                                                                  Stranded.warIsland              get warIslands info
 /warIsland box get <theme> <warIslandID>                                                                                    Stranded.warIsland.lootBox      get lootBox info
-/warIsland box add <lootTable> /*send player box ID*/                                                                       Stranded.warIsland.lootBox      set lootBox
-/warIsland box remove /*removed box from your location*/                                                                    Stranded.warIsland.lootBox      get all lootBoxes to remove
+/warIsland box add <lootTable>                                                                                              Stranded.warIsland.lootBox      set lootBox
+/warIsland box remove                                                                                                       Stranded.warIsland.lootBox      get all lootBoxes to remove
 /warIsland box remove <id>                                                                                                  Stranded.warIsland.lootBox      remove lootBox from warIsland where you are standing in
-/warIsland box remove <id> [theme] [warIslandID] /*these args when you want to delete from distance*/                       Stranded.warIsland.lootBox      remove lootBox from warIsland
+/warIsland box remove <id> [theme] [warIslandID]                                                                            Stranded.warIsland.lootBox      remove lootBox from warIsland
 /warIsland box removeAll                                                                                                    Stranded.warIsland.lootBox      remove all lootBoxes in warIsland where you are standing in
-/warIsland box removeAll [theme] [warIslandID] /*these args when you want to delete all from distance*/                     Stranded.warIsland.lootBox      remove all lootBoxes in warIsland
-/warIsland box edit <id> /*return all data*/                                                                                Stranded.warIsland.lootBox      get all lootBox data
-/warIsland box edit <id> location /*teleport lootBox to you*/                                                               Stranded.warIsland.lootBox      replace lootBox
+/warIsland box removeAll [theme] [warIslandID]                                                                              Stranded.warIsland.lootBox      remove all lootBoxes in warIsland
+/warIsland box edit <id>                                                                                                    Stranded.warIsland.lootBox      get all lootBox data
+/warIsland box edit <id> location                                                                                           Stranded.warIsland.lootBox      replace lootBox to your location
 /warIsland box edit <id> lootTable <lootTable>                                                                              Stranded.warIsland.lootBox      edit lootTable from lootBox
-/warIsland box show <theme> <warIslandID> /*gives item, when hold lootBox boundaries are shown*/                            Stranded.warIsland.lootBox      gives stick that shows where are all lootBoxes from the warIsland where you are standing in
+/warIsland box show <theme> <warIslandID>                                                                                   Stranded.warIsland.lootBox      gives stick that shows where are all lootBoxes from the warIsland where you are standing in
 /warIsland box test <lootTable>                                                                                             Stranded.warIsland.lootBox      spawns a lootBox to test in your location
 /warIsland create <theme> <min> <max>                                                                                       Stranded.warIsland.create       create warIsland
-/warIsland delete <theme> (this return all the IDs for this theme)                                                          Stranded.warIsland.delete       gives all warIslands to delete from that theme
+/warIsland create <theme> <min> <max> <material>                                                                            Stranded.warIsland.create       create warIsland with border
+/warIsland delete <theme>                                                                                                   Stranded.warIsland.delete       gives all warIslands to delete from that theme
 /warIsland delete <theme> <war island ID>                                                                                   Stranded.warIsland.delete       deletes warIsland
 /warIsland download <pasteBinCode>                                                                                          Stranded.warIsland.download     downloads warIsland from Pastebin
-/warIsland edit <theme> (this return all the IDs for this theme)                                                            Stranded.warIsland.edit         gives all warIslandIDs from that theme
+/warIsland edit <theme>                                                                                                     Stranded.warIsland.edit         gives all warIslandIDs from that theme
+/warIsland edit <theme> <war island id>                                                                                     Stranded.warIsland.edit         gives you a stick that shows the boundaries of that warIsland
 /warIsland edit <theme> <war island id> teleport                                                                            Stranded.warIsland.edit         teleports you to the blueSpawn
 /warIsland edit <theme> <war island id> teleport <blue:red>                                                                 Stranded.warIsland.edit         teleports you to the given spawn
-/warIsland edit <theme> <war island id> maxPlayers                                                                          Stranded.warIsland.edit         edit maxPlayers
-/warIsland edit <theme> <war island id> minPlayers                                                                          Stranded.warIsland.edit         edit minPlayers
+/warIsland edit <theme> <war island id> maxPlayers                                                                          Stranded.warIsland.edit         gives maxPlayers
+/warIsland edit <theme> <war island id> minPlayers                                                                          Stranded.warIsland.edit         gives minPlayers
+/warIsland edit <theme> <war island id> maxPlayers <number>                                                                 Stranded.warIsland.edit         edit maxPlayers
+/warIsland edit <theme> <war island id> minPlayers <number>                                                                 Stranded.warIsland.edit         edit minPlayers
 /warIsland edit <theme> <war island id> blueSpawn                                                                           Stranded.warIsland.edit         edit blueSpawn to your location
 /warIsland edit <theme> <war island id> redSpawn                                                                            Stranded.warIsland.edit         edit redSpawn to your location
-/warIsland export <name> <theme> <min> <max>                                                                                Stranded.warIsland.edit         export warIsland to a file
-/warIsland export <name> <theme> <min> <max> force                                                                          Stranded.warIsland.edit         when you wan't to override the island you add the 'force' argument
+/warIsland export <name> <theme> <min> <max>                                                                                Stranded.warIsland.export       export warIsland to a file
+/warIsland export <name> <theme> <min> <max> force                                                                          Stranded.warIsland.export       when you wan't to override the island you add the 'force' argument
 /warIsland import                                                                                                           Stranded.warIsland.import       gives all warIslands to import
 /warIsland import <warIslandFile>                                                                                           Stranded.warIsland.import       import warIsland from file
 /warIsland pos delete                                                                                                       Stranded.warIsland.create       deletes your current pos

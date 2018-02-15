@@ -2,10 +2,7 @@ package com.Stranded.trade.events;
 
 import com.Stranded.Main;
 import com.Stranded.commands.Trade;
-import com.Stranded.fancyMassage.FancyMessage;
-import com.Stranded.fancyMassage.Test;
 import com.Stranded.trade.TradeStatus;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,12 +18,12 @@ import static com.Stranded.towers.inventory.InventoryEvent.toItemStack;
 @SuppressWarnings("unused")
 public class InventoryEvent implements Listener {
 
-    static ItemStack confirm = toItemStack(Material.STAINED_GLASS_PANE, 5, "Confirm");
-    static ItemStack edit = toItemStack(Material.STAINED_GLASS_PANE, 4, "Edit");
-    static ItemStack cancel = toItemStack(Material.STAINED_GLASS_PANE, 14, "Cancel");
-    static ItemStack addXP = toItemStack(Material.EXP_BOTTLE, 0, "Plus 1 XP level");
-    static ItemStack removeXP = toItemStack(Material.EXP_BOTTLE, 0, "Minus 1 XP level");
-    static ItemStack refresh = toItemStack(Material.GOLDEN_APPLE, 1, "Refresh");
+    public static ItemStack confirm = toItemStack(Material.STAINED_GLASS_PANE, 5, "Confirm");
+    public static ItemStack edit = toItemStack(Material.STAINED_GLASS_PANE, 4, "Edit");
+    public static ItemStack cancel = toItemStack(Material.STAINED_GLASS_PANE, 14, "Cancel");
+    public static ItemStack addXP = toItemStack(Material.EXP_BOTTLE, 0, "Plus 1 XP level");
+    public static ItemStack removeXP = toItemStack(Material.EXP_BOTTLE, 0, "Minus 1 XP level");
+    public static ItemStack refresh = toItemStack(Material.GOLDEN_APPLE, 1, "Refresh");
 
     private Main p;
 
@@ -35,17 +32,15 @@ public class InventoryEvent implements Listener {
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void inventoryCloseEvent(InventoryCloseEvent e) {
-        Inventory inv = e.getInventory();
-        if (inv.getTitle().startsWith("Trade")) {
-            Player player = (Player) e.getPlayer();
-            Bukkit.getScheduler().runTaskLater(p, () -> player.openInventory(inv), 1);
-        }
+//        Inventory inv = e.getInventory();
+//        Player player = (Player) e.getPlayer();
+//        if (inv.getTitle().startsWith("Trade") && Trade.tradeStatus.containsKey(player)) {
+//            Bukkit.getScheduler().runTaskLater(p, () -> player.openInventory(inv), 1);
+//        }
     }
 
     @EventHandler
-    @SuppressWarnings("unused")
     public void onInventoryClick(InventoryClickEvent e) {
         Inventory inv = e.getInventory();
 
@@ -55,70 +50,88 @@ public class InventoryEvent implements Listener {
             int slot = e.getRawSlot();
             InventoryAction a = e.getAction();
 
-            if (!Trade.tradeStatus.containsKey(player)) {
+            if (!Trade.tradeStatus.containsKey(Trade.tradeID.get(player))) {
+                return;
+            }
+            TradeStatus tradeStatus = Trade.tradeStatus.get(Trade.tradeID.get(player));
+
+            if (e.getCurrentItem() == null) {
                 return;
             }
 
-
-            TradeStatus tradeStatus = new TradeStatus(player);
-
             if (slot == 0) {//confirm
                 e.setCancelled(true);
-                if (!a.equals(InventoryAction.PICKUP_ONE)) {
+                Main.println(e.getCurrentItem() + " " + a);
+
+                if (!a.equals(InventoryAction.PICKUP_ALL)) {
                     return;
                 }
-
-                tradeStatus.setConfirm(true);
-                tradeStatus.updateTrade(inv);
-
+                if (e.getCurrentItem().equals(confirm)) {
+                    tradeStatus.setConfirm1(true, player);
+                    tradeStatus.updateTrade(player);
+                } else {
+                    tradeStatus.setConfirm1(false, player);
+                    inv.setItem(0, confirm);
+                    tradeStatus.updateTrade(player);
+                }
             } else if (slot == 9) {//cancel
                 e.setCancelled(true);
-                if (!a.equals(InventoryAction.PICKUP_ONE)) {
+                if (!a.equals(InventoryAction.PICKUP_ALL)) {
                     return;
                 }
-
-                tradeStatus.cancel();
+                if (tradeStatus.getConfirm1()) {
+                    tradeStatus.cancel();
+                } else {
+                    player.sendMessage("if you want to edit your trade you have to click on 'edit'");
+                }
 
             } else if (slot == 18) {//add xp
                 e.setCancelled(true);
-                if (!a.equals(InventoryAction.PICKUP_ONE)) {
+                if (!a.equals(InventoryAction.PICKUP_ALL)) {
                     return;
                 }
-
-                if (player.getLevel() > tradeStatus.getXp()) {
-                    tradeStatus.addXp();
+                if (!tradeStatus.getConfirm1()) {
+                    if (player.getLevel() > tradeStatus.getXp1()) {
+                        tradeStatus.addXp(player);
+                    } else {
+                        player.sendMessage("not enough xp");
+                    }
                 } else {
-                    player.sendMessage("not enough xp");
+                    player.sendMessage("if you want to edit your trade you have to click on 'edit'");
                 }
-
             } else if (slot == 27) {//remove xp
                 e.setCancelled(true);
-                if (!a.equals(InventoryAction.PICKUP_ONE)) {
+                if (!a.equals(InventoryAction.PICKUP_ALL)) {
                     return;
                 }
-
-                if (tradeStatus.getXp() > 0) {
-                    tradeStatus.removeXp();
+                if (!tradeStatus.getConfirm1()) {
+                    if (tradeStatus.getXp1() > 0) {
+                        tradeStatus.removeXp(player);
+                    } else {
+                        player.sendMessage("can not go below 0 xp");
+                    }
                 } else {
-                    player.sendMessage("can not go below 0 xp");
+                    player.sendMessage("if you want to edit your trade you have to click on 'edit'");
                 }
+
             } else if (slot == 36) {//refresh
                 e.setCancelled(true);
-                tradeStatus.updateTrade(inv);
+                tradeStatus.updateTrade(player);
             } else if (((slot > 0) && (slot < 4))
                     || ((slot > 9) && (slot < 13))
                     || ((slot > 18) && (slot < 22))
                     || ((slot > 27) && (slot < 31))
                     || ((slot > 36) && (slot < 40))
                     || ((slot > 45) && (slot < 49))) {
+                if (!tradeStatus.getConfirm1()) {
+                    tradeStatus.updateTrade(player);
+                } else {
+                    player.sendMessage("if you want to edit your trade you have to click on 'edit'");
+                }
 
-                tradeStatus.updateTrade(inv);
-
-            } else if (slot < inv.getSize())  {
+            } else if (slot < inv.getSize()) {
                 e.setCancelled(true);
             }
-
-
         }
     }
 }

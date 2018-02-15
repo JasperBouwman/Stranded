@@ -12,9 +12,15 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
+import static com.Stranded.Permissions.hasPermission;
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.GettingFiles.getFiles;
+
 public class StartWar {
 
-    private static void startRandomThemeWar(Main p, Files warData, Files warIslands, Files islands, ArrayList<String> island1, ArrayList<String> island2, String islandName1, String islandName2) {
+    private static void startRandomThemeWar(Files warData, Files warIslands, Files islands, ArrayList<String> island1, ArrayList<String> island2, String islandName1, String islandName2) {
+
+        Files config = getFiles("config.yml");
 
         ArrayList<String> islandIDList = (ArrayList<String>) warData.getConfig().getStringList("war.pending.island1." + islandName1 + ".islandList");
 
@@ -70,7 +76,7 @@ public class StartWar {
             if (Bukkit.getEntity(UUID.fromString(blueUUID)) == null || Bukkit.getEntity(UUID.fromString(redUUID)) == null) {
                 islandIDList.remove(islandNew);
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("Stranded.WarIsland")) {
+                    if (hasPermission(player, "Stranded.WarIsland", false)) {
                         player.sendMessage("WARNING: the war theme " + islandNew.split("\\.")[0] + " island id " + islandNew.split("\\.")[1] +
                                 " has been corrupted, missing: armorStand.\ndelete this island and create it again");
                     }
@@ -81,7 +87,7 @@ public class StartWar {
             if (Bukkit.getEntity(UUID.fromString(blueVillagerUUID)) == null || Bukkit.getEntity(UUID.fromString(redVillagerUUID)) == null) {
                 islandIDList.remove(islandNew);
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("Stranded.WarIsland")) {
+                    if (hasPermission(player, "Stranded.WarIsland", false)) {
                         player.sendMessage("WARNING: the war theme " + islandNew.split("\\.")[0] + " island id " + islandNew.split("\\.")[1] +
                                 " has been corrupted, missing: villager.\ndelete this island and create it again");
                     }
@@ -199,7 +205,7 @@ public class StartWar {
                 warData.getConfig().set("war.war." + id + ".red.VillagerUUID", redVillagerUUID);
                 warData.getConfig().set("war.war." + id + ".warIsland." + finalIslandID.split("\\.")[0], finalIslandID.split("\\.")[1]);
 
-                ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+                ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
 
                 String blueUUID = warIslands.getConfig().getString("warIslands.island." + finalIslandID + ".armorStand.blue");
                 String redUUID = warIslands.getConfig().getString("warIslands.island." + finalIslandID + ".armorStand.red");
@@ -215,8 +221,8 @@ public class StartWar {
 
                 list.addAll(island1);
                 list.addAll(island2);
-                p.getConfig().set("playersInWar", list);
-                p.saveConfig();
+                config.getConfig().set("playersInWar", list);
+                config.saveConfig();
 
                 if (r > 1) {
                     blueAS.setCustomName("§9health: " + healthIsland1);
@@ -235,7 +241,10 @@ public class StartWar {
         warData.saveConfig();
     }
 
-    private static void startThemeWar(Main p, Files warData, Files warIslands, Files islands, ArrayList<String> island1, ArrayList<String> island2, String islandTheme, String islandName1, String islandName2) {
+    private static void startThemeWar(Files warData, Files warIslands, Files islands, ArrayList<String> island1, ArrayList<String> island2, String islandTheme, String islandName1, String islandName2) {
+
+        Files config = getFiles("config.yml");
+
         ArrayList<String> islandIDList = (ArrayList<String>) warData.getConfig().getStringList("war.pending.island1." + islandName1 + ".islandList");
 
         for (String players : island1) {
@@ -291,7 +300,7 @@ public class StartWar {
             if (Bukkit.getEntity(UUID.fromString(blueUUID)) == null || Bukkit.getEntity(UUID.fromString(redUUID)) == null) {
                 islandIDList.remove(islandNew);
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("Stranded.WarIsland")) {
+                    if (hasPermission(player, "Stranded.WarIsland", false)) {
                         player.sendMessage("WARNING: the war theme " + islandTheme + " island id " + islandNew + " has been corrupted, missing: armorStand.\ndelete this island and create it again");
                     }
                 }
@@ -302,7 +311,7 @@ public class StartWar {
             if (Bukkit.getEntity(UUID.fromString(blueVillagerUUID)) == null || Bukkit.getEntity(UUID.fromString(redVillagerUUID)) == null) {
                 islandIDList.remove(islandNew);
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    if (player.hasPermission("Stranded.WarIsland")) {
+                    if (hasPermission(player, "Stranded.WarIsland", false)) {
                         player.sendMessage("WARNING: the war theme " + islandTheme + " island id " + islandNew + " has been corrupted, missing: nexus.\ndelete this island and create it again");
                     }
                 }
@@ -422,12 +431,12 @@ public class StartWar {
                 warData.getConfig().set("war.war." + id + ".red.VillagerUUID", redVillagerUUID);
                 warData.getConfig().set("war.war." + id + ".warIsland." + islandTheme, finalIslandID);
 
-                ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+                ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
 
                 list.addAll(island1);
                 list.addAll(island2);
-                p.getConfig().set("playersInWar", list);
-                p.saveConfig();
+                config.getConfig().set("playersInWar", list);
+                config.saveConfig();
 
                 ArmorStand blueAS = (ArmorStand) Bukkit.getEntity(UUID.fromString(blueUUID));
                 ArmorStand redAS = (ArmorStand) Bukkit.getEntity(UUID.fromString(redUUID));
@@ -453,25 +462,23 @@ public class StartWar {
         warData.saveConfig();
     }
 
-    public static void startWar(String islandName2, Main p) {
+    public static void startWar(String islandName2) {
 
-        Files warIslands = new Files(p, "warIslands.yml");
-        Files warData = new Files(p, "warData.yml");
-        Files islands = new Files(p, "islands.yml");
+        Files warIslands = getFiles("warIslands.yml");
+        Files warData = getFiles("warData.yml");
+        Files islands = getFiles("islands.yml");
 
         String islandName1 = warData.getConfig().getString("war.pending.island2." + islandName2 + ".island");
 
-        ArrayList<String> island1 = new ArrayList<>();
-        ArrayList<String> island2 = new ArrayList<>();
-        island1.addAll(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
-        island2.addAll(warData.getConfig().getConfigurationSection("war.pending.island2." + islandName2 + ".players").getKeys(false));
+        ArrayList<String> island1 = new ArrayList<>(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
+        ArrayList<String> island2 = new ArrayList<>(warData.getConfig().getConfigurationSection("war.pending.island2." + islandName2 + ".players").getKeys(false));
 
         String islandTheme = warData.getConfig().getString("war.pending.island1." + islandName1 + ".theme");
 
         if (islandTheme.equalsIgnoreCase("random")) {
-            startRandomThemeWar(p, warData, warIslands, islands, island1, island2, islandName1, islandName2);
+            startRandomThemeWar(warData, warIslands, islands, island1, island2, islandName1, islandName2);
         } else {
-            startThemeWar(p, warData, warIslands, islands, island1, island2, islandTheme, islandName1, islandName2);
+            startThemeWar(warData, warIslands, islands, island1, island2, islandTheme, islandName1, islandName2);
         }
     }
 }

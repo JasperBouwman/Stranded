@@ -14,6 +14,9 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Invite extends CmdManager {
 
     @Override
@@ -32,19 +35,20 @@ public class Invite extends CmdManager {
         //island invite <player name>
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
         if (Main.reloadPending) {
-            player.sendMessage("the server is trying to reload, please wait just a second to let the server reload");
+            player.sendMessage(ChatColor.RED + "The server is trying to reload, please wait just a second to let the server reload");
             return;
         }
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage(ChatColor.RED + "You can't invite a player while you aren't in an island");
             return;
         }
 
-        Files f = new Files(p, "islands.yml");
-        if (!f.getConfig().getString("island." + p.getConfig().getString("island." + uuid) + ".owner").equals(uuid)) {
+        Files f = getFiles("islands.yml");
+        if (!f.getConfig().getString("island." + config.getConfig().getString("island." + uuid) + ".owner").equals(uuid)) {
             player.sendMessage(ChatColor.RED + "You are not the owner of this island, so you can't invite someone");
             return;
         }
@@ -53,10 +57,10 @@ public class Invite extends CmdManager {
 
             String playerName = args[1];
             //get player uuid
-            String invitedUUID = PlayerUUID.getPlayerUUID(playerName, p);
+            String invitedUUID = PlayerUUID.getPlayerUUID(playerName);
             //test if player is found
             if (invitedUUID == null) {
-                ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[1], p);
+                ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[1]);
                 if (tempPlayers.size() > 1) {
                     player.sendMessage(ChatColor.RED + "The player '" + args[1] + "' is not found, but there are more players found with the same name (not case sensitive)");
                     return;
@@ -74,23 +78,23 @@ public class Invite extends CmdManager {
                 return;
             }
             //get final player name (case sensitive)
-            String invitedPlayerName = PlayerUUID.getPlayerName(invitedUUID, p);
+            String invitedPlayerName = PlayerUUID.getPlayerName(invitedUUID);
             //get player
-            Player invited = PlayerUUID.getPlayerExact(playerName, p);
+            Player invited = PlayerUUID.getPlayerExact(invitedPlayerName);
 
             if (invited != null) {
 
-                if (p.getConfig().contains("island." + invitedUUID) && p.getConfig().getString("island." + invitedUUID).equals(p.getConfig().getString("island." + uuid))) {
+                if (config.getConfig().contains("island." + invitedUUID) && config.getConfig().getString("island." + invitedUUID).equals(config.getConfig().getString("island." + uuid))) {
                     player.sendMessage(ChatColor.RED + invitedPlayerName + " is already in your island");
                     return;
                 }
 
-                if (p.getConfig().contains("invited." + invitedUUID)) {
+                if (config.getConfig().contains("invited." + invitedUUID)) {
                     player.sendMessage(ChatColor.RED + "This player has already an invitation to join another island");
                     return;
                 }
 
-                String island = p.getConfig().getString("island." + uuid);
+                String island = config.getConfig().getString("island." + uuid);
 
 //                invited.sendMessage(ChatColor.DARK_GREEN + player.getName() + " asks if you want to join " + island + "?");
                 FancyMessage fm = new FancyMessage();
@@ -107,7 +111,7 @@ public class Invite extends CmdManager {
 
                 fm.sendMessage(invited);
 
-                String islandOld = p.getConfig().getString("island." + invitedUUID);
+                String islandOld = config.getConfig().getString("island." + invitedUUID);
                 ArrayList<String> old = (ArrayList<String>) f.getConfig().getStringList("island." + islandOld + ".members");
                 if (old.size() == 1) {
                     invited.sendMessage(ChatColor.DARK_RED + "NOTE: If you leave you island, this will get deleted. there can't be less than 1 player in an island");
@@ -120,16 +124,19 @@ public class Invite extends CmdManager {
 
                 int taskID = Bukkit.getScheduler().runTaskLater(p, () -> {
 
-                    if (Bukkit.getPlayer(UUID.fromString(p.getConfig().getString("invited." + finalInvitedUUID + ".inviter"))) != null) {
-                        Bukkit.getPlayer(UUID.fromString(p.getConfig().getString("invited." + finalInvitedUUID + ".inviter"))).sendMessage(invitedPlayerName + " hasn't reacted in time to join your island");
+                    Files finalConfig = getFiles("config.yml");
+
+                    if (Bukkit.getPlayer(UUID.fromString(finalConfig.getConfig().getString("invited." + finalInvitedUUID + ".inviter"))) != null) {
+                        Bukkit.getPlayer(UUID.fromString(finalConfig.getConfig().getString("invited." + finalInvitedUUID + ".inviter")))
+                                .sendMessage(invitedPlayerName + " hasn't reacted in time to join your island");
                     }
                     if (Bukkit.getPlayerExact(invitedPlayerName) != null) {
                         Bukkit.getPlayerExact(invitedPlayerName).sendMessage(
-                                ChatColor.RED + "You ignored the inventation of the island " + p.getConfig().getString("invited." + finalInvitedUUID + ".newIsland"));
+                                ChatColor.RED + "You ignored the inventation of the island " + finalConfig.getConfig().getString("invited." + finalInvitedUUID + ".newIsland"));
                     }
 
-                    p.getConfig().set("invited." + finalInvitedUUID, null);
-                    p.saveConfig();
+                    finalConfig.getConfig().set("invited." + finalInvitedUUID, null);
+                    finalConfig.saveConfig();
 
                     Main.reloadHolds -= 1;
                     if (Main.reloadPending && Main.reloadHolds == 0) {
@@ -138,18 +145,18 @@ public class Invite extends CmdManager {
 
                 }, 1000).getTaskId();
 
-                p.getConfig().set("invited." + invitedUUID + ".newIsland", island);
-                p.getConfig().set("invited." + invitedUUID + ".pendingID", taskID);
-                p.getConfig().set("invited." + invitedUUID + ".inviter", uuid);
+                config.getConfig().set("invited." + invitedUUID + ".newIsland", island);
+                config.getConfig().set("invited." + invitedUUID + ".pendingID", taskID);
+                config.getConfig().set("invited." + invitedUUID + ".inviter", uuid);
 
-                p.saveConfig();
+                config.saveConfig();
 
             } else {
-                player.sendMessage("this player is not online");
+                player.sendMessage(ChatColor.RED + "This player is not online");
             }
 
         } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island invite <player>");
+            sendWrongUse(player, new String[]{"/island invite <player>", "/island invite "});
         }
 
     }

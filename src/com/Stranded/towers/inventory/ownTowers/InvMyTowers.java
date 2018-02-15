@@ -1,5 +1,6 @@
 package com.Stranded.towers.inventory.ownTowers;
 
+import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.towers.Tower;
 import org.bukkit.Bukkit;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
 import static com.Stranded.towers.inventory.InventoryEvent.toItemStack;
 
 public class InvMyTowers {
@@ -21,12 +23,13 @@ public class InvMyTowers {
 
     public static void openInv(Main p, Player player) {
 
-        Tower tower = new Tower(p, player.getName());
+        Tower tower = new Tower(player.getName());
         ArrayList<ItemStack> list = tower.getTowers();
 
         int page = 0;
-        if (p.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
-            page = p.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
+        Files config = getFiles("config.yml");
+        if (config.getConfig().contains("tower." + player.getUniqueId().toString() + ".page")) {
+            page = config.getConfig().getInt("tower." + player.getUniqueId().toString() + ".page");
         }
         page *= 9;
 

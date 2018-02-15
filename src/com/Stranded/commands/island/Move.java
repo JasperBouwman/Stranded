@@ -2,13 +2,15 @@ package com.Stranded.commands.island;
 
 import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
-import com.Stranded.islandBorder.BorderUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
+
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.border.islandBorder.BorderUtils.border2;
 
 public class Move extends CmdManager {
 
@@ -29,26 +31,27 @@ public class Move extends CmdManager {
         //island move
 
         String uuidPlayer = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuidPlayer)) {
+        if (!config.getConfig().contains("island." + uuidPlayer)) {
             player.sendMessage(ChatColor.RED + "You're not in an island");
             return;
         }
 
-        if (BorderUtils.border(player.getLocation(), p, player)) {
+        if (border2(player.getLocation(), player)) {//todo test this
             player.sendMessage(ChatColor.RED + "You must be in your own island");
             return;
         }
 
-        Files f = new Files(p, "islands.yml");
-        String island = p.getConfig().getString("island." + uuidPlayer);
-        String uuid = f.getConfig().getString("island." + island + ".UUID");
+        Files islands = getFiles("islands.yml");
+        String island = config.getConfig().getString("island." + uuidPlayer);
+        String uuid = islands.getConfig().getString("island." + island + ".UUID");
 
         Entity e = Bukkit.getEntity(UUID.fromString(uuid));
         if (e != null) {
             e.teleport(player);
-            f.getConfig().set("island." + island + ".home", e.getLocation());
-            f.saveConfig();
+            islands.getConfig().set("island." + island + ".home", e.getLocation());
+            islands.saveConfig();
             return;
         }
 

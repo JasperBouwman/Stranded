@@ -10,80 +10,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static com.Stranded.worldGeneration.regions.GetRegion.*;
 
 public class ImportWarIsland {
 
-    public static List<String> getBlocks(String blocks) {
-        return Arrays.asList(blocks.split("/"));
-    }
-
-    @SuppressWarnings("deprecation")
-    public static Material getMaterial(String blockData) {
-        try {
-            return Material.getMaterial(Integer.parseInt(blockData.split("\\\\")[0]));
-        } catch (NumberFormatException e) {
-            return Material.AIR;
-        }
-    }
-
-    public static boolean hasExtraData(String blockData) {
-        String[] block = blockData.split("\\\\");
-        if (block.length > 1) {
-            if (block[block.length - 1].startsWith("D")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static int getExtraDataID(String blockData) {
-        String[] block = blockData.split("\\\\");
-        if (block.length > 1) {
-            if (block[block.length - 1].startsWith("D")) {
-                return Integer.parseInt(block[block.length - 1].replace("D", ""));
-            }
-        }
-        return -1;
-    }
-
-    public static boolean hasRepeat(String blockData) {
-        for (String s : blockData.split("\\\\")) {
-            if (s.startsWith("X")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static int getRepeat(String blockData) {
-        for (String s : blockData.split("\\\\")) {
-            if (s.startsWith("X")) {
-                return Integer.parseInt(s.replace("X", ""));
-            }
-        }
-        return 0;
-    }
-
-    public static byte getData(String blockData) {
-        String[] block = blockData.split("\\\\");
-        if (block.length > 1) {
-            if (!block[1].startsWith("D") && !block[1].startsWith("X")) {
-                return Byte.parseByte(block[1]);
-            }
-        }
-        return 0;
-    }
-
-    public static Location getLocation(Location location, int width, int height, int length) {
-
-        int x = location.getBlockX();
-        int y = location.getBlockY();
-        int z = location.getBlockZ();
-
-        return new Location(location.getWorld(), x - width, y - height, z - length);
-    }
 
     @SuppressWarnings("All")
     public static void importWarIsland(Files island, Player player) {
@@ -140,7 +72,6 @@ public class ImportWarIsland {
                         int extraDataID = getExtraDataID(blockData);
 
                         if (extraDataID >= 0) {
-
                             switch (m) {
                                 case STANDING_BANNER:
                                 case WALL_BANNER:
@@ -401,7 +332,6 @@ public class ImportWarIsland {
                                     break;
 
                             }
-
                         }
                     }
 

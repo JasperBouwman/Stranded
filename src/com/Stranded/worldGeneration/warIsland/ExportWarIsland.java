@@ -8,14 +8,14 @@ import org.spigotmc.AsyncCatcher;
 
 public class ExportWarIsland {
 
-    private static String save = "";
-    private static int duplicates = -1;
-    private static byte oldData = -1;
-    private static int oldMaterial = -1;
-    private static int oldExtraDataID = -1;
-    private static boolean oldExtraData = false;
+    private String save = "";
+    private int duplicates = -1;
+    private byte oldData = -1;
+    private int oldMaterial = -1;
+    private int oldExtraDataID = -1;
+    private boolean oldExtraData = false;
 
-    public static void exportWarIsland(Files island, String theme, int minPlayers, int maxPlayers, Location blueSpawn, Location redSpawn, Location L1, Location L2, Player player) {
+    public void exportWarIsland(Files island, String theme, int minPlayers, int maxPlayers, Location blueSpawn, Location redSpawn, Location L1, Location L2, Player player) {
 
         island.getConfig().set("warIsland.theme", theme);
         island.getConfig().set("warIsland.maxPlayers", maxPlayers);
@@ -87,7 +87,7 @@ public class ExportWarIsland {
     }
 
     @SuppressWarnings("deprecation")
-    private static int saveBlock(Files island, Block block, int extraDataID) {
+    private int saveBlock(Files island, Block block, int extraDataID) {
 
         boolean extraData = false;
 

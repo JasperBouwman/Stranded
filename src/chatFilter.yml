@@ -1,3 +1,5 @@
 chatFilter:
   filterReplacement: 0
+  filterType: "star"
   filter: []
+

@@ -21,5 +21,8 @@ public class WorldGenerate {
 
         Bukkit.getWorld("War").setGameRuleValue("doMobSpawning", "false");
 
+        Bukkit.getWorld("Islands").setGameRuleValue("keepInventory", "true");
+        Bukkit.getWorld("War").setGameRuleValue("keepInventory", "true");
+
     }
 }

@@ -20,9 +20,10 @@ public class InvTowers {
     private static ItemStack haste = toItemStack(Material.WOOL, 4, "Haste");
     private static ItemStack regeneration = toItemStack(Material.WOOL, 1, "Regeneration");
     private static ItemStack speed = toItemStack(Material.WOOL, 0, "Speed");
+    private static ItemStack teleport = toItemStack(Material.WOOL, 3, "Teleport");
 
     public static Inventory inv() {
-        Inventory inv = Bukkit.createInventory(null, 9, "My towers");
+        Inventory inv = Bukkit.createInventory(null, 18, "My towers");
 
         inv.setItem(0, tnt);
         inv.setItem(1, slowness);
@@ -32,8 +33,9 @@ public class InvTowers {
         inv.setItem(5, haste);
         inv.setItem(6, regeneration);
         inv.setItem(7, speed);
+        inv.setItem(8, teleport);
 
-        inv.setItem(8, allTowers);
+        inv.setItem(13, allTowers);
 
         return inv;
     }

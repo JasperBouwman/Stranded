@@ -10,7 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Stranded.Permissions.hasPermission;
 import static com.Stranded.towers.inventory.InventoryEvent.toItemStack;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Edit extends CmdManager {
 
@@ -37,14 +39,14 @@ public class Edit extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
-        if (!player.hasPermission("Stranded.editWarIsland")) {
-            player.sendMessage("you don't have permission");
+        if (!hasPermission(player, "Stranded.warIsland.edit")) {
             return;
         }
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
-        //warIsland edit <theme> (this return all the IDs for this theme)
+        //warIsland edit <theme>
+        //warIsland edit <theme> <war island id>
         //warIsland edit <theme> <war island id> teleport
         //warIsland edit <theme> <war island id> teleport <blue:red>
         //warIsland edit <theme> <war island id> maxPlayers
@@ -72,7 +74,6 @@ public class Edit extends CmdManager {
             } else {
                 player.sendMessage("this theme doesn't exist");
             }
-
         }
 
         if (args.length == 3) {
@@ -90,13 +91,10 @@ public class Edit extends CmdManager {
                 return;
             }
 
-            String[] lore = new String[]{"Theme: " + theme, "WarIslandID: " + warIslandID};
-
-            ItemStack is = toItemStack(Material.STICK, 0, "WarIsland Boundary Shower", lore);
-
+            ItemStack is = toItemStack(Material.STICK, 0, "WarIsland Boundary Shower", "Theme: " + theme, "WarIslandID: " + warIslandID);
             player.getInventory().addItem(is);
 
-            player.sendMessage("you just got a warIsland pos shower, when you have this item in your main hand you will see the boundries of that island");
+            player.sendMessage("you just got a warIsland pos shower, when you have this item in your main hand you will see the boundaries of that island");
         }
 
         if (args.length > 3) {
@@ -109,6 +107,7 @@ public class Edit extends CmdManager {
                             return;
                         }
                     }
+                    player.sendMessage("this is not a sub-command");
                 } else {
                     player.sendMessage("this war island ID doesn't exist");
                 }

@@ -51,7 +51,7 @@ public class Island implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-//§
+
             // Create a written book
             ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
             BookMeta meta = (BookMeta) book.getItemMeta();

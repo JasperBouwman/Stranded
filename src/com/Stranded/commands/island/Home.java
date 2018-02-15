@@ -7,6 +7,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Home extends CmdManager {
     @Override
     public String getName() {
@@ -24,19 +26,21 @@ public class Home extends CmdManager {
         //island home
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage(ChatColor.RED + "You must be in an island to go to " + ChatColor.BLUE + "home");
             return;
         }
-
-        if (p.getConfig().getStringList("playersInWar").contains(uuid)) {
-            player.sendMessage(ChatColor.RED + "You can't go to " + ChatColor.BLUE + "home" + ChatColor.RED + " while you are in a war");
-            return;
+        if (config.getConfig().contains("playersInWar")) {
+            if (config.getConfig().getStringList("playersInWar").contains(uuid)) {
+                player.sendMessage(ChatColor.RED + "You can't go to " + ChatColor.BLUE + "home" + ChatColor.RED + " while you are in a war");
+                return;
+            }
         }
 
-        Files f = new Files(p, "islands.yml");
-        Location l = (Location) f.getConfig().get("island." + p.getConfig().getString("island." + uuid) + ".home");
+        Files islands = getFiles("islands.yml");
+        Location l = (Location) islands.getConfig().get("island." + config.getConfig().getString("island." + uuid) + ".home");
 
         player.teleport(l);
         player.sendMessage(ChatColor.GREEN + "Teleported to" + ChatColor.BLUE + " home");

@@ -1,4 +1,6 @@
 plugin:
+  files:
+    autoSave: false
   hub:
     location:
       ==: org.bukkit.Location
@@ -40,8 +42,10 @@ plugin:
       - §3Health§b %health%
       - §3World§b %world%
     walking:
-      amplifier: 10000
+      amplifier: 50000
     pvp:
       amplifier: 300
     mining:
       amplifier: 800
+    flying:
+      amplifier: 9999999

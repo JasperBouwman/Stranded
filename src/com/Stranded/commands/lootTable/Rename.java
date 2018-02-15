@@ -1,5 +1,6 @@
 package com.Stranded.commands.lootTable;
 
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import com.google.common.base.Charsets;
 import org.bukkit.entity.Player;
@@ -26,9 +27,14 @@ public class Rename extends CmdManager {
     public void run(String[] args, Player player) {
 
         // lootTable rename <name> <newName>
-        //todo rename lootTable in lootBoxes (eh, no i guess)
+        //todo rename lootTable in lootBoxes
 
         if (args.length == 3) {
+
+            if (Main.containsSpecialCharacter(args[2])) {
+                player.sendMessage("can not contains any special characters");
+                return;
+            }
 
             File oldFile = new File(p.getDataFolder() + "/lootTables", args[1]);
             File newFile = new File(p.getDataFolder() + "/lootTables", args[2]);

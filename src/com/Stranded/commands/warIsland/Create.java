@@ -14,21 +14,25 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static org.bukkit.Bukkit.getUnsafe;
+
 public class Create extends CmdManager {
     public static Vector getVector(Location blue, Location red) {
         return red.toVector().subtract(blue.toVector());
     }
 
-    static String spawnNexus(Location l, Vector vector, Main p) {
+    static String spawnNexus(Location l, Vector vector) {
 
         l.setY(l.getY() - 1);
 
         Villager v = l.getWorld().spawn(l, Villager.class);
+        Files config = getFiles("config.yml");
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
         list.add(v.getUniqueId().toString());
-        p.getConfig().set("nexus.uuid", list);
-        p.saveConfig();
+        config.getConfig().set("nexus.uuid", list);
+        config.saveConfig();
 
         v.setCustomNameVisible(false);
         v.setProfession(Villager.Profession.NITWIT);
@@ -76,23 +80,34 @@ public class Create extends CmdManager {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void run(String[] args, Player player) {
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         //warIsland create <theme> <min> <max>
+        //warIsland create <theme> <min> <max> <material>
 
-        if (args.length != 4) {
+        if (args.length != 4 && args.length != 5) {
             if (args.length == 1) {
-                player.sendMessage("use /warIsland create <theme> <min> <max> for creating a new war island");
+                player.sendMessage("use /warIsland create <theme> <min> <max> [material] for creating a new war island");
             } else if (args.length == 2) {
                 player.sendMessage("you didn't gave a name, min players and max players");
             } else if (args.length == 3) {
                 player.sendMessage("you didn't gave a min players and max players");
-            } else if (args.length > 4) {
-                player.sendMessage("you gave to many arguments, usage: /warIsland create <theme> <min> <max> for creating a new war island");
+            } else if (args.length > 5) {
+                player.sendMessage("you gave to many arguments, usage: /warIsland create <theme> <min> <max> [material] for creating a new war island");
             }
             return;
+        }
+
+        Material border = Material.AIR;
+
+        if (args.length == 5) {
+            border = getUnsafe().getMaterialFromInternalName(args[4]);
+            if (!args[4].equalsIgnoreCase("air") && border.equals(Material.AIR)) {
+                player.sendMessage("The material " + args[4] + " was not found, so there wont be a testPiston");
+            }
         }
 
         String uuid = player.getUniqueId().toString();
@@ -269,9 +284,11 @@ public class Create extends CmdManager {
 
         Vector v = getVector(blueSpawn, redSpawn);
 
-        warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.blue", spawnNexus(blueSpawn, v, p));
+        setBorder(border, first, second);
+
+        warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.blue", spawnNexus(blueSpawn, v));
         v = v.multiply(-1);
-        warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.red", spawnNexus(redSpawn, v, p));
+        warIslands.getConfig().set("warIslands.island." + args[1] + "." + id + ".nexus.red", spawnNexus(redSpawn, v));
 
         warIslands.getConfig().set("warIslands.offset." + uuid, null);
 
@@ -279,4 +296,9 @@ public class Create extends CmdManager {
 
     }
 
+    private void setBorder(Material border, Location l1, Location l2) {
+        if (border.equals(Material.AIR)) {
+            return;
+        }//todo
+    }
 }

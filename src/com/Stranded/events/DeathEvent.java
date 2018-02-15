@@ -13,7 +13,10 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
+
+import static com.Stranded.GettingFiles.getFiles;
 
 public class DeathEvent implements Listener {
 
@@ -27,11 +30,12 @@ public class DeathEvent implements Listener {
     @SuppressWarnings("unused")
     public void entityDeath(EntityDeathEvent e) {
         if (e.getEntity() instanceof Villager) {
-            ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+            Files config = getFiles("config.yml");
+            ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
             if (list.contains(e.getEntity().getUniqueId().toString())) {
                 list.remove(e.getEntity().getUniqueId().toString());
-                p.getConfig().set("nexus.uuid", list);
-                p.saveConfig();
+                config.getConfig().set("nexus.uuid", list);
+                config.saveConfig();
             }
         }
     }
@@ -42,43 +46,68 @@ public class DeathEvent implements Listener {
 
         e.setDeathMessage("");
 
-        Files warData = new Files(p, "warData.yml");
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warData = getFiles("warData.yml");
+//        Files warIslands = getFiles("warIslands.yml");
+        Files config = getFiles("config.yml");
         Player player = e.getEntity().getPlayer();
         String playerUUID = player.getUniqueId().toString();
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
+
         if (list.contains(playerUUID)) {
+
             for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
-                if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(playerUUID)) {
-                    String uuid = warData.getConfig().getString("war.war." + warID + ".blue.ArmorStandUUID");
-                    ArmorStand as = (ArmorStand) Bukkit.getEntity(UUID.fromString(uuid));
-                    if (as == null) {
+
+                for (String side : Arrays.asList("blue", "red")) {
+                    if (warData.getConfig().getStringList("war.war." + warID + "." + side + ".players").contains(playerUUID)) {
+                        String uuid = warData.getConfig().getString("war.war." + warID + "." + side + ".ArmorStandUUID");
+                        ArmorStand as = (ArmorStand) Bukkit.getEntity(UUID.fromString(uuid));
+                        if (as == null) {
+                            return;
+                        }
+                        int health = Integer.parseInt(as.getName().replace("§9Health: ", ""));
+                        health -= 3;
+                        as.setCustomName("§9Health: " + health);
+
+                        warData.getConfig().set("war.war." + warID + "." + side + ".killStreak." + player.getUniqueId().toString(), 0);
+
+                        if (player.getKiller() != null) {//todo test this
+                            Player killer = player.getKiller();
+                            String killerUuid = killer.getUniqueId().toString();
+                            if (warData.getConfig().getStringList("war.war." + warID + "." + invertSide(side) + ".players").contains(killerUuid)) {
+
+                                int oldKillAmount = warData.getConfig().contains("war.war." + warID + "." + invertSide(side) + ".kills." + killerUuid)
+                                        ? warData.getConfig().getInt("war.war." + warID + "." + invertSide(side) + ".kills." + killerUuid) : 0;
+                                warData.getConfig().set("war.war." + warID + "." + invertSide(side) + ".kills." +
+                                        killerUuid, warData.getConfig().getInt("war.war." + warID + "." + invertSide(side) + ".kills." + killerUuid) + 1);
+
+                                int oldKillStreak = warData.getConfig().contains("war.war." + warID + "." + invertSide(side) + ".killStreak." + killerUuid)
+                                        ? warData.getConfig().getInt("war.war." + warID + "." + invertSide(side) + ".killStreak." + killerUuid) : 0;
+                                warData.getConfig().set("war.war." + warID + "." + invertSide(side) + ".killStreak." +
+                                        killerUuid, warData.getConfig().getInt("war.war." + warID + "." + invertSide(side) + ".killStreak." + oldKillStreak) + 1);
+                            }
+                        }
+                        warData.saveConfig();
+
+                        if (health < 1) {
+                            new EndWar().endWar(p, warID, 2, side);
+                        }
                         return;
                     }
-                    int health = Integer.parseInt(as.getName().replace("§9Health: ", ""));
-                    health -= 3;
-                    as.setCustomName("§9Health: " + health);
-                    if (health < 1) {
-                        new EndWar().endWar(p, warID, 2, "blue");
-                    }
-                    return;
-                }
-                if (warData.getConfig().getStringList("war.war." + warID + ".red.players").contains(playerUUID)) {
-                    String uuid = warData.getConfig().getString("war.war." + warID + ".red.ArmorStandUUID");
-                    ArmorStand as = (ArmorStand) Bukkit.getEntity(UUID.fromString(uuid));
-                    if (as == null) {
-                        return;
-                    }
-                    int health = Integer.parseInt(as.getName().replace("§cHealth: ", ""));
-                    health -= 3;
-                    as.setCustomName("§cHealth: " + health);
-                    if (health < 1) {
-                        new EndWar().endWar(p, warID, 2, "red");
-                    }
-                    return;
                 }
             }
         }
     }
+
+    private String invertSide(String side) {
+        switch (side) {
+            case "blue":
+                return "red";
+            case "red":
+                return "blue";
+            default:
+                return side;
+        }
+    }
+
 }

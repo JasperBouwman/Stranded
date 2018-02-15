@@ -13,6 +13,7 @@ import org.bukkit.util.StringUtil;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class WarIslandTabComplete implements TabCompleter {
 
@@ -76,7 +77,7 @@ public class WarIslandTabComplete implements TabCompleter {
 
     private void fillTabComplete(String[] args) {
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
         if (warIslands.getConfig().contains("warIslands.island")) {
             WARISLAND.addAll(warIslands.getConfig().getConfigurationSection("warIslands.island").getKeys(false));
         }

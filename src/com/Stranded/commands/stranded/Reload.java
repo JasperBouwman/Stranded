@@ -59,7 +59,7 @@ public class Reload extends CmdManager {
             Main.reloadHolds = 0;
             reload(p);
             return;
-        } else if (args.length != 0) {
+        } else if (args.length != 1) {
             player.sendMessage("Usage: /stranded reload \nUsage: /stranded reload force");
             return;
         }

@@ -11,6 +11,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Tower {
 
     private String towerType;
@@ -20,35 +22,35 @@ public class Tower {
 
     public static int MAX_UPGRADE = 20;
 
-    public Tower(Main p, String playerName) {
+    public Tower(String playerName) {
         this.lvl = 0;
-        String uuid = PlayerUUID.getPlayerUUID(playerName, p);
+        String uuid = PlayerUUID.getPlayerUUID(playerName);
         this.owner = UUID.fromString( uuid == null ? "" : uuid);
-        this.towers = new Files(p, "towers.yml");
+        this.towers = getFiles("towers.yml");
         this.towerType = "";
     }
 
-    public Tower(Main p, String playerName, String towerType) {
+    public Tower(String playerName, String towerType) {
         this.towerType = towerType;
         this.lvl = 0;
-        String uuid = PlayerUUID.getPlayerUUID(playerName, p);
+        String uuid = PlayerUUID.getPlayerUUID(playerName);
         this.owner = UUID.fromString( uuid == null ? "" : uuid);
-        this.towers = new Files(p, "towers.yml");
+        this.towers = getFiles("towers.yml");
     }
 
-    public Tower(Main p, UUID uuid, String towerType, int lvl) {
+    public Tower(UUID uuid, String towerType, int lvl) {
         this.towerType = towerType;
         this.lvl = lvl;
         this.owner = uuid;
-        this.towers = new Files(p, "towers.yml");
+        this.towers = getFiles("towers.yml");
     }
 
-    public Tower(Main p, String playerName, String towerType, int lvl) {
+    public Tower(String playerName, String towerType, int lvl) {
         this.towerType = towerType;
         this.lvl = lvl;
-        String uuid = PlayerUUID.getPlayerUUID(playerName, p);
+        String uuid = PlayerUUID.getPlayerUUID(playerName);
         this.owner = UUID.fromString( uuid == null ? "" : uuid);
-        this.towers = new Files(p, "towers.yml");
+        this.towers = getFiles("towers.yml");
     }
 
     public ArrayList<ItemStack> filterTowers(String filter) {
@@ -104,7 +106,7 @@ public class Tower {
         }
     }
 
-    public void saveTower() {
+    void saveTower() {
         int id = 0;
         while (true) {
             if (!towers.getConfig().contains("towers." + owner.toString() + "." + id)) {
@@ -120,14 +122,14 @@ public class Tower {
     @SuppressWarnings("deprecation")
     private ItemStack toItemStack() {
 
-        towerType = towerType.replace("Regen", "Regeneration");
+        towerType = towerType.replace("Regen", "Regeneration").replace("Tp", "Teleport");
         int data = 0;
         ArrayList<String> lore = new ArrayList<>();
         String name = "";
+        //towersData
         switch (towerType) {
             case "TNT":
                 data = (14);
-
                 name = "§4Enemy Tower";
                 break;
             case "Slowness":
@@ -158,6 +160,10 @@ public class Tower {
                 data = (0);
                 name = "§3Friendly Tower";
                 break;
+            case "Teleport":
+                data = (3);
+                name = "§3Friendly Tower";
+                break;
         }
         lore.add(towerType);
         if (lvl != 1) {
@@ -183,6 +189,7 @@ public class Tower {
             level = "MAX";
         }
 
+        //towersData
         switch (towerType) {
             case "TNT":
                 TntTower.Tower(location, level);
@@ -207,6 +214,9 @@ public class Tower {
                 break;
             case "Speed":
                 SpeedTower.Tower(location, level);
+                break;
+            case "Teleport":
+                TeleportTower.Tower(location, level);
                 break;
         }
     }

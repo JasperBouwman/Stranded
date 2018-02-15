@@ -1,12 +1,17 @@
 package com.Stranded.commands.island;
 
 import com.Stranded.Files;
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.Permissions.hasPermission;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
 
 public class Edit extends CmdManager {
 
@@ -21,7 +26,7 @@ public class Edit extends CmdManager {
     }
 
     private void sendIslandTypes(Player player) {
-        Files f = new Files(p, "islands.yml");
+        Files f = getFiles("islands.yml");
         StringBuilder is = new StringBuilder().append(ChatColor.AQUA);
         is.append("Available island types: ");
         int color = 0;
@@ -45,100 +50,111 @@ public class Edit extends CmdManager {
         //island edit <island name> rename <new name>
         //island edit <island name> <enable:disable>
 
-        if (!player.hasPermission("Stranded.editDefaultIslands")) {
-            player.sendMessage(ChatColor.RED + "You don't have permission");
+        if (!hasPermission(player, "Stranded.islandEdit")) {
             return;
         }
-        if (args.length == 2) {
+        switch (args.length) {
+            case 2:
 
-            Files islands = new Files(p, "islands.yml");
-            for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-                String islandName = islands.getConfig().getString("islandData.islandTypes." + s + ".name");
-                if (args[1].equalsIgnoreCase(islandName)) {
-                    Location l = (Location) islands.getConfig().get("islandData.islandTypes." + s + ".defaultLocation");
-                    player.teleport(l);
-                    return;
-                }
-            }
-
-            ArrayList<String> list = new ArrayList<>();
-
-            for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-                list.add(islands.getConfig().getString("islandData.islandTypes." + s + ".name").toLowerCase());
-            }
-
-            if (!list.contains(args[1].toLowerCase())) {
-                player.sendMessage(ChatColor.RED + "Invalid island type given");
-                sendIslandTypes(player);
-            }
-        } else if (args.length == 3) {
-            if (args[2].equalsIgnoreCase("enable")) {
-                Files islands = new Files(p, "islands.yml");
-
+                Files islands = getFiles("islands.yml");
                 for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
                     String islandName = islands.getConfig().getString("islandData.islandTypes." + s + ".name");
                     if (args[1].equalsIgnoreCase(islandName)) {
+                        Location l = (Location) islands.getConfig().get("islandData.islandTypes." + s + ".defaultLocation");
+                        player.teleport(l);
+                        return;
+                    }
+                }
 
-                        boolean state = islands.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled");
-                        if (state) {
-                            player.sendMessage(ChatColor.RED + "This island is already enabled");
-                        } else {
-                            islands.getConfig().set("islandData.islandTypes." + s + ".enabled", true);
-                            islands.saveConfig();
+                ArrayList<String> list = new ArrayList<>();
+
+                for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+                    list.add(islands.getConfig().getString("islandData.islandTypes." + s + ".name").toLowerCase());
+                }
+
+                if (!list.contains(args[1].toLowerCase())) {
+                    player.sendMessage(ChatColor.RED + "Invalid island type given");
+                    sendIslandTypes(player);
+                }
+                break;
+            case 3:
+                if (args[2].equalsIgnoreCase("enable")) {
+                    islands = getFiles("islands.yml");
+
+                    for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+                        String islandName = islands.getConfig().getString("islandData.islandTypes." + s + ".name");
+                        if (args[1].equalsIgnoreCase(islandName)) {
+
+                            boolean state = islands.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled");
+                            if (state) {
+                                player.sendMessage(ChatColor.RED + "This island is already enabled");
+                            } else {
+                                islands.getConfig().set("islandData.islandTypes." + s + ".enabled", true);
+                                islands.saveConfig();
+                            }
+                            return;
                         }
-                        return;
                     }
-                }
 
-            } else if (args[2].equalsIgnoreCase("disable")) {
+                } else if (args[2].equalsIgnoreCase("disable")) {
 
-                Files islands = new Files(p, "islands.yml");
-                for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-                    String islandName = islands.getConfig().getString("islandData.islandTypes." + s + ".name");
-                    if (args[1].equalsIgnoreCase(islandName)) {
+                    islands = getFiles("islands.yml");
+                    for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+                        String islandName = islands.getConfig().getString("islandData.islandTypes." + s + ".name");
+                        if (args[1].equalsIgnoreCase(islandName)) {
 
-                        boolean state = islands.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled");
-                        if (!state) {
-                            player.sendMessage(ChatColor.RED + "This island is already disabled");
-                        } else {
-                            islands.getConfig().set("islandData.islandTypes." + s + ".enabled", false);
-                            islands.saveConfig();
+                            boolean state = islands.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled");
+                            if (!state) {
+                                player.sendMessage(ChatColor.RED + "This island is already disabled");
+                            } else {
+                                islands.getConfig().set("islandData.islandTypes." + s + ".enabled", false);
+                                islands.saveConfig();
+                            }
+                            return;
                         }
-                        return;
                     }
+
+                } else {
+                    sendWrongUse(player, new String[]{"/island edit <island name> <enable:disable>", "/island edit "});
                 }
 
-            } else {
-                player.sendMessage(ChatColor.RED + "Usage: /island edit <island name> <enable:disable>");
-            }
+                break;
+            case 4:
+                if (args[2].equalsIgnoreCase("rename")) {
+                    islands = getFiles("islands.yml");
 
-        } else if (args.length == 4) {
-            if (args[2].equalsIgnoreCase("rename")) {
-                Files islands = new Files(p, "islands.yml");
-
-                for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-                    if (islands.getConfig().getString("islandData.islandTypes." + s + ".name").equalsIgnoreCase(args[3])) {
-                        player.sendMessage(ChatColor.RED + "This name is already in use");
+                    if (Main.containsSpecialCharacter(args[3])) {
+                        player.sendMessage(ChatColor.RED + "Your name can't contains any special characters");
                         return;
                     }
-                }
 
-                for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-                    if (args[1].equalsIgnoreCase(islands.getConfig().getString("islandData.islandTypes." + s + ".name"))) {
-                        islands.getConfig().set("islandData.islandTypes." + s + ".name", args[3]);
-                        player.sendMessage(ChatColor.GREEN + "The island has been renamed to " + args[3]);
-                        islands.saveConfig();
-                        return;
+                    for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+                        if (islands.getConfig().getString("islandData.islandTypes." + s + ".name").equalsIgnoreCase(args[3])) {
+                            player.sendMessage(ChatColor.RED + "This name is already in use");
+                            return;
+                        }
                     }
-                }
-                player.sendMessage(ChatColor.RED + "Invalid island type given");
-                sendIslandTypes(player);
-            } else {
-                player.sendMessage(ChatColor.RED + "Usage: /island edit <island name> rename <new name>");
-            }
 
-        } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island edit <island name>\n/island edit <island name> rename <new name>\n/island edit <island name> <enable:disable>");
+                    for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+                        if (args[1].equalsIgnoreCase(islands.getConfig().getString("islandData.islandTypes." + s + ".name"))) {
+                            islands.getConfig().set("islandData.islandTypes." + s + ".name", args[3]);
+                            player.sendMessage(ChatColor.GREEN + "The island has been renamed to " + args[3]);
+                            islands.saveConfig();
+                            return;
+                        }
+                    }
+                    player.sendMessage(ChatColor.RED + "Invalid island type given");
+                    sendIslandTypes(player);
+                } else {
+                    sendWrongUse(player, new String[]{"/island edit <island name> rename <new name>", "/island edit "});
+                }
+
+                break;
+            default:
+                sendWrongUse(player, new String[]{"/island edit <island name>", "/island edit "},
+                        new String[]{"/island edit <island name> rename <new name>", "/island edit "},
+                        new String[]{"/island edit <island name> <enable:disable>", "/island edit "});
+                break;
         }
     }
 }

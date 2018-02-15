@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class RespawnEvent implements Listener {
 
@@ -33,9 +34,10 @@ public class RespawnEvent implements Listener {
 
                 String uuid = player.getUniqueId().toString();
 
-                Scoreboard.scores(p, player);
+                Scoreboard.scores(player);
 
-                Files warData = new Files(p, "warData.yml");
+                Files warData = getFiles("warData.yml");
+                Files config = getFiles("config.yml");
 
                 for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
                     if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(uuid)) {
@@ -48,15 +50,15 @@ public class RespawnEvent implements Listener {
                     }
                 }
 
-                if (p.getConfig().contains("island." + uuid)) {
+                if (config.getConfig().contains("island." + uuid)) {
 
-                    Files islands = new Files(p, "islands.yml");
-                    String island = p.getConfig().getString("island." + uuid);
+                    Files islands = getFiles("islands.yml");
+                    String island = config.getConfig().getString("island." + uuid);
                     player.teleport((Location) islands.getConfig().get("island." + island + ".home"));
                     return;
                 }
 
-                Files pluginData = new Files(p, "pluginData.yml");
+                Files pluginData = getFiles("pluginData.yml");
                 Location spawn = (Location) pluginData.getConfig().get("plugin.hub.location");
                 player.teleport(spawn);
             }

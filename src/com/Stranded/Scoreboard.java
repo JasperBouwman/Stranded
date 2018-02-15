@@ -11,18 +11,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Scoreboard {
 
-    public static void updateIslandScoreboard(Main p, String island) {
+    public static void updateIslandScoreboard(String island) {
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles( "islands.yml");
 
         for (String s : islands.getConfig().getStringList("island." + island + ".members")) {
 
             Player pl = Bukkit.getPlayer(UUID.fromString(s));
 
             if (pl != null) {
-                scores(p, pl);
+                scores(pl);
             }
         }
 
@@ -46,11 +48,12 @@ public class Scoreboard {
 
     }
 
-    public static void scores(Main p, Player player) {
+    public static void scores(Player player) {
 
-        Files pluginData = new Files(p, "pluginData.yml");
-        Files playerData = new Files(p, "playerData.yml");
-        Files islands = new Files(p, "islands.yml");
+        Files pluginData = getFiles( "pluginData.yml");
+        Files playerData = getFiles( "playerData.yml");
+        Files islands = getFiles( "islands.yml");
+        Files config = getFiles("config.yml");
 
         String uuid = player.getUniqueId().toString();
 
@@ -78,12 +81,12 @@ public class Scoreboard {
         int islandOnline = 0;
         int islandCount = 0;
 
-        if (p.getConfig().contains("island." + uuid)) {
-            island = p.getConfig().getString("island." + uuid);
+        if (config.getConfig().contains("island." + uuid)) {
+            island = config.getConfig().getString("island." + uuid);
 
-            for (String players : p.getConfig().getConfigurationSection("island").getKeys(false)) {
+            for (String players : config.getConfig().getConfigurationSection("island").getKeys(false)) {
                 Player pl = Bukkit.getPlayer(UUID.fromString(players));
-                if (p.getConfig().getString("island." + players).equals(island)) {
+                if (config.getConfig().getString("island." + players).equals(island)) {
                     islandCount += 1;
                     if (pl != null) {
                         islandOnline += 1;
@@ -107,15 +110,15 @@ public class Scoreboard {
 
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        if (!setData(objective, p, player, walk, pvp, block, fly, health, serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline)) {
+        if (!setData(objective, player, walk, pvp, block, fly, health, serverOnline, islandOnline, islandCount, island, islandLvl, maxOnline)) {
             player.setScoreboard(board);
         }
     }
 
 
-    private static boolean setData(Objective objective, Main p, Player player, long walk, long pvp, long block, long fly, int health, int serverOnline, int islandOnline, int islandCount,
+    private static boolean setData(Objective objective, Player player, long walk, long pvp, long block, long fly, int health, int serverOnline, int islandOnline, int islandCount,
                                 String island, String islandLvl, int maxOnline) {
-        Files pd = new Files(p, "pluginData.yml");
+        Files pd = getFiles( "pluginData.yml");
 
         ArrayList<String> lines = (ArrayList<String>) pd.getConfig().getStringList("plugin.scoreboard.default.lines");
 

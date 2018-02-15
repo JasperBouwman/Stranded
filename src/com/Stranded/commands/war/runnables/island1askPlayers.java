@@ -4,22 +4,22 @@ import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.stranded.Reload;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import java.util.UUID;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class island1askPlayers implements Runnable {
 
-    private Main p;
     private final String island;
 
-    public island1askPlayers(Main main, String island) {
-        p = main;
+    public island1askPlayers(String island) {
         this.island = island;
     }
 
     @Override
     public void run() {
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
 //        ArrayList<String> list = (ArrayList<String>) warData.getConfig().getStringList("war.pending.memberPendingList");
 //
@@ -30,7 +30,7 @@ public class island1askPlayers implements Runnable {
 
         for (String players : warData.getConfig().getConfigurationSection("war.pending.island1." + island + ".players").getKeys(false)) {
             if (Bukkit.getPlayer(UUID.fromString(players)) != null) {
-                Bukkit.getPlayer(UUID.fromString(players)).sendMessage("not everybody accepted this war invite in time");
+                Bukkit.getPlayer(UUID.fromString(players)).sendMessage("not everybody accepted this war invite in time" + ChatColor.ITALIC + ChatColor.YELLOW);
             }
         }
         warData.getConfig().set("war.pending.island1." + island, null);

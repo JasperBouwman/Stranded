@@ -46,7 +46,7 @@ public class WarTabComplete implements TabCompleter {
             if (f.getType() == List.class) {
                 try {
                     ((List<String>) f.get(f)).clear();
-                } catch (IllegalAccessException e) {
+                } catch (IllegalAccessException ignored) {
                 }
             }
         }

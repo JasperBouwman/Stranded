@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
+import static com.Stranded.GettingFiles.getFiles;
 public class PlayerEffects extends CmdManager {
     @Override
     public String getName() {
@@ -36,7 +37,7 @@ public class PlayerEffects extends CmdManager {
 
             FancyMessage fm = new FancyMessage();
 
-            Files pluginData = new Files(p, "pluginData.yml");
+            Files pluginData = getFiles("pluginData.yml");
 
             fm.addText("These are the playerEffects amplifiers: ", Colors.DARK_AQUA);
 
@@ -64,7 +65,7 @@ public class PlayerEffects extends CmdManager {
             }
             FancyMessage fm = new FancyMessage();
 
-            fm.addText("Amplifier for " + effect + " is " + new Files(p, "pluginData.yml").getConfig().getString("plugin.scoreboard." + effect + ".amplifier"), Colors.DARK_AQUA);
+            fm.addText("Amplifier for " + effect + " is " + getFiles("pluginData.yml").getConfig().getString("plugin.scoreboard." + effect + ".amplifier"), Colors.DARK_AQUA);
             fm.addSuggest("/stranded playerEffects " + effect + " ");
             fm.addHover("/stranded playerEffects " + effect + " <amplifier>", Colors.BLUE);
             fm.sendMessage(player);
@@ -96,7 +97,7 @@ public class PlayerEffects extends CmdManager {
                 return;
             }
 
-            Files pluginData = new Files(p, "pluginData.yml");
+            Files pluginData = getFiles("pluginData.yml");
             pluginData.getConfig().set("plugin.scoreboard." + effect + ".amplifier", i);
             pluginData.saveConfig();
             player.sendMessage("successfully edited");

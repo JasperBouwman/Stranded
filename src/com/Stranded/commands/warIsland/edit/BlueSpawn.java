@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static com.Stranded.commands.warIsland.edit.RedSpawn.spawnArmorstand;
 import static com.Stranded.commands.warIsland.edit.RedSpawn.spawnNexus;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class BlueSpawn extends CmdManager {
     @Override
@@ -32,7 +33,7 @@ public class BlueSpawn extends CmdManager {
     public void run(String[] args, Player player) {
         //warIsland edit <theme> <war island ID> blueSpawn
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         if (args.length == 4) {
 
@@ -100,12 +101,12 @@ public class BlueSpawn extends CmdManager {
 
             if (blueVillager == null) {
                 Location blueSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue");
-                blueVillager = spawnNexus(blueSpawn, p);
+                blueVillager = spawnNexus(blueSpawn);
                 warIslands.getConfig().set("warIslands.island." + theme + "." + warIslandID + ".nexus.blue", blueVillager.getUniqueId().toString());
             }
             if (redVillager == null) {
                 Location redSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.red");
-                redVillager = spawnNexus(redSpawn, p);
+                redVillager = spawnNexus(redSpawn);
                 warIslands.getConfig().set("warIslands.island." + theme + "." + warIslandID + ".nexus.red", redVillager.getUniqueId().toString());
             }
             if (armorStand == null) {

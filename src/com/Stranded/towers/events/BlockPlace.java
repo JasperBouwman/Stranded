@@ -1,11 +1,11 @@
 package com.Stranded.towers.events;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
+import com.Stranded.border.islandBorder.BorderUtils;
 import com.Stranded.commands.war.util.WarUtil;
-import com.Stranded.islandBorder.BorderUtils;
 import com.Stranded.towers.Tower;
 import com.Stranded.towers.TowerUtil;
+import com.Stranded.worldGeneration.regions.SaveRegion;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,20 +19,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.commands.war.util.WarUtil.testIfIsInWar;
+
 public class BlockPlace implements Listener {
 
-    private Main p;
     private String warID;
     private String side;
-    private String island;
-
-    public BlockPlace(Main main) {
-        p = main;
-    }
 
     private boolean test(Player player, Block block) {
-        int temp = WarUtil.testIfPlayerIsInWar(p, player);
-        boolean borderUtils = BorderUtils.border2(block.getLocation(), p, player); //true == not in island
+        int temp = WarUtil.testIfPlayerIsInWar(player);
+        boolean borderUtils = BorderUtils.testBorder(block.getLocation(), player); //true == not in island
 
         if (!player.getWorld().getName().equals("War") && !player.getWorld().getName().equals("Islands")) {
             player.sendMessage("you can only place a tower in your own island or in a war");
@@ -48,12 +45,11 @@ public class BlockPlace implements Listener {
             return true;
         }
 
-
-        if (TowerUtil.testTowerLocationFromTower(block.getLocation(), p)) {
+        if (TowerUtil.testTowerLocationFromTower(block.getLocation())) {
             player.sendMessage("you can't place a tower to close to another tower");
             return true;
         }
-        if (TowerUtil.testTowerLocationFromNexus(block.getLocation(), p)) {
+        if (TowerUtil.testTowerLocationFromNexus(block.getLocation())) {
             player.sendMessage("you can't place a tower to close to a nexus");
             return true;
         }
@@ -80,7 +76,8 @@ public class BlockPlace implements Listener {
             if (im.getDisplayName().equals("§4Enemy Tower") || im.getDisplayName().equals("§3Friendly Tower")) {
 
 
-                if (!p.getConfig().contains("island." + uuid)) {
+                Files config = getFiles("config.yml");
+                if (!config.getConfig().contains("island." + uuid)) {
                     e.setCancelled(true);
                     player.sendMessage("you aren't in an island");
                     return;
@@ -92,13 +89,14 @@ public class BlockPlace implements Listener {
                 }
 
                 if (!im.hasLore()) {
-                    player.sendMessage(ChatColor.RED + "I see what you did there, but please don't");
+                    player.sendMessage(ChatColor.RED + "I see what you did there, but please don't");//todo
                     return;
                 }
 
                 List<String> lore = im.getLore();
                 String type = lore.get(0);
-                int lvl = Tower.MAX_UPGRADE;
+                //this is the start level of the tower
+                int lvl = 1;
                 if (lore.size() == 2) {
                     try {
                         lvl = Integer.parseInt(lore.get(1).replace("lvl: ", ""));
@@ -106,15 +104,48 @@ public class BlockPlace implements Listener {
                     }
                 }
 
+                if (type.equals("Teleport") || type.equals("Tp")) {
+
+                    int teleportTowers = 0;
+                    String island = config.getConfig().getString("island." + uuid);
+
+                    if (testIfIsInWar(player.getName()) == 2) {
+                        String warTowerPath = getWarTowerPath(island);
+                        Files warData = getFiles("warData.yml");
+
+                        for (String towerID : warData.getConfig().getConfigurationSection(warTowerPath).getKeys(false)) {
+                            if (warData.getConfig().contains("war.war." + warID + ".towers." + side + "." + towerID + ".type")) {
+                                if (warData.getConfig().getString("war.war." + warID + ".towers." + side + "." + towerID + ".type").equals("Teleport")) {
+                                    teleportTowers++;
+                                }
+                            }
+                        }
+                    }
+                    Files islands = getFiles("islands.yml");
+
+                    if (islands.getConfig().contains("island." + island + ".towers")) {
+                        for (String towerID : islands.getConfig().getConfigurationSection("island." + island + ".towers").getKeys(false)) {
+                            if (islands.getConfig().getString("island." + island + ".towers." + towerID + ".type").equals("Teleport")) {
+                                teleportTowers++;
+                            }
+                        }
+                    }
+
+                    if (Math.floor(islands.getConfig().getDouble("island." + island + ".lvl") / 10D + 1D) <= teleportTowers) {
+                        player.sendMessage("you have your maximum amount of TeleportTowers reached");
+                        return;
+                    }
+                }
+
                 e.setCancelled(true);
 
                 Location location = block.getLocation();
-                if (WarUtil.testIfPlayerIsInWar(p, player) == 1) {
+                if (WarUtil.testIfPlayerIsInWar(player) == 1) {
                     SaveWarTower(location, player, type);
                 } else {
                     SaveIslandTower(location, player, type);
                 }
-                new Tower(p, player.getUniqueId(), type, lvl).setTower(location);
+                new Tower(player.getUniqueId(), type, lvl).setTower(location);
 //                switch (type) {
 //                    case "TNT":
 //
@@ -215,37 +246,59 @@ public class BlockPlace implements Listener {
         }
     }
 
+    private static String getWarTowerPath(String island) {
+
+        Files warData = getFiles("warData.yml");
+
+        if (warData.getConfig().contains("war.pending.island1." + island)) {
+            return null;
+        }
+        if (warData.getConfig().contains("war.pending.island2." + island)) {
+            return null;
+        }
+
+        for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
+
+            if (warData.getConfig().getString("war.war." + warID + ".blue.islandName").equals(island)) {
+                return "war.war." + warID + ".towers.blue";
+            }
+            if (warData.getConfig().getString("war.war." + warID + ".red.islandName").equals(island)) {
+                return "war.war." + warID + ".towers.red";
+            }
+        }
+        return null;
+    }
+
     @SuppressWarnings("deprecation")
     private void SaveIslandTower(Location l, Player player, String type) {
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        String island = p.getConfig().getString("island." + uuid);
+        String island = config.getConfig().getString("island." + uuid);
         int id = 0;
         boolean loop = true;
 
         while (loop) {
 
-            if (id == 100) {
-                player.sendMessage("an error occurred, this is an auto loop prevention. this will only work is you have over 100 towers or an error");
-                loop = false;
-            }
-
             int timeout = 30;
             if (type.equals("TNT")) {
                 timeout = 45;
+            } else if (type.equals("Teleport")) {
+                timeout = 300;
             }
             if (!islands.getConfig().contains("island." + island + ".towers." + id)) {
                 islands.getConfig().set("island." + island + ".towers." + id + ".location", l);
                 islands.getConfig().set("island." + island + ".towers." + id + ".owner", uuid);
                 islands.getConfig().set("island." + island + ".towers." + id + ".timeout", timeout);
                 islands.getConfig().set("island." + island + ".towers." + id + ".timer", timeout);
+                islands.getConfig().set("island." + island + ".towers." + id + ".type", type);
 
                 Location L1 = new Location(l.getWorld(), l.getX() + 1, l.getY(), l.getZ() + 2);
                 Location L2 = new Location(l.getWorld(), l.getX() - 1, l.getY() + 4, l.getZ() - 2);
-
+//
                 int minX = Math.min(L1.getBlockX(), L2.getBlockX());
                 int minY = Math.min(L1.getBlockY(), L2.getBlockY());
                 int minZ = Math.min(L1.getBlockZ(), L2.getBlockZ());
@@ -271,6 +324,8 @@ public class BlockPlace implements Listener {
 
                 islands.saveConfig();
 
+//                new SaveRegion().saveRegion(L1, L2, islands, "island." + island + ".towers." + id + ".terrain");
+
                 loop = false;
             } else {
                 id++;
@@ -279,7 +334,8 @@ public class BlockPlace implements Listener {
     }
 
     private void setSaveWarTowerData(Player player, Files warData) {
-        this.island = p.getConfig().getString("island." + player.getUniqueId().toString());
+        Files config = getFiles("config.yml");
+        String island = config.getConfig().getString("island." + player.getUniqueId().toString());
         this.warID = "";
         this.side = "";
 
@@ -300,29 +356,26 @@ public class BlockPlace implements Listener {
     @SuppressWarnings("deprecation")
     private void SaveWarTower(Location l, Player player, String type) {
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
         setSaveWarTowerData(player, warData);
 
         int id = 0;
-        boolean loop = true;
 
-        while (loop) {
-
-            if (id == 100) {
-                player.sendMessage("an error occurred, this is an auto loop prevention. this will only work is you have over 100 towers or an error");
-                loop = false;
-            }
+        while (true) {
 
             int timeout = 30;
             if (type.equals("TNT")) {
                 timeout = 45;
+            } else if (type.equals("Teleport")) {
+                timeout = 300;
             }
-            if (!warData.getConfig().contains("island." + island + ".towers." + id)) {
+            if (!warData.getConfig().contains("war.war." + warID + ".towers." + side + "." + id)) {
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".location", l);
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".owner", player.getUniqueId().toString());
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".timeout", timeout);
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".timer", timeout);
+                warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".type", type);
 
                 Location L1 = new Location(l.getWorld(), l.getX() + 1, l.getY(), l.getZ() + 2);
                 Location L2 = new Location(l.getWorld(), l.getX() - 1, l.getY() + 4, l.getZ() - 2);
@@ -349,8 +402,7 @@ public class BlockPlace implements Listener {
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".terrain." + 27 + ".type", 0);
                 warData.getConfig().set("war.war." + warID + ".towers." + side + "." + id + ".terrain." + 27 + ".data", 0);
                 warData.saveConfig();
-
-                loop = false;
+                return;
             } else {
                 id++;
             }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Leave extends CmdManager {
 
     @Override
@@ -32,79 +34,82 @@ public class Leave extends CmdManager {
         //island leave
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage(ChatColor.RED + "You aren't in an island");
             return;
         }
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
-        if (p.getConfig().getStringList("playersInWar").contains(uuid)) {
-            player.sendMessage(ChatColor.RED + "You can't leave an island while you are in a war");
-            return;
+        if (config.getConfig().contains("playersInWar")) {
+            if (config.getConfig().getStringList("playersInWar").contains(uuid)) {
+                player.sendMessage(ChatColor.RED + "You can't leave an island while you are in a war");
+                return;
+            }
         }
-        if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + uuid))) {
-            if (warData.getConfig().contains("war.pending.island1." + p.getConfig().getString("island." + uuid) + ".players." + uuid)) {
+        if (warData.getConfig().contains("war.pending.island1." + config.getConfig().getString("island." + uuid))) {
+            if (warData.getConfig().contains("war.pending.island1." + config.getConfig().getString("island." + uuid) + ".players." + uuid)) {
                 player.sendMessage(ChatColor.RED + "You can't leave your island while you are pending for a war");
                 return;
             }
         }
-        if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + player.getName()))) {
-            if (warData.getConfig().contains("war.pending.island2." + p.getConfig().getString("island." + uuid) + ".players." + uuid)) {
+        if (warData.getConfig().contains("war.pending.island2." + config.getConfig().getString("island." + player.getName()))) {
+            if (warData.getConfig().contains("war.pending.island2." + config.getConfig().getString("island." + uuid) + ".players." + uuid)) {
                 player.sendMessage(ChatColor.RED + "You can't leave your island while you are pending for a war");
                 return;
             }
         }
 
 
-        Files f = new Files(p, "islands.yml");
+        Files files = getFiles("islands.yml");
 
-        String islandOld = p.getConfig().getString("island." + uuid);
+        String islandOld = config.getConfig().getString("island." + uuid);
 
-        com.Stranded.Scoreboard.updateIslandScoreboard(p, islandOld);
-        com.Stranded.Scoreboard.scores(p, player);
-        Main.resetPlayerData(uuid, p);
+        com.Stranded.Scoreboard.updateIslandScoreboard(islandOld);
+        com.Stranded.Scoreboard.scores(player);
+        Main.resetPlayerData(uuid);
 
-        ArrayList<String> old = (ArrayList<String>) f.getConfig().getStringList("island." + islandOld + ".members");
+        ArrayList<String> old = (ArrayList<String>) files.getConfig().getStringList("island." + islandOld + ".members");
         if (old.contains(uuid)) {
-            p.getConfig().set("island." + uuid, null);
-            p.saveConfig();
+            config.getConfig().set("island." + uuid, null);
+            config.saveConfig();
             old.remove(uuid);
-            f.getConfig().set("island." + islandOld + ".members", old);
+            files.getConfig().set("island." + islandOld + ".members", old);
 
-            if (f.getConfig().getString("island." + islandOld + ".owner").equals(uuid)) {
+            if (files.getConfig().getString("island." + islandOld + ".owner").equals(uuid)) {
 
                 String newOwner = old.get(new Random().nextInt(old.size()));
                 if (Bukkit.getPlayer(UUID.fromString(newOwner)) != null) {
                     Bukkit.getPlayer(UUID.fromString(newOwner)).sendMessage(ChatColor.RED + "You are the new owner of " + islandOld);
                 } else {
-                    ArrayList<String> newOwnerList = (ArrayList<String>) p.getConfig().getStringList("online.newOwner");
+                    ArrayList<String> newOwnerList = (ArrayList<String>) config.getConfig().getStringList("online.newOwner");
                     newOwnerList.add(newOwner);
-                    p.getConfig().set("online.newOwner", newOwnerList);
-                    p.saveConfig();
+                    config.getConfig().set("online.newOwner", newOwnerList);
+                    config.saveConfig();
                 }
-                f.getConfig().set("island." + islandOld + ".owner", newOwner);
+                files.getConfig().set("island." + islandOld + ".owner", newOwner);
             }
 
             for (String s : old) {
                 if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
-                    Bukkit.getPlayer(UUID.fromString(s)).sendMessage(player.getName() + " left your island");
+                    Bukkit.getPlayer(UUID.fromString(s)).sendMessage(ChatColor.RED + player.getName() + " left your island");
                 }
             }
 
-            Files pluginData = new Files(p, "pluginData.yml");
+            Files pluginData = getFiles("pluginData.yml");
             Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
             player.teleport(l);
 
             if (old.size() == 0) {
-                f.getConfig().set("island." + islandOld, null);
-                f.saveConfig();
+                files.getConfig().set("island." + islandOld, null);
+                files.saveConfig();
                 player.sendMessage(ChatColor.RED + "You left " + islandOld + " as last one, so this island is now deleted (not from the world)");
                 return;
             }
             player.sendMessage(ChatColor.RED + "You left " + islandOld);
-            f.saveConfig();
+            files.saveConfig();
 
         } else {
             player.sendMessage(ChatColor.RED + "You aren't in an island");

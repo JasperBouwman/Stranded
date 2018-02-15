@@ -1,10 +1,8 @@
 package com.Stranded.commands;
 
 import com.Stranded.Main;
-import com.Stranded.commands.stranded.Hub;
-import com.Stranded.commands.stranded.PlayerEffects;
-import com.Stranded.commands.stranded.Reload;
-import com.Stranded.commands.stranded.Scoreboard;
+import com.Stranded.commands.stranded.*;
+import com.Stranded.fancyMassage.FancyMessage;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,12 +24,18 @@ public class Stranded implements CommandExecutor {
         actions.add(new Scoreboard());
         actions.add(new Reload());
         actions.add(new PlayerEffects());
+        actions.add(new MOTD());
+        actions.add(new World());
+        actions.add(new FilesCommand());
     }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
         //stranded
+        //stranded files autoSave [on:off] {on=beta}
+        //stranded files reload
+        //stranded files save
         //stranded reload
         //stranded reload force
         //stranded scoreboard
@@ -51,14 +55,15 @@ public class Stranded implements CommandExecutor {
         //stranded hub
         //stranded hub set
         //stranded MOTD
-        //stranded MOTD setPlayer <text...>
-        //stranded MOTD getPlayer
-        //stranded MOTD setIsland <text...>
-        //stranded MOTD getIsland
-        //stranded MOTD setRandom <text...>
-        //stranded MOTD getRandom
+        //stranded MOTD player <text...>
+        //stranded MOTD player
+        //stranded MOTD island <text...>
+        //stranded MOTD island
+        //stranded MOTD random <text...>
+        //stranded MOTD random
+        //stranded world <world>
+        //stranded world <world> <X> <Y> <Z>
 
-        //todo make command
         if (args.length > 0 && args[0].equalsIgnoreCase("reload") && commandSender instanceof ConsoleCommandSender) {
             return false;
         }
@@ -70,7 +75,15 @@ public class Stranded implements CommandExecutor {
         Player player = (Player) commandSender;
 
         if (args.length == 0) {
-            player.sendMessage("i don't know yet");
+
+            FancyMessage fm = new FancyMessage();
+            fm.addText("Stranded info:\nAuthors: ");
+            fm.addText("The_Spaceman");
+            fm.addUrl("https://dev.bukkit.org/members/the_spaceman2000/projects");
+            fm.addHover("https://dev.bukkit.org/members/the_spaceman2000/projects");
+            fm.addText(", 7h3_4ch3r\nVersion: " + p.getDescription().getVersion());
+            fm.sendMessage(player);
+
             return false;
         }
 

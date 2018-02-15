@@ -1,7 +1,7 @@
 package com.Stranded.towers;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
+import com.Stranded.worldGeneration.regions.GetRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class RemoveTower {
 
-    private static void giveTower(Main p, Location main, String owner, String towerLvl) {
+    private static void giveTower(Location main, String owner) {
         Block blockNorth = new Location(main.getWorld(), main.getBlockX(), main.getBlockY() + 1, main.getBlockZ() - 2)
                 .getBlock();
         Block blockSouth = new Location(main.getWorld(), main.getBlockX(), main.getBlockY() + 1, main.getBlockZ() + 2)
@@ -35,11 +35,12 @@ public class RemoveTower {
                     effect = effect.replace(str.append(i).toString(), "");
                 }
                 // get tower lvl
+                //towersData
                 String lvl = (signNorth.getLine(1).replace("Speed lvl: ", "")
                         .replace("Slow lvl: ", "").replace("Regen lvl: ", "")
                         .replace("Haste lvl: ", "").replace("Wither lvl: ", "")
                         .replace("Hunger lvl: ", "").replace("Tnt lvl: ", "")
-                        .replace("Arrow lvl: ", ""));
+                        .replace("Arrow lvl: ", "").replace("Tp lvl: ", ""));
 
                 int lvlInt = Tower.MAX_UPGRADE;
                 try {
@@ -47,13 +48,7 @@ public class RemoveTower {
                 } catch (NumberFormatException ignore) {
                 }
 
-
-                if (towerLvl.equals("half")) {
-                    lvlInt /= 2;
-                } else if (towerLvl.equals("null")) {
-                    lvlInt = 0;
-                }
-                new Tower(p, UUID.fromString(owner), effect, lvlInt).saveTower();
+                new Tower(UUID.fromString(owner), effect, lvlInt).saveTower();
                 return;
             }
         } catch (ClassCastException cce) {
@@ -71,22 +66,19 @@ public class RemoveTower {
                     effect = effect.replace(str.append(i).toString(), "");
                 }
                 // get tower lvl
+                //towersData
                 String lvl = (signSouth.getLine(1).replace("Speed lvl: ", "")
                         .replace("Slow lvl: ", "").replace("Regen lvl: ", "")
                         .replace("Haste lvl: ", "").replace("Wither lvl: ", "")
                         .replace("Hunger lvl: ", "").replace("Tnt lvl: ", "")
-                        .replace("Arrow lvl: ", ""));
+                        .replace("Arrow lvl: ", "").replace("Tp lvl: ", ""));
                 int lvlInt = Tower.MAX_UPGRADE;
                 try {
                     lvlInt = Integer.parseInt(lvl);
                 } catch (NumberFormatException ignore) {
                 }
-                if (towerLvl.equals("half")) {
-                    lvlInt /= 2;
-                } else if (towerLvl.equals("null")) {
-                    lvlInt = 0;
-                }
-                new Tower(p, UUID.fromString(owner), effect, lvlInt).saveTower();
+
+                new Tower(UUID.fromString(owner), effect, lvlInt).saveTower();
 
             }
         } catch (ClassCastException cce) {
@@ -95,14 +87,14 @@ public class RemoveTower {
     }
 
     @SuppressWarnings("deprecation")
-    public static void removeWarTower(Main p, Files warData, String warID, String towerID, String side, String towerLvl) {
+    public static void removeWarTower(Files warData, String warID, String towerID, String side) {
         Location main = (Location) warData.getConfig().get("war.war." + warID + ".towers." + side + "." + towerID + ".location");
         Location L1 = new Location(main.getWorld(), main.getX() + 1, main.getY(), main.getZ() + 2);
         Location L2 = new Location(main.getWorld(), main.getX() - 1, main.getY() + 4, main.getZ() - 2);
 
         String owner = warData.getConfig().getString("war.war." + warID + ".towers." + side + "." + towerID + ".owner");
 
-        giveTower(p, main, owner, towerLvl);
+        giveTower(main, owner);
 
         int minX = Math.min(L1.getBlockX(), L2.getBlockX());
         int minY = Math.min(L1.getBlockY(), L2.getBlockY());
@@ -113,7 +105,6 @@ public class RemoveTower {
 
         int blockCount = 0;
 
-        // set all blocks in this region to air
         for (int xx = minX; xx <= maxX; xx++) {
             for (int yy = minY; yy <= maxY; yy++) {
                 for (int zz = minZ; zz <= maxZ; zz++) {
@@ -130,14 +121,14 @@ public class RemoveTower {
     }
 
     @SuppressWarnings("deprecation")
-    public static void removeIslandTower(Main p, Files islands, String island, String id) {
+    public static void removeIslandTower(Files islands, String island, String id) {
         Location main = (Location) islands.getConfig().get("island." + island + ".towers." + id + ".location");
         Location L1 = new Location(main.getWorld(), main.getX() + 1, main.getY(), main.getZ() + 2);
         Location L2 = new Location(main.getWorld(), main.getX() - 1, main.getY() + 4, main.getZ() - 2);
 
         String owner = islands.getConfig().getString("island." + island + ".towers." + id + ".owner"); //UUID
 
-        giveTower(p, main, owner, "full");
+        giveTower(main, owner);
 
         int minX = Math.min(L1.getBlockX(), L2.getBlockX());
         int minY = Math.min(L1.getBlockY(), L2.getBlockY());
@@ -159,6 +150,8 @@ public class RemoveTower {
                 }
             }
         }
+
+//        new GetRegion().setRegion(islands, L1, "island." + island + ".towers." + id + ".terrain");
 
         islands.getConfig().set("island." + island + ".towers." + id, null);
         islands.saveConfig();

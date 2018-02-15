@@ -1,7 +1,6 @@
 package com.Stranded.commands.warIsland;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -13,12 +12,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
 import static com.Stranded.commands.warIsland.Wand.wand;
 
 public class Pos extends CmdManager {
 
-    public static void showBoundary(Main p) {
-        Files warIslands = new Files(p, "warIslands.yml");
+    public static void showBoundary() {
+        Files warIslands = getFiles("warIslands.yml");
 
         for (Player player : Bukkit.getOnlinePlayers()) {
 
@@ -186,44 +186,46 @@ public class Pos extends CmdManager {
                     }
                 }).start();
             }
-//            if (warIslands.getConfig().contains("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")) {
-//                Location redSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue");
-//
-//                redSpawn.setY(redSpawn.getY() + 1);
-//                redSpawn.setX(redSpawn.getX() + 0.57);
-//                redSpawn.setZ(redSpawn.getZ() + 0.55);
-//
-//                if (player.getLocation().getWorld().equals(redSpawn.getWorld()) && player.getLocation().distance(redSpawn) <= range) {
-//                    for (double d = 0; d < 1.8; d = d + 0.1) {
-//                        redSpawn.setY(redSpawn.getY() + 0.1);
-//                        redSpawn.getWorld().spawnParticle(Particle.DRIP_LAVA, redSpawn, 10);
-//                    }
-//                }
-//
-//            }
-//
-//            if (warIslands.getConfig().contains("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")) {
-//                Location blueSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue");
-//
-//                blueSpawn.setY(blueSpawn.getY() + 1);
-//                blueSpawn.setX(blueSpawn.getX() + 0.57);
-//                blueSpawn.setZ(blueSpawn.getZ() + 0.55);
-//
-//                if (player.getLocation().getWorld().equals(blueSpawn.getWorld()) && player.getLocation().distance(blueSpawn) <= range) {
-//                    for (double d = 0; d < 1.8; d = d + 0.1) {
-//                        blueSpawn.setY(blueSpawn.getY() + 0.1);
-//                        blueSpawn.getWorld().spawnParticle(Particle.DRIP_WATER, blueSpawn, 10);
-//                    }
-//                }
-//
-//            }
+            if (warIslands.getConfig().contains("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")) {
+                Location redSpawn = ((Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")).clone();
+
+                redSpawn.setY(redSpawn.getY() + 1);
+                redSpawn.setX(redSpawn.getX() + 0.57);
+                redSpawn.setZ(redSpawn.getZ() + 0.55);
+
+                if (player.getLocation().getWorld().equals(redSpawn.getWorld()) && player.getLocation().distance(redSpawn) <= range) {
+                    for (double d = 0; d < 1.8; d = d + 0.1) {
+                        redSpawn.setY(redSpawn.getY() + 0.1);
+                        redSpawn.getWorld().spawnParticle(Particle.DRIP_LAVA, redSpawn, 10);
+                    }
+                }
+            }
+
+            if (warIslands.getConfig().contains("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")) {
+                Location blueSpawn = ((Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue")).clone();
+
+                blueSpawn.setY(blueSpawn.getY() + 1);
+                blueSpawn.setX(blueSpawn.getX() + 0.57);
+                blueSpawn.setZ(blueSpawn.getZ() + 0.55);
+
+                if (player.getLocation().getWorld().equals(blueSpawn.getWorld()) && player.getLocation().distance(blueSpawn) <= range) {
+                    for (double d = 0; d < 1.8; d = d + 0.1) {
+                        blueSpawn.setY(blueSpawn.getY() + 0.1);
+                        blueSpawn.getWorld().spawnParticle(Particle.DRIP_WATER, blueSpawn, 10);
+                    }
+                }
+            }
 
         }
     }
 
-    public static void showOffset(Main p) {
+    public static void showOffset() {
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
+
+        if (!warIslands.getConfig().contains("warIslands.offset")) {
+            return;
+        }
 
         for (String uuid : warIslands.getConfig().getConfigurationSection("warIslands.offset").getKeys(false)) {
 
@@ -368,7 +370,7 @@ public class Pos extends CmdManager {
                 }).start();
             }
             if (warIslands.getConfig().contains("warIslands.offset." + uuid + ".redSpawn")) {
-                Location redSpawn = (Location) warIslands.getConfig().get("warIslands.offset." + uuid + ".redSpawn");
+                Location redSpawn = ((Location) warIslands.getConfig().get("warIslands.offset." + uuid + ".redSpawn")).clone();
 
                 redSpawn.setY(redSpawn.getY() + 1);
                 redSpawn.setX(redSpawn.getX() + 0.57);
@@ -383,7 +385,7 @@ public class Pos extends CmdManager {
 
             }
             if (warIslands.getConfig().contains("warIslands.offset." + uuid + ".blueSpawn")) {
-                Location blueSpawn = (Location) warIslands.getConfig().get("warIslands.offset." + uuid + ".blueSpawn");
+                Location blueSpawn = ((Location) warIslands.getConfig().get("warIslands.offset." + uuid + ".blueSpawn")).clone();
 
                 blueSpawn.setY(blueSpawn.getY() + 1);
                 blueSpawn.setX(blueSpawn.getX() + 0.57);
@@ -422,7 +424,7 @@ public class Pos extends CmdManager {
         if (args.length == 2) {
             if (args[1].equalsIgnoreCase("delete")) {
 
-                Files warIslands = new Files(p, "warIslands.yml");
+                Files warIslands = getFiles("warIslands.yml");
                 String uuid = player.getUniqueId().toString();
 
                 if (warIslands.getConfig().contains("warIslands.offset." + uuid)) {
@@ -438,7 +440,7 @@ public class Pos extends CmdManager {
 
             } else if (args[1].equalsIgnoreCase("showPos")) {
 
-                Files warIslands = new Files(p, "warIslands.yml");
+                Files warIslands = getFiles("warIslands.yml");
 
                 int range = 100;
                 if (warIslands.getConfig().contains("warIslands.showOffset.range")) {
@@ -464,7 +466,7 @@ public class Pos extends CmdManager {
                     return;
                 }
 
-                Files warIslands = new Files(p, "warIslands.yml");
+                Files warIslands = getFiles("warIslands.yml");
 
                 warIslands.getConfig().set("warIslands.showOffset.range", range);
                 warIslands.saveConfig();

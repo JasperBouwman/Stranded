@@ -3,14 +3,19 @@ package com.Stranded.commands.warIsland;
 import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
+import com.Stranded.fancyMassage.Colors;
+import com.Stranded.fancyMassage.FancyMessage;
+import com.Stranded.worldGeneration.warIsland.ExportWarIsland;
+import com.google.common.base.Joiner;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.Arrays;
 
-import static com.Stranded.worldGeneration.warIsland.ExportWarIsland.exportWarIsland;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Export extends CmdManager {
     @Override
@@ -38,8 +43,15 @@ public class Export extends CmdManager {
             File file = new File(p.getDataFolder() + "/warIslands/", args[1]);
 
             if (file.exists()) {
-                //todo beautify
-                player.sendMessage("this warIsland already exist, if you wan't to override this island add 'force' behind your command");
+                FancyMessage fm = new FancyMessage();
+
+                fm.addText("This warIsland already exist, if you want to override this island add 'force' behind your command. Or click ", Colors.BLUE);
+                fm.addText("here", Colors.DARK_AQUA);
+                fm.addCommand("/warIsland " + Joiner.on(" ").join(Arrays.asList(args)) + " force");
+                fm.addHover("/warIsland " + Joiner.on(" ").join(Arrays.asList(args)) + " force", Colors.DARK_AQUA);
+                fm.addText(" to complete the export of your island", Colors.BLUE);
+
+                fm.sendMessage(player);
             } else {
                 testExportCommand(p, player, args, false);
             }
@@ -87,7 +99,7 @@ public class Export extends CmdManager {
             return;
         }
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         String uuid = player.getUniqueId().toString();
 
@@ -202,7 +214,7 @@ public class Export extends CmdManager {
         warIslands.getConfig().set("warIslands.offset." + uuid, null);
         warIslands.saveConfig();
 
-        exportWarIsland(island, args[2], min, max, blueSpawn, redSpawn, first, second, player);
+        new ExportWarIsland().exportWarIsland(island, args[2], min, max, blueSpawn, redSpawn, first, second, player);
 
     }
 

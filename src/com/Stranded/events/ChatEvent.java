@@ -1,7 +1,6 @@
 package com.Stranded.events;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
 import com.Stranded.commands.Reply;
 import com.Stranded.fancyMassage.Colors;
 import com.Stranded.fancyMassage.FancyMessage;
@@ -14,21 +13,17 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.*;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.Permissions.hasPermission;
 import static com.Stranded.commands.Reply.chatData;
 
 public class ChatEvent implements Listener {
-
-    private Main p;
-
-    public ChatEvent(Main main) {
-        p = main;
-    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     @SuppressWarnings("unused")
     public void chatEvent(AsyncPlayerChatEvent e) {
 
-        String finalMessage = chatFilter(e.getMessage(), p);
+        String finalMessage = chatFilter(e.getMessage(), e.getPlayer());
 
         int chatID = 0;
         while (chatData.containsKey(chatID)) {
@@ -43,20 +38,23 @@ public class ChatEvent implements Listener {
         } else {
             sendMessage(finalMessage, e.getPlayer(), chatID);
         }
-
     }
 
-    public static String chatFilter(String toFilter, Main p) {
+    public static String chatFilter(String toFilter, Player player) {
 
-        Files chatFilter = new Files(p, "chatFilter.yml");
+        Files chatFilter = getFiles("chatFilter.yml");
 
         ArrayList<String> list = (ArrayList<String>) chatFilter.getConfig().getStringList("chatFilter.filter");
-        String filterType = chatFilter.getConfig().getString("chatFilter.filterReplacement");
+        String filterReplacement = chatFilter.getConfig().getString("chatFilter.filterReplacement");
 
         int filter = 50;
         try {
-            filter = Integer.parseInt(filterType);
+            filter = Integer.parseInt(filterReplacement);
         } catch (NumberFormatException ignore) {
+        }
+
+        if (hasPermission(player, "Stranded.swear", false)) {
+            filter = 0;
         }
 
         Random r = new Random();
@@ -84,6 +82,10 @@ public class ChatEvent implements Listener {
             tmpMessage = tmpMessage.replace("&" + color, "");
         }
 
+        String filterType = chatFilter.getConfig().getString("chatFilter.filterType");
+
+        char[] comicChars = "#$%&?!*@".toCharArray();
+
         if (filter != 0) {
             for (String badWord : list) {
                 while (true) {
@@ -93,12 +95,22 @@ public class ChatEvent implements Listener {
                     StringBuilder str = new StringBuilder();
                     for (int i = 0; i < badWord.length(); i++) {
                         if (r.nextInt(100) < filter) {
-                            str.append("*");
+                            switch (filterType) {
+                                case "comic":
+                                    str.append(comicChars[new Random().nextInt(comicChars.length)]);
+                                    break;
+                                case "star":
+                                default:
+                                    str.append("*");
+                            }
                         } else {
                             str.append(badWord.toCharArray()[i]);
                         }
                     }
-                    tmpMessage = tmpMessage.replaceFirst(badWord, str.toString());
+                    try {
+                        tmpMessage = tmpMessage.replaceFirst(badWord, str.toString());
+                    } catch (IllegalArgumentException ignore) {
+                    }
                 }
             }
         }
@@ -131,13 +143,15 @@ public class ChatEvent implements Listener {
 
         StringBuilder stringBuilder = new StringBuilder();
         int l = 1;
+        String oldColor = "";
         for (char c : capitalMessage.toString().toCharArray()) {
             if (colors.keySet().contains(l)) {
-                stringBuilder.append(colors.get(l));
+                oldColor = colors.get(l);
+                stringBuilder.append(oldColor);
                 l++;
                 colors.remove(l);
             }
-            stringBuilder.append(c);
+            stringBuilder.append(oldColor).append(c);
             l++;
         }
 
@@ -160,6 +174,11 @@ public class ChatEvent implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()) {
             fm.sendMessage(p);
         }
+        sendConsoleMessage(s, sender);
+    }
+
+    private void sendConsoleMessage(String s, Player sender) {
+        Bukkit.getConsoleSender().sendMessage("<" + sender.getName() + "> " + s);
     }
 
     private void sendCommand(String s, Player sender, int chatID) {
@@ -175,5 +194,6 @@ public class ChatEvent implements Listener {
             fm.sendMessage(p);
         }
 
+        sendConsoleMessage(s, sender);
     }
 }

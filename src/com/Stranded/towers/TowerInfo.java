@@ -1,10 +1,10 @@
-package com.Stranded.towers.events;
+package com.Stranded.towers;
 
-class TowerInfo {
+public class TowerInfo {
 
-    static String getTowerInfo(String s, String lvl) {
+    public static String getTowerInfo(String s, String lvl) {
 
-        //todo set tower upgrade max lvl
+        //todo set tower upgrade max lvl 9-19 (MAX==20)
 
         if (s.startsWith("Speed lvl: ")) {
             switch (lvl) {
@@ -238,6 +238,35 @@ class TowerInfo {
                 case "MAX":
                     return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 45 arrows");
             }
+        } else if (s.startsWith("Tp lvl: ")) {
+            switch (lvl) {
+                case "1":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 5 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 10 arrows");
+                case "2":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 10 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 15 arrows");
+                case "3":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 15 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 20 arrows");
+                case "4":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 20 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 25 arrows");
+                case "5":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 25 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 30 arrows");
+                case "6":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 30 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 35 arrows");
+                case "7":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 35 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 40 arrows");
+                case "8":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 40 arrows\n") +
+                            ("Next upgrade:\nCooldown: 30\nEffect: shoot 45 arrows");
+                case "MAX":
+                    return ("Arrow Tower lvl " + lvl + ":\nCooldown: 30\nEffect: shoot 45 arrows");
+            }//todo
         }
         return "";
     }

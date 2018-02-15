@@ -15,6 +15,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class ServerPingEvent implements Listener {
 
     private static HashMap<String, String> playerIP = new HashMap<>();
@@ -47,16 +49,18 @@ public class ServerPingEvent implements Listener {
             if (playerIP.containsKey(e.getAddress().toString().replace(".", ","))) {
                 String player = playerIP.get(e.getAddress().toString().replace(".", ","));
 
-                String uuid = PlayerUUID.getPlayerUUID(player, p);
+                String uuid = PlayerUUID.getPlayerUUID(player);
 
-                if (p.getConfig().contains("island." + uuid)) {
+                Files config = getFiles("config.yml");
+
+                if (config.getConfig().contains("island." + uuid)) {
 
                     String islandMOTD = pluginData.getConfig().getString("plugin.server.MOTD.island");
 
                     if (!islandMOTD.equals("%default%")) {
 
-                        Files playerData = new Files(p, "playerData.yml");
-                        Files islands = new Files(p, "islands.yml");
+                        Files playerData = getFiles("playerData.yml");
+                        Files islands = getFiles("islands.yml");
 
                         long walk = playerData.getConfig().getLong("walk." + uuid) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
                         long block = playerData.getConfig().getLong("BlockBreak." + uuid) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
@@ -67,11 +71,11 @@ public class ServerPingEvent implements Listener {
                         int islandOnline = 0;
                         int islandCount = 0;
 
-                        String island = p.getConfig().getString("island." + uuid);
+                        String island = config.getConfig().getString("island." + uuid);
 
-                        for (String players : p.getConfig().getConfigurationSection("island").getKeys(false)) {
+                        for (String players : config.getConfig().getConfigurationSection("island").getKeys(false)) {
                             Player pl = Bukkit.getPlayer(UUID.fromString(players));
-                            if (p.getConfig().getString("island." + players).equals(island)) {
+                            if (config.getConfig().getString("island." + players).equals(island)) {
                                 islandCount += 1;
                                 if (pl != null) {
                                     islandOnline += 1;
@@ -81,7 +85,6 @@ public class ServerPingEvent implements Listener {
                         if (islands.getConfig().contains("island." + island + ".lvl")) {
                             islandLvl = islands.getConfig().getString("island." + island + ".lvl");
                         }
-
 
                         e.setMotd(rep(islandMOTD, walk, block, fly, pvp, player, island, islandOnline, islandCount, islandLvl));
                     }
@@ -106,12 +109,12 @@ public class ServerPingEvent implements Listener {
             if (!pluginData.getConfig().contains("plugin.server.MOTD.icon")) {
                 return;
             }
-            File file = new File(p.getDataFolder() + "/serverIcon/" + pluginData.getConfig().getString("plugin.server.MOTD.icon") + ".png");
+            File file = new File(p.getDataFolder() + "/serverIcon/" + pluginData.getConfig().getString("plugin.server.MOTD.icon"));
             if (!file.exists()) {
                 return;
             }
             BufferedImage image = ImageIO.read(file);
-            if (image.getWidth() != 64 || !(image.getHeight() == 64)) {
+            if (image.getWidth() != 64 || image.getHeight() != 64) {
                 return;
             }
 

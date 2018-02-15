@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.Stranded.Permissions.hasPermission;
+import static com.Stranded.GettingFiles.getFiles;
+
 public class IslandTabComplete implements TabCompleter {
 
     private static List<String> ISLAND = new ArrayList<>();
@@ -78,8 +81,7 @@ public class IslandTabComplete implements TabCompleter {
             if (f.getType() == List.class) {
                 try {
                     ((List<String>) f.get(f)).clear();
-                } catch (IllegalAccessException e) {
-                    //this should just work
+                } catch (IllegalAccessException ignore) {
                 }
             }
         }
@@ -89,7 +91,8 @@ public class IslandTabComplete implements TabCompleter {
 
         String uuid = player.getUniqueId().toString();
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
+        Files config = getFiles("config.yml");
 
         for (CmdManager command : new Island(p).actions) {
             ISLAND.add(command.getName());
@@ -101,7 +104,7 @@ public class IslandTabComplete implements TabCompleter {
             }
         }
 
-        if (player.hasPermission("Stranded.deleteIsland")) {
+        if (hasPermission(player, "Stranded.islandDelete", false)) {
             ISLAND_DELETE.addAll(islands.getConfig().getConfigurationSection("island").getKeys(false));
         }
 
@@ -110,26 +113,26 @@ public class IslandTabComplete implements TabCompleter {
         }
         ISLAND_EDIT_ISLAND.addAll(Arrays.asList("enable", "disable", "rename"));
 
-        if (p.getConfig().contains("island." + uuid)) {
-            String island = p.getConfig().getString("island." + uuid);
+        if (config.getConfig().contains("island." + uuid)) {
+            String island = config.getConfig().getString("island." + uuid);
             if (islands.getConfig().getString("island." + island + ".owner").equals(uuid)) {
                 for (String tempUUID : islands.getConfig().getStringList("island." + island + ".members")) {
                     if (!tempUUID.equals(uuid)) {
-                        String playerName = PlayerUUID.getPlayerName(tempUUID, p);
+                        String playerName = PlayerUUID.getPlayerName(tempUUID);
                         ISLAND_EVICT.add(playerName);
                     }
                 }
             }
         }
 
-        if (p.getConfig().contains("island." + uuid)) {
-            String island = p.getConfig().getString("island." + uuid);
+        if (config.getConfig().contains("island." + uuid)) {
+            String island = config.getConfig().getString("island." + uuid);
             if (islands.getConfig().getString("island." + island + ".owner").equals(uuid)) {
                 for (Player pl : Bukkit.getOnlinePlayers()) {
                     ISLAND_INVITE.add(pl.getName());
                 }
                 for (String tempUUID : islands.getConfig().getStringList("island." + island + ".members")) {
-                    String playerName = PlayerUUID.getPlayerName(tempUUID, p);
+                    String playerName = PlayerUUID.getPlayerName(tempUUID);
                     ISLAND_INVITE.remove(playerName);
                 }
             }
@@ -139,9 +142,9 @@ public class IslandTabComplete implements TabCompleter {
             ISLAND_VISIT.addAll(islands.getConfig().getConfigurationSection("island").getKeys(false));
 
             for (Player online : Bukkit.getOnlinePlayers()) {
-                if (!p.getConfig().contains("island." + online.getName())) {
+                if (!config.getConfig().contains("island." + online.getName())) {
                     ISLAND_INVITE.add(online.getName());
-                } else if (!p.getConfig().getString("island." + online.getName()).equals(p.getConfig().getString("island." + player.getName()))) {
+                } else if (!config.getConfig().getString("island." + online.getName()).equals(config.getConfig().getString("island." + player.getName()))) {
                     ISLAND_INVITE.add(online.getName());
                 }
             }

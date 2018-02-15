@@ -20,7 +20,7 @@ public class TeleportEvent implements Listener {
     @EventHandler
     @SuppressWarnings("unused")
     public void teleportEvent(PlayerTeleportEvent e) {
-        Scoreboard.scores(p, e.getPlayer());
-        Bukkit.getScheduler().runTaskLater(p, () -> new PlayerHide(p), 1);
+        Scoreboard.scores(e.getPlayer());
+        Bukkit.getScheduler().runTaskLater(p, PlayerHide::new, 1);
     }
 }

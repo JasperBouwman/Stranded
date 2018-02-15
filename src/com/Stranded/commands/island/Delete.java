@@ -14,6 +14,10 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.Permissions.hasPermission;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Delete extends CmdManager {
     @Override
     public String getName() {
@@ -41,12 +45,13 @@ public class Delete extends CmdManager {
         if (args.length != 1) {
 
             if (args.length > 2) {
-                if (player.hasPermission("Stranded.deleteOtherIsland")) {
+                if (hasPermission(player, "Stranded.islandDelete")) {
 
-                    Files islands = new Files(p, "islands.yml");
+                    Files islands = getFiles("islands.yml");
+                    Files config = getFiles("config.yml");
                     if (islands.getConfig().contains("island." + args[1])) {
 
-                        int testWar = WarUtil.testIfIsInWar(p, args[1]);
+                        int testWar = WarUtil.testIfIsInWar(args[1]);
 
                         if (testWar == 1) {
                             player.sendMessage(ChatColor.RED + "You can't delete this island when this island is pending for a war");
@@ -57,14 +62,14 @@ public class Delete extends CmdManager {
                             return;
                         }
 
-                        FancyMessage fm = new FancyMessage();
-
-                        if (p.getConfig().contains("deleteIsland." + uuid)) {
-                            player.sendMessage("you can't delete this island while you already are deleting your own");
+                        if (config.getConfig().contains("deleteIsland." + uuid)) {
+                            player.sendMessage(ChatColor.RED + "You can't delete this island while you already are deleting your own");
                             return;
                         }
 
-                        if (!p.getConfig().contains("deleteOtherIsland." + uuid)) {
+                        FancyMessage fm = new FancyMessage();
+
+                        if (!config.getConfig().contains("deleteOtherIsland." + uuid)) {
 
                             fm.addText("Are you sure? Click ", Colors.GREEN);
                             fm.addText("here", Colors.DARK_GREEN);
@@ -77,9 +82,11 @@ public class Delete extends CmdManager {
 
                             int taskID = Bukkit.getScheduler().runTaskLater(p, () -> {
 
+                                Files finalConfig = getFiles("config.yml");
+
                                 player.sendMessage(ChatColor.RED + "Your island delete has been expired");
-                                p.getConfig().set("deleteOtherIsland." + uuid, null);
-                                p.saveConfig();
+                                finalConfig.getConfig().set("deleteOtherIsland." + uuid, null);
+                                finalConfig.saveConfig();
 
                                 Main.reloadHolds -= 1;
                                 if (Main.reloadPending && Main.reloadHolds == 0) {
@@ -88,10 +95,10 @@ public class Delete extends CmdManager {
 
                             }, 600).getTaskId();
 
-                            p.getConfig().set("deleteOtherIsland." + uuid + ".taskID", taskID);
-                            p.getConfig().set("deleteOtherIsland." + uuid + ".island", args[1]);
-                            p.getConfig().set("deleteOtherIsland." + uuid + ".reason", Joiner.on(" ").join(Arrays.asList(args).subList(3, args.length)));
-                            p.saveConfig();
+                            config.getConfig().set("deleteOtherIsland." + uuid + ".taskID", taskID);
+                            config.getConfig().set("deleteOtherIsland." + uuid + ".island", args[1]);
+                            config.getConfig().set("deleteOtherIsland." + uuid + ".reason", Joiner.on(" ").join(Arrays.asList(args).subList(3, args.length)));
+                            config.saveConfig();
 
                         } else {
                             fm.addText("To confirm click ", Colors.GREEN);
@@ -101,31 +108,31 @@ public class Delete extends CmdManager {
                             fm.addText(" to delete the island" + args[0], Colors.GREEN);
                             fm.sendMessage(player);
                         }
+                        return;
 
                     } else {
-                        player.sendMessage("This island doesn't exist");
+                        player.sendMessage(ChatColor.RED + "This island doesn't exist");
                         return;
                     }
                 }
-                return;
             }
-
-            player.sendMessage(ChatColor.RED + "Usage: /island delete");
+            sendWrongUse(player, "/island delete");
             return;
         }
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage(ChatColor.RED + "You can only use this when you are in an island and the owner of that island");
             return;
         }
-        if (!islands.getConfig().getString("island." + p.getConfig().getString("island." + uuid) + ".owner").equals(uuid)) {
+        if (!islands.getConfig().getString("island." + config.getConfig().getString("island." + uuid) + ".owner").equals(uuid)) {
             player.sendMessage(ChatColor.RED + "You are not the owner of this island, so you can't delete this island");
             return;
         }
 
-        int testWar = WarUtil.testIfIsInWar(p, player);
+        int testWar = WarUtil.testIfIsInWar(player);
 
         if (testWar == 1) {
             player.sendMessage(ChatColor.RED + "You can't delete your island when your island is pending for a war");
@@ -138,12 +145,12 @@ public class Delete extends CmdManager {
 
         FancyMessage fm = new FancyMessage();
 
-        if (p.getConfig().contains("deleteOtherIsland." + uuid)) {
-            player.sendMessage("you can't delete your island while you already are deleting someones island");
+        if (config.getConfig().contains("deleteOtherIsland." + uuid)) {
+            player.sendMessage(ChatColor.RED + "You can't delete your island while you already are deleting an island");
             return;
         }
 
-        if (!p.getConfig().contains("deleteIsland." + uuid)) {
+        if (!config.getConfig().contains("deleteIsland." + uuid)) {
 
             fm.addText("Are you sure? Click ", Colors.GREEN);
             fm.addText("here", Colors.DARK_GREEN);
@@ -157,8 +164,9 @@ public class Delete extends CmdManager {
             int taskID = Bukkit.getScheduler().runTaskLater(p, () -> {
 
                 player.sendMessage(ChatColor.RED + "Your island delete has been expired");
-                p.getConfig().set("deleteIsland." + player.getName(), null);
-                p.saveConfig();
+                Files finalConfig = getFiles("config.yml");
+                finalConfig.getConfig().set("deleteIsland." + player.getName(), null);
+                finalConfig.saveConfig();
 
                 Main.reloadHolds -= 1;
                 if (Main.reloadPending && Main.reloadHolds == 0) {
@@ -167,8 +175,8 @@ public class Delete extends CmdManager {
 
             }, 600).getTaskId();
 
-            p.getConfig().set("deleteIsland." + uuid, taskID);
-            p.saveConfig();
+            config.getConfig().set("deleteIsland." + uuid, taskID);
+            config.saveConfig();
 
         } else {
             fm.addText("To confirm click ", Colors.GREEN);
@@ -178,6 +186,5 @@ public class Delete extends CmdManager {
             fm.addText(" to delete your island", Colors.GREEN);
             fm.sendMessage(player);
         }
-
     }
 }

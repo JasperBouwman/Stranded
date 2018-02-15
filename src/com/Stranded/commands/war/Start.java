@@ -9,10 +9,12 @@ import com.Stranded.fancyMassage.Colors;
 import com.Stranded.fancyMassage.FancyMessage;
 import com.Stranded.playerUUID.PlayerUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Set;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Start extends CmdManager {
 
@@ -32,11 +34,11 @@ public class Start extends CmdManager {
         fm.addText(player.getName() + " has started a war in the theme " + theme + " they have to answer in " + pendingTime + " seconds to answer,", Colors.AQUA);
         fm.addText("these players will join this battle:\n", Colors.AQUA);
 
-        Files playerData = new Files(p, "playerData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
+        Files playerData = getFiles("playerData.yml");
+        Files pluginData = getFiles("pluginData.yml");
 
         for (String user : tempUsers) {
-            fm.addText(PlayerUUID.getPlayerName(user, p) + " ", Colors.RED);
+            fm.addText(PlayerUUID.getPlayerName(user) + " ", Colors.RED);
 
             long walk = playerData.getConfig().getLong("walk." + user) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
             long block = playerData.getConfig().getLong("BlockBreak." + user) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
@@ -64,15 +66,16 @@ public class Start extends CmdManager {
         //war start <war theme> [playerNames...]
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage("you aren't in an island");
             return;
         }
 
-        Files warData = new Files(p, "warData.yml");
-        Files warIslands = new Files(p, "warIslands.yml");
-        Files islands = new Files(p, "islands.yml");
+        Files warData = getFiles("warData.yml");
+        Files warIslands = getFiles("warIslands.yml");
+        Files islands = getFiles("islands.yml");
 
         Set<String> set0 = warIslands.getConfig().getConfigurationSection("warIslands.island").getKeys(false);
         if (set0.size() == 0) {
@@ -82,9 +85,9 @@ public class Start extends CmdManager {
 
         long pendingTime = 30;
 
-        String islandName1 = p.getConfig().getString("island." + uuid);
+        String islandName1 = config.getConfig().getString("island." + uuid);
 
-        if (WarUtil.testIfIsInWarWithComments(p, player))
+        if (WarUtil.testIfIsInWarWithComments(player))
             return;
 
         if ((args.length == 3 && !args[2].equalsIgnoreCase(player.getName())) || args.length > 3) {
@@ -111,10 +114,10 @@ public class Start extends CmdManager {
 
 
                 //get player uuid
-                String playerUUID = PlayerUUID.getPlayerUUID(args[i], p);
+                String playerUUID = PlayerUUID.getPlayerUUID(args[i]);
                 //test if player is found
                 if (playerUUID == null) {
-                    ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[i], p);
+                    ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[i]);
                     if (tempPlayers.size() > 1) {
                         //more players found with name
                         player.sendMessage("there are more players found with the " + args[i]);
@@ -133,9 +136,9 @@ public class Start extends CmdManager {
                     return;
                 }
                 //get final player name (case sensitive)
-                String playerName = PlayerUUID.getPlayerName(playerUUID, p);
+                String playerName = PlayerUUID.getPlayerName(playerUUID);
                 //get player
-                Player tmpPlayer = PlayerUUID.getPlayerExact(playerName, p);
+                Player tmpPlayer = PlayerUUID.getPlayerExact(playerName);
 
                 if (!tempUsers.contains(playerUUID)) {
                     if (!island1MemberList.contains(playerUUID)) {
@@ -148,7 +151,7 @@ public class Start extends CmdManager {
                         tempUsers.add(playerUUID);
                     }
                 } else {
-                    player.sendMessage(playerName + " is already mentioned");
+                    player.sendMessage(playerName + " is already mentioned" + ChatColor.RED);
                     br = true;
                 }
             }
@@ -208,17 +211,17 @@ public class Start extends CmdManager {
                 }
             }
             if (!br) {
-                player.sendMessage("there is no island in this theme found that you will fit in, choose a different theme");
+                player.sendMessage(ChatColor.RED + "There are no islands in this theme found that you will fit in, choose a different theme");
                 return;
             }
 
-            player.sendMessage("all the people have now to accept this and the war will be send to the server");
+            player.sendMessage("All people have to accept this and the war will be send to the server");
 
 //            ArrayList<String> pendingList = (ArrayList<String>) warData.getConfig().getStringList("war.pending.memberPendingList");
 //            pendingList.add(islandName1);
 //            warData.getConfig().set("war.pending.memberPendingList", pendingList);
 
-            int pendingID = Bukkit.getScheduler().runTaskLater(p, new island1askPlayers(p, islandName1), pendingTime * 20).getTaskId();
+            int pendingID = Bukkit.getScheduler().runTaskLater(p, new island1askPlayers(islandName1), pendingTime * 20).getTaskId();
 
             warData.getConfig().set("war.pending.island1." + islandName1 + ".pendingID", pendingID);
             for (String user : tempUsers) {

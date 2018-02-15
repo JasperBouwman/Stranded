@@ -2,10 +2,13 @@ package com.Stranded.commands.war.runnables;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
+import com.Stranded.commands.Chat;
 import com.Stranded.commands.stranded.Reload;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import java.util.UUID;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class island1AcceptIsland2 implements Runnable {
 
@@ -19,7 +22,7 @@ public class island1AcceptIsland2 implements Runnable {
 
     @Override
     public void run() {
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
 //        ArrayList<String> list = (ArrayList<String>) warData.getConfig().getStringList("war.pending.islandPendingListStartWar");
 //
@@ -30,7 +33,7 @@ public class island1AcceptIsland2 implements Runnable {
 
         for (String players : warData.getConfig().getConfigurationSection("war.pending.island2." + island + ".players").getKeys(false)) {
             if (Bukkit.getPlayer(UUID.fromString(players)) != null) {
-                Bukkit.getPlayer(UUID.fromString(players)).sendMessage("there was no island that wanted war");
+                Bukkit.getPlayer(UUID.fromString(players)).sendMessage("there was no island that wanted war" + ChatColor.ITALIC + ChatColor.YELLOW);
             }
         }
         warData.getConfig().set("war.pending.island2." + island, null);

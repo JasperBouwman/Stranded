@@ -3,6 +3,7 @@ package com.Stranded.towers;
 import com.Stranded.Files;
 import com.Stranded.Main;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -11,9 +12,12 @@ import org.bukkit.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.Stranded.towers.RemoveTower.removeIslandTower;
 import static com.Stranded.towers.RemoveTower.removeWarTower;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class TowerManager implements Runnable {
 
@@ -60,7 +64,6 @@ public class TowerManager implements Runnable {
                 }
             }
         }
-
         return mobs;
     }
 
@@ -82,7 +85,7 @@ public class TowerManager implements Runnable {
                 // if tower doesn't has an sign the location will be
                 // removed, and this will get the tower type
                 if (!blockNorth.getType().equals(Material.WALL_SIGN) && !blockSouth.getType().equals(Material.WALL_SIGN)) {
-                    removeIslandTower(p, islands, island, towerID);
+                    removeIslandTower(islands, island, towerID);
                     return;
                 }
 
@@ -91,22 +94,63 @@ public class TowerManager implements Runnable {
                 try {
                     signNorth = (Sign) blockNorth.getState();
                 } catch (ClassCastException cce) {
-                    removeIslandTower(p, islands, island, towerID);
+                    removeIslandTower(islands, island, towerID);
                     return;
                 }
                 if (!signNorth.getData().toString().equals("WALL_SIGN(2) facing NORTH")) {
-                    removeIslandTower(p, islands, island, towerID);
+                    removeIslandTower(islands, island, towerID);
                     return;
 
                 }
                 try {
                     signSouth = (Sign) blockSouth.getState();
                 } catch (ClassCastException cce) {
-                    removeIslandTower(p, islands, island, towerID);
+                    removeIslandTower(islands, island, towerID);
                     return;
                 }
                 if (!signSouth.getData().toString().equals("WALL_SIGN(3) facing SOUTH")) {
-                    removeIslandTower(p, islands, island, towerID);
+                    removeIslandTower(islands, island, towerID);
+                    return;
+                }
+
+
+                String effect = islands.getConfig().getString("island." + island + ".towers." + towerID + ".type");
+
+                Files config = getFiles("config.yml");
+
+                if (effect.trim().equals("Tp")) {
+
+                    Set<String> tmpList = islands.getConfig().getConfigurationSection("island." + island + ".towers." + towerID + ".players").getKeys(false);
+
+                    for (String playerUUID : tmpList) {
+
+                        Player tmpPlayer = Bukkit.getPlayer(UUID.fromString(playerUUID));
+                        if (tmpPlayer == null) {
+                            continue;
+                        }
+                        if (getNearbyPlayers(l).contains(tmpPlayer)) {
+                            if (config.getConfig().getString("island." + playerUUID).equals(island)) {
+                                long timeout = islands.getConfig().getLong("island." + island + ".towers." + towerID + ".players." + playerUUID + ".timeout");
+                                if (timeout == 1) {
+                                    tmpPlayer.sendMessage(ChatColor.BLUE + "TeleportTower ready");//todo add command
+                                }
+                                if (timeout != 0) {
+                                    islands.getConfig().set("island." + island + ".towers." + towerID + ".players." + playerUUID + ".timeout", timeout - 1);
+                                }
+                            }
+                        }
+                    }
+
+                    for (Player pl : getNearbyPlayers(l)) {
+                        if (config.getConfig().getString("island." + pl.getUniqueId().toString()).equals(island)) {
+                            if (!tmpList.contains(pl.getUniqueId().toString())) {
+                                islands.getConfig().set("island." + island + ".towers." + towerID + ".players." + pl.getUniqueId().toString() + ".timeout",
+                                        islands.getConfig().getLong("island." + island + ".towers." + towerID + ".timer"));
+                            }
+                        }
+                    }
+
+                    islands.saveConfig();
                     return;
                 }
 
@@ -114,37 +158,7 @@ public class TowerManager implements Runnable {
                 int timeout = islands.getConfig().getInt("island." + island + ".towers." + towerID + ".timeout");
                 // if the timeout is 1 the tower will give an effect
                 if (timeout == 1) {
-                    // reset timeout
 
-                    if (signNorth.getLine(1).startsWith("Tnt")) {
-                        if (signNorth.getLine(1).endsWith("2")) {
-                            int timer = 40;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("3")) {
-                            int timer = 36;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("4")) {
-                            int timer = 33;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("5")) {
-                            int timer = 30;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("6")) {
-                            int timer = 27;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("7")) {
-                            int timer = 24;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("8")) {
-                            int timer = 22;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        } else if (signNorth.getLine(1).endsWith("MAX")) {
-                            int timer = 20;
-                            islands.getConfig().set("island." + island + ".towers." + towerID + ".timer", timer);
-                        }
-
-                        islands.saveConfig();
-                    }
                     //reset timeout
                     islands.getConfig().set("island." + island + ".towers." + towerID + ".timeout",
                             islands.getConfig().getInt("island." + island + ".towers." + towerID + ".timer"));
@@ -156,68 +170,52 @@ public class TowerManager implements Runnable {
                     Entity closestEnemy = null;
                     // get the closest player
                     for (Entity e : list) {
-                        if (!p.getConfig().contains("island." + e.getUniqueId().toString())) {
-
-                            if (closestFriendly == null) {
-
-                                closestFriendly = e;
-                            }
+                        if (!config.getConfig().contains("island." + e.getUniqueId().toString())) {
                             if (closestEnemy == null) {
                                 closestEnemy = e;
                             }
                             if (l.distance(e.getLocation()) <= l.distance(closestEnemy.getLocation())) {
                                 closestEnemy = e;
                             }
-
-                            if (l.distance(e.getLocation()) <= l.distance(closestFriendly.getLocation())) {
-                                closestFriendly = e;
-                            }
                             continue;
                         }
 
                         if (closestFriendly == null) {
-                            if (p.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                            if (config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
                                 closestFriendly = e;
                             }
                         }
                         if (closestEnemy == null) {
-                            if (!p.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                            if (!config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
                                 closestEnemy = e;
                             }
                         }
                         if (closestEnemy != null) {
                             if (l.distance(e.getLocation()) <= l.distance(closestEnemy.getLocation())
-                                    && !p.getConfig().getString("island." + e.getUniqueId().toString())
+                                    && !config.getConfig().getString("island." + e.getUniqueId().toString())
                                     .equals(island)) {
                                 closestEnemy = e;
                             }
                         }
                         if (closestFriendly != null) {
                             if (l.distance(e.getLocation()) <= l.distance(closestFriendly.getLocation())
-                                    && p.getConfig().getString("island." + e.getUniqueId().toString())
+                                    && config.getConfig().getString("island." + e.getUniqueId().toString())
                                     .equals(island)) {
                                 closestFriendly = e;
                             }
                         }
-
                     }
                     // is there is an closest player:
                     if (closestEnemy != null || closestFriendly != null) {
 
                         TowerEffectManager tem = new TowerEffectManager(p);
-                        // get tower type
-                        String effect = (signNorth.getLine(1).replace(" lvl: ", "").replace("MAX", ""));
-                        for (int i = 1; i <= 9; i++) {
-                            StringBuilder str = new StringBuilder();
 
-                            effect = effect.replace(str.append(i).toString(), "");
-                        }
-                        // get tower lvl
+                        //towersData
                         String lvl = (signNorth.getLine(1).replace("Speed lvl: ", "")
                                 .replace("Slow lvl: ", "").replace("Regen lvl: ", "")
                                 .replace("Haste lvl: ", "").replace("Wither lvl: ", "")
                                 .replace("Hunger lvl: ", "").replace("Tnt lvl: ", "")
-                                .replace("Arrow lvl: ", ""));
+                                .replace("Arrow lvl: ", "").replace("Tp lvl: ", ""));
                         int lvlInt = Tower.MAX_UPGRADE;
                         try {
                             lvlInt = Integer.parseInt(lvl);
@@ -243,6 +241,9 @@ public class TowerManager implements Runnable {
     private void TowerLoopWar(String warID, String side, Files warData) {
         // if the island doesn't own any towers this island will be
         // skipped
+
+        Files config = getFiles("config.yml");
+
         if (warData.getConfig().contains("war.war." + warID + ".towers." + side)) {
             // get all towers
             for (String towerID : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers." + side).getKeys(false)) {
@@ -259,7 +260,7 @@ public class TowerManager implements Runnable {
                 // if tower doesn't has an sign the location will be
                 // removed, and this will get the tower type
                 if (!blockNorth.getType().equals(Material.WALL_SIGN) && !blockSouth.getType().equals(Material.WALL_SIGN)) {
-                    removeWarTower(p, warData, warID, towerID, side, "full");
+                    removeWarTower(warData, warID, towerID, side);
                     return;
                 }
 
@@ -268,146 +269,131 @@ public class TowerManager implements Runnable {
                 try {
                     signNorth = (Sign) blockNorth.getState();
                 } catch (ClassCastException cce) {
-                    removeWarTower(p, warData, warID, towerID, side, "full");
+                    removeWarTower(warData, warID, towerID, side);
                     return;
                 }
                 if (!signNorth.getData().toString().equals("WALL_SIGN(2) facing NORTH")) {
-                    removeWarTower(p, warData, warID, towerID, side, "full");
+                    removeWarTower(warData, warID, towerID, side);
                     return;
-
                 }
                 try {
                     signSouth = (Sign) blockSouth.getState();
                 } catch (ClassCastException cce) {
-                    removeWarTower(p, warData, warID, towerID, side, "full");
+                    removeWarTower(warData, warID, towerID, side);
                     return;
                 }
                 if (!signSouth.getData().toString().equals("WALL_SIGN(3) facing SOUTH")) {
-                    removeWarTower(p, warData, warID, towerID, side, "full");
+                    removeWarTower(warData, warID, towerID, side);
                     return;
 
                 }
 
+                String island = config.getConfig().getString("island." + warData.getConfig().getString("war.war." + warID + ".towers." + side + "." + towerID + ".owner"));
+                String effect = warData.getConfig().getString("war.war." + warID + ".towers." + side + "." + towerID + ".type");
 
-            // this will get the timeout
-            int timeout = warData.getConfig().getInt("war.war." + warID + ".towers." + side + "." + towerID + ".timeout");
-            // if the timeout is 1 the tower will give an
-            // effect
-            if (timeout == 1) {
-                // reset timeout
+                if (effect.trim().equals("Tp")) {
 
-                if (signNorth.getLine(1).startsWith("Tnt")) {
-                    if (signNorth.getLine(1).endsWith("2")) {
-                        int timer = 40;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("3")) {
-                        int timer = 36;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("4")) {
-                        int timer = 33;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("5")) {
-                        int timer = 30;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("6")) {
-                        int timer = 27;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("7")) {
-                        int timer = 24;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("8")) {
-                        int timer = 22;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
-                    } else if (signNorth.getLine(1).endsWith("MAX")) {
-                        int timer = 20;
-                        warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timer", timer);
+                    for (String playerUUID : warData.getConfig().getStringList("war.war." + warID + ".towers." + side + "." + towerID + ".players")) {
+
+                        Player tmpPlayer = Bukkit.getPlayer(UUID.fromString(playerUUID));
+                        if (tmpPlayer == null) {
+                            continue;
+                        }
+                        if (getNearbyPlayers(l).contains(tmpPlayer)) {
+                            if (config.getConfig().getString("island." + playerUUID).equals(island)) {
+                                long timeout = warData.getConfig().getLong("war.war." + warID + ".towers." + side + "." + towerID + ".players." + playerUUID + ".timeout");
+                                if (timeout == 1) {
+                                    tmpPlayer.sendMessage("you can teleport now");//todo set colors
+                                }
+                                if (timeout != 0) {
+                                    warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".players." + playerUUID + ".timeout", timeout - 1);
+                                }
+                            }
+                        }
                     }
                     warData.saveConfig();
+                    return;
                 }
 
-                warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timeout",
-                        warData.getConfig().getInt("war.war." + warID + ".towers." + side + "." + towerID + ".timer"));
+                // this will get the timeout
+                int timeout = warData.getConfig().getInt("war.war." + warID + ".towers." + side + "." + towerID + ".timeout");
+                // if the timeout is 1 the tower will give an
+                // effect
+                if (timeout == 1) {
 
-                String island = p.getConfig().getString(
-                        "island." + warData.getConfig().getStringList("war.war." + warID + "." + side + ".players").get(0));
+                    warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timeout",
+                            warData.getConfig().getInt("war.war." + warID + ".towers." + side + "." + towerID + ".timer"));
 
-                // get all nearby players
-                List<Player> list = getNearbyPlayers(l);
-                // make some players
-                Player closestFriendly = null;
-                Player closestEnemy = null;
-                // get the closest player
-                for (Player e : list) {
-                    if (!p.getConfig().contains("island." + e.getUniqueId().toString())) {
-                        continue;
-                    }
+//                String island = config.getConfig().getString(
+//                        "island." + warData.getConfig().getStringList("war.war." + warID + "." + side + ".players").get(0));
 
-                    if (closestFriendly == null) {
-                        if (p.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
-                            closestFriendly = e;
+
+                    // get all nearby players
+                    List<Player> list = getNearbyPlayers(l);
+                    // make some players
+                    Player closestFriendly = null;
+                    Player closestEnemy = null;
+                    // get the closest player
+                    for (Player e : list) {
+                        if (!config.getConfig().contains("island." + e.getUniqueId().toString())) {
+                            continue;
+                        }
+                        if (closestFriendly == null) {
+                            if (config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                                closestFriendly = e;
+                            }
+                        }
+                        if (closestEnemy == null) {
+                            if (!config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                                closestEnemy = e;
+                            }
+                        }
+                        if (closestEnemy != null) {
+                            if (l.distance(e.getLocation()) <= l.distance(closestEnemy.getLocation())
+                                    && !config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                                closestEnemy = e;
+                            }
+                        }
+                        if (closestFriendly != null) {
+                            if (l.distance(e.getLocation()) <= l.distance(closestFriendly.getLocation())
+                                    && config.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
+                                closestFriendly = e;
+                            }
                         }
                     }
-                    if (closestEnemy == null) {
-                        if (!p.getConfig().getString("island." + e.getUniqueId().toString()).equals(island)) {
-                            closestEnemy = e;
+                    // is there is an closest player:
+                    if (closestEnemy != null || closestFriendly != null) {
+
+                        TowerEffectManager tem = new TowerEffectManager(p);
+
+                        //towersData
+                        String lvl = (signNorth.getLine(1).replace("Speed lvl: ", "")
+                                .replace("Slow lvl: ", "").replace("Regen lvl: ", "")
+                                .replace("Haste lvl: ", "").replace("Wither lvl: ", "")
+                                .replace("Hunger lvl: ", "").replace("Tnt lvl: ", "")
+                                .replace("Arrow lvl: ", "").replace("Tp lvl: ", ""));
+
+                        int lvlInt = Tower.MAX_UPGRADE;
+                        try {
+                            lvlInt = Integer.parseInt(lvl);
+                        } catch (NumberFormatException ignore) {
                         }
-                    }
-                    if (closestEnemy != null) {
-                        if (l.distance(e.getLocation()) <= l.distance(closestEnemy.getLocation())
-                                && !p.getConfig().getString("island." + e.getUniqueId().toString())
-                                .equals(island)) {
-                            closestEnemy = e;
-                        }
-                    }
-                    if (closestFriendly != null) {
-                        if (l.distance(e.getLocation()) <= l.distance(closestFriendly.getLocation())
-                                && p.getConfig().getString("island." + e.getUniqueId().toString())
-                                .equals(island)) {
-                            closestFriendly = e;
-                        }
+
+                        // setup the effects
+                        tem.Effects(effect, lvlInt, closestEnemy, closestFriendly, l);
+
                     }
 
+                } else {
+                    // remove a second from the timeout
+                    warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timeout",
+                            timeout - 1);
                 }
-                // is there is an closest player:
-                if (closestEnemy != null || closestFriendly != null) {
-
-                    TowerEffectManager tem = new TowerEffectManager(p);
-                    // get tower type
-                    String effect = (signNorth.getLine(1).replace(" lvl: ", "").replace("MAX", ""));
-                    for (int i = 1; i <= 9; i++) {
-                        StringBuilder str = new StringBuilder();
-
-                        effect = effect.replace(str.append(i).toString(), "");
-                    }
-                    // get tower lvl
-                    String lvl = (signNorth.getLine(1).replace("Speed lvl: ", "")
-                            .replace("Slow lvl: ", "").replace("Regen lvl: ", "")
-                            .replace("Haste lvl: ", "").replace("Wither lvl: ", "")
-                            .replace("Hunger lvl: ", "").replace("Tnt lvl: ", "")
-                            .replace("Arrow lvl: ", ""));
-
-                    int lvlInt = Tower.MAX_UPGRADE;
-                    try {
-                        lvlInt = Integer.parseInt(lvl);
-                    } catch (NumberFormatException ignore) {
-                    }
-
-                    // setup the effects
-                    tem.Effects(effect, lvlInt, closestEnemy, closestFriendly, l);
-
-                }
-
-            } else {
-                // remove a second from the timeout
-                warData.getConfig().set("war.war." + warID + ".towers." + side + "." + towerID + ".timeout",
-                        warData.getConfig().getInt("war.war." + warID + ".towers." + side + "." + towerID + ".timeout")
-                                - 1);
+                warData.saveConfig();
             }
-            warData.saveConfig();
         }
-    }
 
-}
+    }
 
     public void Tower() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(p, this, 20, 20);
@@ -415,8 +401,8 @@ public class TowerManager implements Runnable {
 
     @Override
     public void run() {
-        Files islands = new Files(p, "islands.yml");
-        Files warData = new Files(p, "warData.yml");
+        Files islands = getFiles("islands.yml");
+        Files warData = getFiles("warData.yml");
 
         if (!islands.getConfig().contains("island")) {
             return;
@@ -429,8 +415,8 @@ public class TowerManager implements Runnable {
 
         //get al wars
         for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
-            TowerLoopWar(warID, "red", warData);
             TowerLoopWar(warID, "blue", warData);
+            TowerLoopWar(warID, "red", warData);
         }
     }
 }

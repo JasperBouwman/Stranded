@@ -11,15 +11,18 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Create extends CmdManager {
 
-    private static void islandDataCheck(Main p) {
-        Files f = new Files(p, "islands.yml");
-        if (!f.getConfig().contains("islandData.default")) {
+    private static void islandDataCheck() {
+        Files islands = getFiles("islands.yml");
+        if (!islands.getConfig().contains("islandData.default")) {
             int l = -200000;
-            f.getConfig().set("islandData.default.X", l);
-            f.getConfig().set("islandData.default.Z", l);
-            f.saveConfig();
+            islands.getConfig().set("islandData.default.X", l);
+            islands.getConfig().set("islandData.default.Z", l);
+            islands.saveConfig();
         }
     }
 
@@ -34,12 +37,12 @@ public class Create extends CmdManager {
     }
 
     private void sendIslandTypes(Player player) {
-        Files f = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
         StringBuilder is = new StringBuilder().append(ChatColor.AQUA);
         is.append(ChatColor.GREEN).append("Available island types: ");
         int color = 0;
-        for (String s : f.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
-            if (f.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled")) {
+        for (String s : islands.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
+            if (islands.getConfig().getBoolean("islandData.islandTypes." + s + ".enabled")) {
                 if (color == 0) {
                     color++;
                     is.append(ChatColor.BLUE);
@@ -47,7 +50,7 @@ public class Create extends CmdManager {
                     color = 0;
                     is.append(ChatColor.DARK_BLUE);
                 }
-                is.append(f.getConfig().getString("islandData.islandTypes." + s + ".name"));
+                is.append(islands.getConfig().getString("islandData.islandTypes." + s + ".name"));
                 is.append(" ");
             }
         }
@@ -60,16 +63,17 @@ public class Create extends CmdManager {
         //island create <name> <islandType>
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
         if (Bukkit.getWorld("Islands") != null) {
-            Files islands = new Files(p, "islands.yml");
+            Files islands = getFiles("islands.yml");
             if (islands.getConfig().contains("islandData.islandTypesCopied")) {
                 if (!islands.getConfig().getBoolean("islandData.islandTypesCopied")) {
-                    player.sendMessage(ChatColor.DARK_RED + "Please wait, default islands are not generated yet");
+                    player.sendMessage(ChatColor.DARK_RED + "Please wait, default Islands are not generated yet");
                     return;
                 }
             } else {
-                player.sendMessage(ChatColor.DARK_RED + "Please wait, default islands are not generated yet");
+                player.sendMessage(ChatColor.DARK_RED + "Please wait, default Islands are not generated yet");
                 return;
             }
         } else {
@@ -90,15 +94,19 @@ public class Create extends CmdManager {
                 player.sendMessage(ChatColor.RED + "You can't use a special character in your island name");
                 return;
             }
+            if (name.equalsIgnoreCase("remove")) {
+                player.sendMessage(ChatColor.RED + "Please do not use this name");
+                return;
+            }
 
-            if (p.getConfig().contains("island." + player.getName())) {
+            if (config.getConfig().contains("island." + player.getName())) {
                 player.sendMessage(ChatColor.RED + "You are already in an island");
                 return;
             }
 
-            islandDataCheck(p);
+            islandDataCheck();
 
-            Files islands = new Files(p, "islands.yml");
+            Files islands = getFiles("islands.yml");
 
             ArrayList<String> list = new ArrayList<>();
 
@@ -140,7 +148,7 @@ public class Create extends CmdManager {
             islands.getConfig().set("island." + name + ".nexusLvl", 1);
             islands.getConfig().set("island." + name + ".nexusHealth", 20);
 
-            p.getConfig().set("island." + uuid, name);
+            config.getConfig().set("island." + uuid, name);
 
             ArrayList<String> members = new ArrayList<>();
             members.add(uuid);
@@ -148,7 +156,7 @@ public class Create extends CmdManager {
 
             player.sendMessage(ChatColor.GREEN + "Your island is being generated");
             //island generation
-            IslandGeneration.generate(l, p, islandType);
+            IslandGeneration.generate(l, islandType);
 
             islands.getConfig().set("island." + name + ".UUID", IslandGeneration.UUID.toString());
 
@@ -156,7 +164,7 @@ public class Create extends CmdManager {
 
             player.teleport(IslandGeneration.nexusLocation);
             player.setBedSpawnLocation(IslandGeneration.nexusLocation, true);
-            com.Stranded.Scoreboard.scores(p, player);
+            com.Stranded.Scoreboard.scores(player);
 
             islands.getConfig().set("island." + name + ".home", IslandGeneration.nexusLocation);
 
@@ -172,11 +180,11 @@ public class Create extends CmdManager {
 
 
             islands.saveConfig();
-            p.saveConfig();
+            config.saveConfig();
 
 
         } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island create <name> <island>");
+            sendWrongUse(player, new String[] {"/island create <name> <island>", "/island create "});
         }
     }
 }

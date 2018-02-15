@@ -1,5 +1,6 @@
 package com.Stranded.commands.warIsland.edit;
 
+import static com.Stranded.GettingFiles.getFiles;
 import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
@@ -34,7 +35,7 @@ public class RedSpawn extends CmdManager {
     public void run(String[] args, Player player) {
         //warIsland edit <theme> <war island ID> blueSpawn
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         if (args.length == 4) {
 
@@ -99,12 +100,12 @@ public class RedSpawn extends CmdManager {
 
             if (blueVillager == null) {
                 Location blueSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.blue");
-                blueVillager = spawnNexus(blueSpawn, p);
+                blueVillager = spawnNexus(blueSpawn);
                 warIslands.getConfig().set("warIslands.island." + theme + "." + warIslandID + ".nexus.blue", blueVillager.getUniqueId().toString());
             }
             if (redVillager == null) {
                 Location redSpawn = (Location) warIslands.getConfig().get("warIslands.island." + theme + "." + warIslandID + ".spawn.red");
-                redVillager = spawnNexus(redSpawn, p);
+                redVillager = spawnNexus(redSpawn);
                 warIslands.getConfig().set("warIslands.island." + theme + "." + warIslandID + ".nexus.red", redVillager.getUniqueId().toString());
             }
             if (armorStand == null) {
@@ -156,14 +157,15 @@ public class RedSpawn extends CmdManager {
 
     }
 
-    static Villager spawnNexus(Location l, Main p) {
+    static Villager spawnNexus(Location l) {
 
         Villager v = l.getWorld().spawn(l, Villager.class);
+        Files config = getFiles("config.yml");
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
         list.add(v.getUniqueId().toString());
-        p.getConfig().set("nexus.uuid", list);
-        p.saveConfig();
+        config.getConfig().set("nexus.uuid", list);
+        config.saveConfig();
 
         v.setCustomNameVisible(true);
         v.setProfession(Villager.Profession.NITWIT);

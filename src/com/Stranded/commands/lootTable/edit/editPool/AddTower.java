@@ -1,5 +1,6 @@
 package com.Stranded.commands.lootTable.edit.editPool;
 
+import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
 import com.Stranded.lootTable.LootTable;
 import org.bukkit.entity.Player;
@@ -62,6 +63,10 @@ public class AddTower extends CmdManager {
                 }
 
 
+                if (Main.containsSpecialCharacter(args[5])) {
+                    player.sendMessage("can not contains any special characters");
+                    return;
+                }
 
                 boolean item = addTower(lootTable, poolName, args[5], args[6], chanceMax, chanceMin, chance, amountMax, amountMin, amountChance, levelMax, levelMin, levelChance);
                 if (item) {
@@ -124,7 +129,9 @@ public class AddTower extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
+                    case "lower":
                         levelChance = s[2].toLowerCase();
                         break;
                     default:
@@ -156,7 +163,9 @@ public class AddTower extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
+                    case "lower":
                         amountChance = s[2].toLowerCase();
                         break;
                     default:
@@ -188,7 +197,9 @@ public class AddTower extends CmdManager {
                 switch (s[2].toLowerCase()) {
                     case "equal":
                     case "high":
+                    case "higher":
                     case "low":
+                    case "lower":
                         chance = s[2].toLowerCase();
                         break;
                     default:

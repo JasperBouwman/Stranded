@@ -1,12 +1,12 @@
-package com.Stranded.commands.warIsland.edit;
+package com.Stranded.commands.lootTable.edit.editPool.editRolls;
 
 import com.Stranded.commands.CmdManager;
 import org.bukkit.entity.Player;
 
-public class Pos2 extends CmdManager {
+public class Min extends CmdManager {
     @Override
     public String getName() {
-        return "pos2";
+        return "min";
     }
 
     @Override

@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Transfer extends CmdManager {
 
     @Override
@@ -29,19 +32,20 @@ public class Transfer extends CmdManager {
         //island transfer <player name>
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + uuid)) {
+        if (!config.getConfig().contains("island." + uuid)) {
             player.sendMessage(ChatColor.RED + "You must own an island to to transfer your island to another one");
             return;
         }
 
         if (args.length == 2) {
 
-            Player newOwner = PlayerUUID.getPlayerExact(args[1], p);
+            Player newOwner = PlayerUUID.getPlayerExact(args[1]);
             String newOwnerUUID = "";
 
             if (newOwner == null) {
-                ArrayList<Player> list = PlayerUUID.getGlobalPlayers(args[1], p);
+                ArrayList<Player> list = PlayerUUID.getGlobalPlayers(args[1]);
                 if (list.size() == 0) {
                     player.sendMessage(ChatColor.RED + "There is no player found with the name " + args[1]);
                     return;
@@ -50,13 +54,13 @@ public class Transfer extends CmdManager {
                     newOwner = list.get(0);
 
                     if (newOwner == null) {
-                        newOwnerUUID = PlayerUUID.getGlobalPlayerUUID(args[1], p).get(0);
+                        newOwnerUUID = PlayerUUID.getGlobalPlayerUUID(args[1]).get(0);
                     } else {
                         newOwnerUUID = newOwner.getUniqueId().toString();
                     }
                 }
                 if (list.size() > 1) {
-                    player.sendMessage(ChatColor.RED  + "There are more '" + args[1] + "' found, this is case sensitive");
+                    player.sendMessage(ChatColor.RED + "There are more '" + args[1] + "' found, this is case sensitive");
                     return;
                 }
             }
@@ -65,10 +69,10 @@ public class Transfer extends CmdManager {
                 newOwnerUUID = newOwner.getUniqueId().toString();
             }
 
-            Files islands = new Files(p, "islands.yml");
+            Files islands = getFiles("islands.yml");
 
-            String island = p.getConfig().getString("island." + uuid);
-            String newOwnerName = PlayerUUID.getPlayerName(newOwnerUUID, p);
+            String island = config.getConfig().getString("island." + uuid);
+            String newOwnerName = PlayerUUID.getPlayerName(newOwnerUUID);
 
             Set<String> set = islands.getConfig().getConfigurationSection("island." + island + ".members").getKeys(false);
 
@@ -84,8 +88,8 @@ public class Transfer extends CmdManager {
 
             if (newOwner == null) {
 
-                p.getConfig().set("online.newIslandOwner." + newOwnerUUID, "you are now the owner of " + island);
-                p.saveConfig();
+                config.getConfig().set("online.newIslandOwner." + newOwnerUUID, "you are now the owner of " + island);
+                config.saveConfig();
 
             } else {
                 newOwner.sendMessage(ChatColor.GREEN + "You are now the owner of " + island);
@@ -100,14 +104,13 @@ public class Transfer extends CmdManager {
                 }
 
                 if (tmpPlayer != null) {
-                    tmpPlayer.sendMessage(ChatColor.GREEN + "Your island has a new owner.\n"  + newOwnerName + " is now the new owner");
+                    tmpPlayer.sendMessage(ChatColor.GREEN + "Your island has a new owner.\n" + newOwnerName + " is now the new owner");
                 }
 
             }
 
         } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island transfer <player name>");
+            sendWrongUse(player, new String[]{"/island transfer <player>", "/island transfer "});
         }
-
     }
 }

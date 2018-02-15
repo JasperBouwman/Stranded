@@ -10,6 +10,7 @@ import static com.Stranded.towers.inventory.InventoryEvent.toItemStack;
 
 public class InvShopEnemy {
 
+    //towersData
     public static ItemStack tnt = toItemStack(Material.WOOL, 14, "TNT", "cost: 15");
     public static ItemStack slowness = toItemStack(Material.WOOL, 10, "Slowness", "cost: 15");
     public static ItemStack hunger = toItemStack(Material.WOOL, 13, "Hunger", "cost: 15");

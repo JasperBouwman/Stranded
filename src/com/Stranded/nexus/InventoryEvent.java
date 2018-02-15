@@ -15,9 +15,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class InventoryEvent implements Listener {
 
-    private Main p;
+    private final Main p;
 
     public InventoryEvent(Main instance) {
         p = instance;
@@ -34,17 +36,18 @@ public class InventoryEvent implements Listener {
         return is;
     }
 
-    private static String upgradeIsland(Player player, Main p) {
+    private static String upgradeIsland(Player player) {
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
+        Files config = getFiles("config.yml");
 
-        String island = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String island = config.getConfig().getString("island." + player.getUniqueId().toString());
 
         double x = islands.getConfig().getDouble("island." + island + ".lvl");
 
         double y = Math.sinh((x + 35) / 20);
 
-        Scoreboard.updateIslandScoreboard(p, island);
+        Scoreboard.updateIslandScoreboard(island);
 
         if (x == 100) {
             return "max upgraded";
@@ -64,15 +67,16 @@ public class InventoryEvent implements Listener {
     }
 
     private static String upgradeNexus(Player player, Main p) {
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles( "islands.yml");
+        Files config = getFiles("config.yml");
 
-        String island = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String island = config.getConfig().getString("island." + player.getUniqueId().toString());
 
         double x = islands.getConfig().getDouble("island." + island + ".nexusLvl");
 
         double y = Math.sinh((x + 35) / 20);
 
-        Scoreboard.updateIslandScoreboard(p, island);
+        Scoreboard.updateIslandScoreboard(island);
 
         if (x == 50) {
             return "max upgraded";
@@ -113,34 +117,37 @@ public class InventoryEvent implements Listener {
                 return;
             }
 
-            Files pluginData = new Files(p, "pluginData.yml");
-            Files islands = new Files(p, "islands.yml");
+            Files pluginData = getFiles( "pluginData.yml");
+            Files islands = getFiles( "islands.yml");
 
             int rawSlot = e.getRawSlot();
 
-            if (rawSlot == 0) {
-                if (item.equals(InvMain.islandUpgrade(p, islands, player))) {
-                    player.sendMessage(upgradeIsland(player, p));
-                    e.setCancelled(true);
-                    InvMain.openInv(p, player);
-                } else {
-                    InvMain.openInv(p, player);
-                }
-            } else if (rawSlot == 1) {
-                if (item.equals(InvMain.nexusUpgrade(p, islands, player))) {
-                    player.sendMessage(upgradeNexus(player, p));
-                    e.setCancelled(true);
-                    InvMain.openInv(p, player);
-                } else {
-                    InvMain.openInv(p, player);
-                }
-            } else if (rawSlot == 2) {
-                InvGamble.openInv(player);
-            } else if (rawSlot == 3) {
-                InvTower.openInv(player);
+            switch (rawSlot) {
+                case 0:
+                    if (item.equals(InvMain.islandUpgrade(islands, player))) {
+                        player.sendMessage(upgradeIsland(player));
+                        e.setCancelled(true);
+                        InvMain.openInv(player);
+                    } else {
+                        InvMain.openInv(player);
+                    }
+                    break;
+                case 1:
+                    if (item.equals(InvMain.nexusUpgrade(islands, player))) {
+                        player.sendMessage(upgradeNexus(player, p));
+                        e.setCancelled(true);
+                        InvMain.openInv(player);
+                    } else {
+                        InvMain.openInv(player);
+                    }
+                    break;
+                case 2:
+                    InvGamble.openInv(player);
+                    break;
+                case 3:
+                    InvTower.openInv(player);
+                    break;
             }
-
         }
-
     }
 }

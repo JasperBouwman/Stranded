@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Delete extends CmdManager {
     @Override
@@ -26,7 +27,8 @@ public class Delete extends CmdManager {
         //warIsland delete <theme> (this return all the IDs for this theme)
         //warIsland delete <theme> <war island ID>
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
+        Files config = getFiles("config.yml");
         if (args.length == 2) {
             if (warIslands.getConfig().contains("warIslands.island." + args[1])) {
                 StringBuilder str = new StringBuilder();
@@ -63,15 +65,15 @@ public class Delete extends CmdManager {
                 String blueASUUID = warIslands.getConfig().getString("warIslands.island." + theme + "." + warIslandID + ".armorStand.blue");
                 String redASUUID = warIslands.getConfig().getString("warIslands.island." + theme + "." + warIslandID + ".armorStand.red");
 
-                ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+                ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
                 if (list.contains(blueUUID)) {
                     list.remove(blueUUID);
                 }
                 if (list.contains(redUUID)) {
                     list.remove(redUUID);
                 }
-                p.getConfig().set("nexus.uuid", list);
-                p.saveConfig();
+                config.getConfig().set("nexus.uuid", list);
+                config.saveConfig();
 
                 Entity blue = Bukkit.getEntity(UUID.fromString(blueUUID));
                 Entity red = Bukkit.getEntity(UUID.fromString(redUUID));

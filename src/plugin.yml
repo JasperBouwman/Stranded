@@ -1,7 +1,7 @@
 main: com.Stranded.Main
 version: 1.12
 name: Stranded
-authors: [The_Spaceman, 7he_4rch3r]
+authors: [The_Spaceman, 7h3_4rch3r]
 
 commands:
   nexus:
@@ -30,4 +30,9 @@ commands:
   reply:
     description: reply to other people
   trade:
-    description: safe strade
+    description: feautere not available yet
+  map:
+    description: add custom maps to your world (ex. preview of warIslands)
+  towerteleport:
+    description: teleport to players who are within the range of the telport tower
+    aliases: [twtp]

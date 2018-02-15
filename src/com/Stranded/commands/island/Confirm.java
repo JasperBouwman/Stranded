@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Confirm extends CmdManager {
     @Override
     public String getName() {
@@ -28,18 +31,19 @@ public class Confirm extends CmdManager {
 
         //island confirm
 
-        String playerName = PlayerUUID.getPlayerName(player.getUniqueId(), p);
+        String playerName = player.getName();
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
         if (args.length == 1) {
-            if (p.getConfig().contains("deleteOtherIsland." + uuid)) {
+            if (config.getConfig().contains("deleteOtherIsland." + uuid)) {
 
-                Files pluginData = new Files(p, "pluginData.yml");
+                Files pluginData = getFiles("pluginData.yml");
                 Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
 
-                int taskID = p.getConfig().getInt("deleteOtherIsland." + uuid + ".taskID");
-                String island = p.getConfig().getString("deleteOtherIsland." + uuid + ".island");
-                String reason = p.getConfig().getString("deleteOtherIsland." + uuid + ".reason");
+                int taskID = config.getConfig().getInt("deleteOtherIsland." + uuid + ".taskID");
+                String island = config.getConfig().getString("deleteOtherIsland." + uuid + ".island");
+                String reason = config.getConfig().getString("deleteOtherIsland." + uuid + ".reason");
 
                 Bukkit.getScheduler().cancelTask(taskID);
                 Main.reloadHolds -= 1;
@@ -47,18 +51,18 @@ public class Confirm extends CmdManager {
                     Reload.reload(p);
                 }
 
-                p.getConfig().set("deleteOtherIsland." + uuid, null);
-                p.saveConfig();
+                config.getConfig().set("deleteOtherIsland." + uuid, null);
+                config.saveConfig();
 
-                Files islands = new Files(p, "islands.yml");
+                Files islands = getFiles("islands.yml");
 
                 ArrayList<String> list1 = (ArrayList<String>) islands.getConfig().getStringList("island." + island + ".members");
 
                 for (String s : list1) {
 
-                    Main.resetPlayerData(s, p);
+                    Main.resetPlayerData(s);
 
-                    Player tempPlayer = PlayerUUID.getPlayerExact(s, p);
+                    Player tempPlayer = PlayerUUID.getPlayerExact(s);
 
                     if (tempPlayer != null) {
                         tempPlayer.sendMessage(ChatColor.RED + "Your island has been removed by a " +
@@ -66,11 +70,11 @@ public class Confirm extends CmdManager {
 
                         tempPlayer.teleport(l);
 
-                        com.Stranded.Scoreboard.scores(p, tempPlayer);
+                        com.Stranded.Scoreboard.scores(tempPlayer);
 
                     } else {
-                        p.getConfig().set("online.removedIslandByMod." + PlayerUUID.getPlayerUUID(s, p), reason);
-                        p.saveConfig();
+                        config.getConfig().set("online.removedIslandByMod." + PlayerUUID.getPlayerUUID(s), reason);
+                        config.saveConfig();
                     }
                 }
 
@@ -79,12 +83,12 @@ public class Confirm extends CmdManager {
                 islands.getConfig().set("island." + island, null);
                 islands.saveConfig();
 
-            } else if (p.getConfig().contains("deleteIsland." + uuid)) {
+            } else if (config.getConfig().contains("deleteIsland." + uuid)) {
 
-                Files pluginData = new Files(p, "pluginData.yml");
+                Files pluginData = getFiles("pluginData.yml");
                 Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
 
-                int taskID = p.getConfig().getInt("deleteIsland." + uuid);
+                int taskID = config.getConfig().getInt("deleteIsland." + uuid);
 
                 Bukkit.getScheduler().cancelTask(taskID);
                 Main.reloadHolds -= 1;
@@ -92,18 +96,18 @@ public class Confirm extends CmdManager {
                     Reload.reload(p);
                 }
 
-                p.getConfig().set("deleteIsland." + uuid, null);
-                p.saveConfig();
+                config.getConfig().set("deleteIsland." + uuid, null);
+                config.saveConfig();
 
-                Files islands = new Files(p, "islands.yml");
+                Files islands = getFiles("islands.yml");
 
-                ArrayList<String> list1 = (ArrayList<String>) islands.getConfig().getStringList("island." + p.getConfig().getString("island." + uuid) + ".members");
+                ArrayList<String> list1 = (ArrayList<String>) islands.getConfig().getStringList("island." + config.getConfig().getString("island." + uuid) + ".members");
 
                 for (String s : list1) {
 
-                    Main.resetPlayerData(s, p);
+                    Main.resetPlayerData(s);
 
-                    Player tempPlayer = PlayerUUID.getPlayerExact(s, p);
+                    Player tempPlayer = PlayerUUID.getPlayerExact(s);
 
                     if (tempPlayer != null && !s.equals(player.getName())) {
                         tempPlayer.sendMessage(ChatColor.RED + "Your island has been removed by the " + ChatColor.DARK_BLUE + "owner");
@@ -111,24 +115,24 @@ public class Confirm extends CmdManager {
 
                         tempPlayer.teleport(l);
 
-                        com.Stranded.Scoreboard.scores(p, tempPlayer);
+                        com.Stranded.Scoreboard.scores(tempPlayer);
 
                     } else if (!s.equals(player.getName())) {
-                        ArrayList<String> listOnline = (ArrayList<String>) p.getConfig().getStringList("online.removedIsland");
-                        String uuid2 = PlayerUUID.getPlayerUUID(s, p);
+                        ArrayList<String> listOnline = (ArrayList<String>) config.getConfig().getStringList("online.removedIsland");
+                        String uuid2 = PlayerUUID.getPlayerUUID(s);
                         listOnline.add(uuid2);
-                        p.getConfig().set("online.removedIsland", listOnline);
-                        p.saveConfig();
+                        config.getConfig().set("online.removedIsland", listOnline);
+                        config.saveConfig();
                     }
                 }
 
-                com.Stranded.Scoreboard.scores(p, player);
-                Main.resetPlayerData(player.getUniqueId().toString(), p);
+                com.Stranded.Scoreboard.scores(player);
+                Main.resetPlayerData(player.getUniqueId().toString());
 
                 player.sendMessage(ChatColor.GREEN + "Your island has been removed");
                 player.teleport(l);
 
-                islands.getConfig().set("island." + p.getConfig().getString("island." + uuid), null);
+                islands.getConfig().set("island." + config.getConfig().getString("island." + uuid), null);
                 islands.saveConfig();
 
             } else {
@@ -136,7 +140,7 @@ public class Confirm extends CmdManager {
             }
 
         } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island confirm");
+            sendWrongUse(player, "/island confirm");
         }
     }
 }

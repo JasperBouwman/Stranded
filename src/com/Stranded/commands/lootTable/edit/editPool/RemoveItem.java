@@ -16,6 +16,7 @@ public class RemoveItem extends CmdManager {
 
     @Override
     public void run(String[] args, Player player) {
+        // lootTable edit <name> editPool <poolName> removeItem <name>
 
     }
 }

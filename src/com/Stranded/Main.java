@@ -1,5 +1,6 @@
 package com.Stranded;
 
+import com.Stranded.border.warLimitations.WarLimitations;
 import com.Stranded.commands.*;
 import com.Stranded.commands.tabComplete.IslandTabComplete;
 import com.Stranded.commands.tabComplete.TowerTabComplete;
@@ -11,7 +12,8 @@ import com.Stranded.effects.events.HitKill;
 import com.Stranded.effects.events.WalkRun;
 import com.Stranded.events.*;
 import com.Stranded.gamble.InvClickEvent;
-import com.Stranded.islandBorder.events.BorderEvents;
+import com.Stranded.border.islandBorder.IslandBorder;
+import com.Stranded.mapsUtil.MapTool;
 import com.Stranded.nexus.InventoryEvent;
 import com.Stranded.nexus.VillagerInteract;
 import com.Stranded.towers.RemoveTower;
@@ -31,19 +33,19 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Main extends JavaPlugin {
 
     public static int reloadHolds = 0;
     public static boolean reloadPending = false;
 
     private static String className;
-
     public static void println(String text) {
-        int line = ___8drrd3148796d_Xaf();
+        int line = ___8d4rd3148796d_Xaf();
         System.out.println(text + " (" + className + ":" + line + ")");
     }
-
-    private static int ___8drrd3148796d_Xaf() {
+    private static int ___8d4rd3148796d_Xaf() {
         boolean thisOne = false;
         int thisOneCountDown = 1;
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
@@ -56,19 +58,31 @@ public class Main extends JavaPlugin {
             } else if (thisOne) {
                 thisOneCountDown--;
             }
-            if (methodName.equals("___8drrd3148796d_Xaf")) {
+            if (methodName.equals("___8d4rd3148796d_Xaf")) {
                 thisOne = true;
             }
         }
         return -1;
     }
 
-    //todo check out permissions
-    //todo update defaultIslands to new method
-    //todo war islands cant contain blocks with a filled container
-    //todo in island set lootBox with lootTable
-    //todo finish /lootTable, /stranded
+    //todo add permissions
+    //todo finish /lootTable
+    //todo finish /warIsland box
     //todo test inv type
+    //todo set colors to: {edit, lootTable, trade, war, warIsland, other}
+    //todo create towerBlock warIslands ???
+    //todo add .contains to all {till /island done}
+    //todo update towers to new TerrainSave
+    //todo set lootBox in island/warIsland
+    //todo add lootBox on island from sign '<lootBox> \n %lootTable%'
+
+    //todo towerTeleport.java
+
+    //todo redo /stranded reload
+
+    //todo all in runnable update files ?done?
+
+    //find filter tower: "//towersData"
 
     public static boolean containsSpecialCharacter(String s) {
         if (s == null || s.trim().isEmpty()) {
@@ -80,44 +94,46 @@ public class Main extends JavaPlugin {
         return m.find();
     }
 
-    public static void resetPlayerData(String player, Main main) {
+    public static void resetPlayerData(String player) {
 
         Player p = Bukkit.getPlayer(UUID.fromString(player));
+        Files config = getFiles("config.yml");
 
         if (p == null) {
 
-            main.getConfig().set("online.removeAll." + player, true);
 
-            if (main.getConfig().contains("island." + player)) {
-                String island = main.getConfig().getString("island." + player);
-                Files islands = new Files(main, "islands.yml");
+            config.getConfig().set("online.removeAll." + player, true);
+
+            if (config.getConfig().contains("island." + player)) {
+                String island = config.getConfig().getString("island." + player);
+                Files islands = getFiles("islands.yml");
                 for (String id : islands.getConfig().getConfigurationSection("island." + island + ".towers").getKeys(false)) {
                     if (islands.getConfig().getString("island." + island + ".towers." + id + ".owner").equals(player)) {
-                        RemoveTower.removeIslandTower(main, islands, island, id);
+                        RemoveTower.removeIslandTower(islands, island, id);
                     }
                 }
-                Files towers = new Files(main, "towers.yml");
+                Files towers = getFiles("towers.yml");
                 towers.getConfig().set("towers." + player, null);
                 towers.saveConfig();
             }
         } else {
             p.setLevel(0);
             p.getInventory().clear();
-            if (main.getConfig().contains("island." + player)) {
-                String island = main.getConfig().getString("island." + player);
-                Files islands = new Files(main, "islands.yml");
+            if (config.getConfig().contains("island." + player)) {
+                String island = config.getConfig().getString("island." + player);
+                Files islands = getFiles("islands.yml");
                 for (String id : islands.getConfig().getConfigurationSection("island." + island + ".towers").getKeys(false)) {
                     if (islands.getConfig().getString("island." + island + ".towers." + id + ".owner").equals(player)) {
-                        RemoveTower.removeIslandTower(main, islands, island, id);
+                        RemoveTower.removeIslandTower(islands, island, id);
                     }
                 }
 
-                Files towers = new Files(main, "towers.yml");
+                Files towers = getFiles("towers.yml");
 
                 towers.getConfig().set("towers." + player, null);
                 towers.saveConfig();
 
-                Files playerData = new Files(main, "playerData.yml");
+                Files playerData = getFiles( "playerData.yml");
                 playerData.getConfig().set("walk." + player, null);
                 playerData.getConfig().set("BlockBreak." + player, null);
                 playerData.getConfig().set("HitKill." + player, null);
@@ -131,6 +147,8 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
 
+        new GettingFiles(this);
+
         registerCommands();
         registerEvents();
         enableRunnables();
@@ -141,25 +159,15 @@ public class Main extends JavaPlugin {
         setDefaultIslands();
 
         new ServerPingEvent(this).setList();
-    }
 
-    private void setDefaultIslands() {
-        if (Bukkit.getWorld("Islands") != null) {
-            Files islands = new Files(this, "islands.yml");
-            if (islands.getConfig().contains("islandData.islandTypesCopied")) {
-                if (!islands.getConfig().getBoolean("islandData.islandTypesCopied")) {
-                    Bukkit.broadcastMessage("the default islands are now loading in the server");
-                    new DefaultIslandGenerator(this);
-                }
-            } else {
-                Bukkit.broadcastMessage("the default islands are now loading in the server");
-                new DefaultIslandGenerator(this);
-            }
-        }
+        MapTool.loadMaps(this);
+
     }
 
     @Override
     public void onDisable() {
+
+        MapTool.saveMapTools();
 
         Files warData = new Files(this, "warData.yml");
 
@@ -190,48 +198,70 @@ public class Main extends JavaPlugin {
 
         new ServerPingEvent(this).saveList();
 
+        for (Files file : getFiles()) {
+            file.saveConfig(true);
+        }
+        this.saveConfig();
 
+    }
+
+    private void setDefaultIslands() {
+        if (Bukkit.getWorld("Islands") != null) {
+            Files islands = new Files(this, "islands.yml");
+            if (islands.getConfig().contains("islandData.islandTypesCopied")) {
+                if (!islands.getConfig().getBoolean("islandData.islandTypesCopied")) {
+                    Bukkit.broadcastMessage("the default islands are now loading in the server");
+                    new DefaultIslandGenerator(this);
+                }
+            } else {
+                Bukkit.broadcastMessage("the default islands are now loading in the server");
+                new DefaultIslandGenerator(this);
+            }
+        }
     }
 
     private void registerCommands() {
         getCommand("stranded").setExecutor(new Stranded(this));
         getCommand("nexus").setExecutor(new Nexus(this));
-        getCommand("edit").setExecutor(new Edit(this));
+        getCommand("edit").setExecutor(new Edit());
         getCommand("war").setExecutor(new War(this));
         getCommand("island").setExecutor(new Island(this));
-        getCommand("warisland").setExecutor(new WarIsland(this));
+        getCommand("warIsland".toLowerCase()).setExecutor(new WarIsland(this));
         getCommand("tower").setExecutor(new Towers(this));
         getCommand("gamble").setExecutor(new Gamble(this));
-        getCommand("chat").setExecutor(new Chat(this));
+        getCommand("chat").setExecutor(new Chat());
         getCommand("trade").setExecutor(new Trade());
         getCommand("lootTable".toLowerCase()).setExecutor(new LootTable(this));
-        getCommand("chatFilter".toLowerCase()).setExecutor(new ChatFilter(this));
-        getCommand("reply").setExecutor(new Reply(this));
+        getCommand("chatFilter".toLowerCase()).setExecutor(new ChatFilter());
+        getCommand("reply").setExecutor(new Reply());
+        getCommand("towerTeleport".toLowerCase()).setExecutor(new towerTeleport(this));
+        getCommand("map").setExecutor(new Map(this));
 
         getCommand("island").setTabCompleter(new IslandTabComplete(this));
         getCommand("war").setTabCompleter(new WarTabComplete(this));
-        getCommand("warisland").setTabCompleter(new WarIslandTabComplete(this));
+        getCommand("warIsland".toLowerCase()).setTabCompleter(new WarIslandTabComplete(this));
         getCommand("tower").setTabCompleter(new TowerTabComplete(this));
     }
 
     private void registerEvents() {
         PluginManager pm = getServer().getPluginManager();
-        //border
-        pm.registerEvents(new BorderEvents(this), this);
+        //testPiston
+        pm.registerEvents(new IslandBorder(this), this);
+        pm.registerEvents(new WarLimitations(this), this);
         //effects
-        pm.registerEvents(new BlockBreak(this), this);
-        pm.registerEvents(new WalkRun(this), this);
-        pm.registerEvents(new HitKill(this), this);
+        pm.registerEvents(new BlockBreak(), this);
+        pm.registerEvents(new WalkRun(), this);
+        pm.registerEvents(new HitKill(), this);
         //nexus
         pm.registerEvents(new InventoryEvent(this), this);
         pm.registerEvents(new VillagerInteract(this), this);
         pm.registerEvents(new DamageEvent(this), this);
         //towers
-        pm.registerEvents(new PlayerInteract(), this);
-        pm.registerEvents(new BlockPlace(this), this);
+        pm.registerEvents(new PlayerInteract(this), this);
+        pm.registerEvents(new BlockPlace(), this);
         pm.registerEvents(new Tnt(), this);
         pm.registerEvents(new com.Stranded.towers.inventory.InventoryEvent(this), this);
-        pm.registerEvents(new ChatEvent(this), this);
+        pm.registerEvents(new ChatEvent(), this);
         //other
         pm.registerEvents(new CobbleGenEvent(this), this);
         pm.registerEvents(new LoginEvent(this), this);
@@ -249,12 +279,10 @@ public class Main extends JavaPlugin {
     }
 
     private void enableRunnables() {
-        PlayerEffects pe = new PlayerEffects(this);
+        new PlayerEffects(this).effects();
         //this is also the runnable for the offset shower
-        pe.Effects();
 
-        TowerManager tm = new TowerManager(this);
-        tm.Tower();
+        new TowerManager(this).Tower();
     }
 
     private void saveDefaults() {

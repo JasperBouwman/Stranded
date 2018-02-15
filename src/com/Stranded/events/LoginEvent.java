@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerLoginEvent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class LoginEvent implements Listener {
 
@@ -38,11 +39,11 @@ public class LoginEvent implements Listener {
     @SuppressWarnings("unused")
     public void onOnline(PlayerLoginEvent e) {
 
-        PlayerUUID.setPlayerUUID(e.getPlayer(), p);
+        PlayerUUID.setPlayerUUID(e.getPlayer());
 
         Bukkit.getScheduler().runTaskLater(p, () -> {
             for (Player pl : Bukkit.getOnlinePlayers()) {
-                Scoreboard.scores(p, pl);
+                Scoreboard.scores(pl);
             }
 
             Player player = e.getPlayer();
@@ -59,88 +60,86 @@ public class LoginEvent implements Listener {
             }
 
             new ServerPingEvent(p).setPlayer(e.getPlayer());
+            Files config = getFiles("config.yml");
+            Files islands = getFiles( "islands.yml");
+            Files pluginData = getFiles("pluginData.yml");
+            Files warData = getFiles("warData.yml");
 
-            ArrayList<String> listRemoved = (ArrayList<String>) p.getConfig().getStringList("online.removedIsland");
-            ArrayList<String> listEvict = (ArrayList<String>) p.getConfig().getStringList("online.evict");
-            ArrayList<String> listNewOwner = (ArrayList<String>) p.getConfig().getStringList("online.newOwner");
-            if (p.getConfig().contains("online.removeAll." + uuid)) {
-                p.getConfig().set("online.removeAll." + uuid, null);
-                p.saveConfig();
+            ArrayList<String> listRemoved = (ArrayList<String>) config.getConfig().getStringList("online.removedIsland");
+            ArrayList<String> listEvict = (ArrayList<String>) config.getConfig().getStringList("online.evict");
+            ArrayList<String> listNewOwner = (ArrayList<String>) config.getConfig().getStringList("online.newOwner");
+            if (config.getConfig().contains("online.removeAll." + uuid)) {
+                config.getConfig().set("online.removeAll." + uuid, null);
+                config.saveConfig();
 
                 player.setLevel(0);
                 player.getInventory().clear();
             }
-            if (p.getConfig().contains("online.warWin." + uuid)) {
-                String msg = p.getConfig().getString("online.warWin." + uuid);
+            if (config.getConfig().contains("online.warWin." + uuid)) {
+                String msg = config.getConfig().getString("online.warWin." + uuid);
                 player.sendMessage(msg);
-                p.getConfig().set("online.warWin." + uuid, null);
-                p.saveConfig();
+                config.getConfig().set("online.warWin." + uuid, null);
+                config.saveConfig();
 
-                Files islands = new Files(p, "islands.yml");
-                Location l = (Location) islands.getConfig().get("island." + p.getConfig().getStringList("island." + uuid) + ".home");
+                Location l = (Location) islands.getConfig().get("island." + config.getConfig().getStringList("island." + uuid) + ".home");
                 player.teleport(l);
             }
-            if (p.getConfig().contains("online.warLose." + uuid)) {
-                String msg = p.getConfig().getString("online.warLose." + uuid);
+            if (config.getConfig().contains("online.warLose." + uuid)) {
+                String msg = config.getConfig().getString("online.warLose." + uuid);
                 player.sendMessage(msg);
-                p.getConfig().set("online.warLose." +uuid, null);
-                p.saveConfig();
+                config.getConfig().set("online.warLose." +uuid, null);
+                config.saveConfig();
 
-                Files islands = new Files(p, "islands.yml");
-                Location l = (Location) islands.getConfig().get("island." + p.getConfig().getStringList("island." + uuid) + ".home");
+                Location l = (Location) islands.getConfig().get("island." + config.getConfig().getStringList("island." + uuid) + ".home");
                 player.teleport(l);
             }
 
-            if (p.getConfig().contains("online.removedIslandByMod." + uuid)) {
-                player.sendMessage("you island is removed by an moderator with the reason: " + p.getConfig().getString("online.removedIslandByMod." + uuid + ".reason"));
+            if (config.getConfig().contains("online.removedIslandByMod." + uuid)) {
+                player.sendMessage("you island is removed by an moderator with the reason: " + config.getConfig().getString("online.removedIslandByMod." + uuid + ".reason"));
 
-                Files pluginData = new Files(p, "pluginData.yml");
                 Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
                 player.teleport(l);
 
-                p.getConfig().set("online.removedIslandByMod." + uuid, null);
-                p.saveConfig();
+                config.getConfig().set("online.removedIslandByMod." + uuid, null);
+                config.saveConfig();
                 return;
             }
             if (listRemoved.contains(uuid)) {
                 player.sendMessage("you island is removed by the owner");
 
-                Files pluginData = new Files(p, "pluginData.yml");
                 Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
                 player.teleport(l);
 
                 listRemoved.remove(uuid);
-                p.getConfig().set("online.removedIsland", listRemoved);
-                p.saveConfig();
+                config.getConfig().set("online.removedIsland", listRemoved);
+                config.saveConfig();
                 return;
             }
             if (listEvict.contains(uuid)) {
                 player.sendMessage("you where removed by the owner from this island");
 
-                Files pluginData = new Files(p, "pluginData.yml");
                 Location l = (Location) pluginData.getConfig().get("plugin.hub.location");
                 player.teleport(l);
 
                 listEvict.remove(uuid);
-                p.getConfig().set("online.evict", listEvict);
-                p.saveConfig();
+                config.getConfig().set("online.evict", listEvict);
+                config.saveConfig();
                 return;
             }
 
             if (listNewOwner.contains(uuid)) {
                 player.sendMessage("you are now the new owner if your island");
                 listNewOwner.remove(uuid);
-                p.getConfig().set("online.newOwner", listNewOwner);
-                p.saveConfig();
+                config.getConfig().set("online.newOwner", listNewOwner);
+                config.saveConfig();
             }
-            if (p.getConfig().contains("online.newIslandOwner." + uuid)) {
-                player.sendMessage(p.getConfig().getString("online.newIslandOwner." + uuid));
-                p.getConfig().set("online.newIslandOwner." + uuid, null);
-                p.saveConfig();
+            if (config.getConfig().contains("online.newIslandOwner." + uuid)) {
+                player.sendMessage(config.getConfig().getString("online.newIslandOwner." + uuid));
+                config.getConfig().set("online.newIslandOwner." + uuid, null);
+                config.saveConfig();
             }
 
-            if (p.getConfig().getStringList("playersInWar").contains(uuid)) {
-                Files warData = new Files(p, "warData.yml");
+            if (config.getConfig().getStringList("playersInWar").contains(uuid)) {
                 for (String warID : warData.getConfig().getConfigurationSection("war.war").getKeys(false)) {
                     if (warData.getConfig().getStringList("war.war." + warID + ".blue.players").contains(uuid)) {
                         player.teleport((Location) warData.getConfig().get("war.war." + warID + ".blueSpawn"));

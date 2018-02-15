@@ -1,14 +1,12 @@
-package com.Stranded.commands.lootTable.edit.editPool;
+package com.Stranded.commands.lootTable.edit.editPool.editRolls;
 
 import com.Stranded.commands.CmdManager;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-
-public class EditChance extends CmdManager {
+public class Chance extends CmdManager {
     @Override
     public String getName() {
-        return "editChance".toLowerCase();
+        return "chance";
     }
 
     @Override
@@ -20,5 +18,4 @@ public class EditChance extends CmdManager {
     public void run(String[] args, Player player) {
 
     }
-
 }

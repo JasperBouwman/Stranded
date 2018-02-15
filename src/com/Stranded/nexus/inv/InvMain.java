@@ -13,20 +13,23 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
 import static com.Stranded.towers.inventory.InventoryEvent.toItemStack;
 
 public class InvMain {
 
-    private static ItemStack gamble = toItemStack(Material.DIAMOND, 0, "gamble");
-    private static ItemStack tower = toItemStack(Material.WOOL, 11, "towers");
+    private static final ItemStack gamble = toItemStack(Material.DIAMOND, 0, "gamble");
+    private static final ItemStack tower = toItemStack(Material.WOOL, 11, "towers");
 
-    public static ItemStack nexusUpgrade(Main p, Files islands, Player player) {
+    public static ItemStack nexusUpgrade(Files islands, Player player) {
+
+        Files config = getFiles("config.yml");
         ItemStack is = new ItemStack(Material.MONSTER_EGG);
         SpawnEggMeta im = (SpawnEggMeta) is.getItemMeta();
         im.setSpawnedType(EntityType.VILLAGER);
         im.setDisplayName("nexus upgrade");
 
-        String island = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String island = config.getConfig().getString("island." + player.getUniqueId().toString());
         int x = islands.getConfig().getInt("island." + island + ".nexusLvl");
 
         ArrayList<String> lore = new ArrayList<>();
@@ -45,10 +48,11 @@ public class InvMain {
         return is;
     }
 
-    public static ItemStack islandUpgrade(Main p, Files islands, Player player) {
+    public static ItemStack islandUpgrade(Files islands, Player player) {
         ItemStack is = new ItemStack(Material.GRASS);
         ItemMeta im = is.getItemMeta();
-        String island = p.getConfig().getString("island." + player.getUniqueId().toString());
+        Files config = getFiles("config.yml");
+        String island = config.getConfig().getString("island." + player.getUniqueId().toString());
         int x = islands.getConfig().getInt("island." + island + ".lvl");
 
         int spc = (19 + 6 * (x + 1)) * (19 + 6 * (x + 1));
@@ -72,13 +76,13 @@ public class InvMain {
     }
 
 
-    public static void openInv(Main p, Player player) {
+    public static void openInv(Player player) {
         Inventory inv = Bukkit.createInventory(null, 9, "§2Nexus");
 
-        Files islands = new Files(p, "islands.yml");
+        Files islands = getFiles("islands.yml");
 
-        inv.setItem(0, islandUpgrade(p, islands, player));
-        inv.setItem(1, nexusUpgrade(p, islands, player));
+        inv.setItem(0, islandUpgrade(islands, player));
+        inv.setItem(1, nexusUpgrade(islands, player));
         inv.setItem(2, gamble);
         inv.setItem(3, tower);
 

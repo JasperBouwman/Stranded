@@ -1,6 +1,5 @@
 package com.Stranded.commands;
 
-import com.Stranded.Main;
 import com.Stranded.worldGeneration.Generator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -10,13 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import static com.Stranded.Permissions.hasPermission;
+
 public class Edit implements CommandExecutor {
-
-    private Main p;
-
-    public Edit(Main instance) {
-        p = instance;
-    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 
@@ -25,8 +20,7 @@ public class Edit implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-        if (!player.hasPermission("Stranded.edit")) {
-            player.sendMessage("you don't have the permission to use this");
+        if (!hasPermission(player, "Stranded.edit")) {
             return false;
         }
 

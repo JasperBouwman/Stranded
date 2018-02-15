@@ -1,5 +1,6 @@
 package com.Stranded.nexus;
 
+import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.nexus.inv.InvMain;
 import org.bukkit.entity.Player;
@@ -10,9 +11,11 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import java.util.ArrayList;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class VillagerInteract implements Listener {
 
-    private Main p;
+    private final Main p;
 
     public VillagerInteract(Main main) {
         p = main;
@@ -29,10 +32,11 @@ public class VillagerInteract implements Listener {
         Player player = e.getPlayer();
 
         if (e.getRightClicked() instanceof Villager) {
-            ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+            Files config = getFiles("config.yml");
+            ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
             if (list.contains(e.getRightClicked().getUniqueId().toString())) {
 
-                InvMain.openInv(p, player);
+                InvMain.openInv(player);
 
                 e.setCancelled(true);
             }

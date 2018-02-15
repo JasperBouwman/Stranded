@@ -4,6 +4,7 @@ import com.Stranded.Files;
 import com.Stranded.commands.CmdManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Teleport extends CmdManager {
     @Override
@@ -21,7 +22,7 @@ public class Teleport extends CmdManager {
         //warIsland edit <theme> <war island ID> teleport
         //warIsland edit <theme> <war island ID> teleport <blue:red>
 
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         if (args.length == 4) {
 

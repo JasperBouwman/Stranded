@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static com.Stranded.GettingFiles.getFiles;
 import static com.Stranded.towers.RemoveTower.removeWarTower;
 
 public class EndWar {
@@ -19,8 +20,8 @@ public class EndWar {
 
     public static void testPlayers(Main p, String warID, String side) {
 
-        Files warData = new Files(p, "warData.yml");
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files warData = getFiles("warData.yml");
+        Files warIslands = getFiles("warIslands.yml");
 
         String theme = (String) warData.getConfig().getConfigurationSection("war.war." + warID + ".warIsland").getKeys(false).toArray()[0];
         int warIslandID = warData.getConfig().getInt("war.war." + warID + ".warIsland." + theme);
@@ -49,11 +50,11 @@ public class EndWar {
 
     public void endWar(Main p, String warID, int reason, String islandWin) {
         /*
-        * reason
-        * 1: to few players
-        * 2: nexus killed
-        */
-        Files warData = new Files(p, "warData.yml");
+         * reason
+         * 1: to few players
+         * 2: nexus killed
+         */
+        Files warData = getFiles("warData.yml");
 
         if (reason == 1) {
             initReason1();
@@ -77,26 +78,34 @@ public class EndWar {
         String islandWinName = warData.getConfig().getString("war.war." + warID + "." + islandWinSide + ".islandName");
         String islandLoseName = warData.getConfig().getString("war.war." + warID + "." + islandLoseSide + ".islandName");
 
-        Files islands = new Files(p, "islands.yml");
-        Files warIslands = new Files(p, "warIslands.yml");
+        Files islands = getFiles("islands.yml");
+        Files warIslands = getFiles("warIslands.yml");
+        Files config = getFiles("config.yml");
 
         Location islandWinLocation = (Location) islands.getConfig().get("island." + islandWinName + ".home");
         Location islandLoseLocation = (Location) islands.getConfig().get("island." + islandLoseName + ".home");
 
-        double wonXp = islands.getConfig().getDouble("island." + islandLoseName + ".nexusLvl") * 0.75 + 1;
+//        double wonXp = islands.getConfig().getDouble("island." + islandLoseName + ".nexusLvl") * 0.75 + 1;
 
         for (String s : islandWinPlayerList) {
 
             if (Bukkit.getPlayer(UUID.fromString(s)) != null) {
                 Player player = Bukkit.getPlayer(UUID.fromString(s));
 
+                double wonXp = islands.getConfig().getDouble("island." + islandLoseName + ".nexusLvl") * 0.5 + 1;
+
+                int kills = warData.getConfig().getInt("war.war." + warID + "." + islandWinSide + ".kills." + s);
+                int killStreak = warData.getConfig().getInt("war.war." + warID + "." + islandWinSide + ".killStreak." + s);
+
+                wonXp += (kills + killStreak) / 2;
+
                 player.sendMessage(warWinMsg.replace("%islandLoseName%", islandLoseName).replace("%wonXp%", wonXp + ""));
                 player.setLevel((int) wonXp);
                 player.teleport(islandWinLocation);
             } else {
 
-                p.getConfig().set("online.warWin." + s, warWinMsgOffline.replace("%islandLoseName%", islandLoseName));
-                p.saveConfig();
+                config.getConfig().set("online.warWin." + s, warWinMsgOffline.replace("%islandLoseName%", islandLoseName));
+                config.saveConfig();
 
             }
         }
@@ -109,26 +118,21 @@ public class EndWar {
                 player.sendMessage(warLoseMsg.replace("%islandWinName%", islandWinName));
                 player.teleport(islandLoseLocation);
             } else {
-                p.getConfig().set("online.warLose." + s, warLoseMsgOffline.replace("%islandWinName%", islandWinName));
-                p.saveConfig();
+                config.getConfig().set("online.warLose." + s, warLoseMsgOffline.replace("%islandWinName%", islandWinName));
+                config.saveConfig();
             }
         }
         for (String side : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers").getKeys(false)) {
             for (String towerID : warData.getConfig().getConfigurationSection("war.war." + warID + ".towers." + side).getKeys(false)) {
-
-                if (side.equals(islandWinName)) {
-                    removeWarTower(p, warData, warID, towerID, side, "half");
-                } else {
-                    removeWarTower(p, warData, warID, towerID, side, "null");
-                }
+                removeWarTower(warData, warID, towerID, side);
             }
         }
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("playersInWar");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("playersInWar");
         list.removeAll(islandLosePlayerList);
         list.removeAll(islandWinPlayerList);
-        p.getConfig().set("playersInWar", list);
-        p.saveConfig();
+        config.getConfig().set("playersInWar", list);
+        config.saveConfig();
 
         String theme = (String) warData.getConfig().getConfigurationSection("war.war." + warID + ".warIsland").getKeys(false).toArray()[0];
         String warIslandID = warData.getConfig().getString("war.war." + warID + ".warIsland." + theme);

@@ -1,15 +1,18 @@
-package com.Stranded.islandBorder;
+package com.Stranded.border.islandBorder;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
+import static com.Stranded.GettingFiles.getFiles;
+
 public class BorderUtils {
 
-    public static boolean border(Location location, Main p, BlockFace blockFace, boolean offset) {
+    public static boolean testPiston(Location location, BlockFace blockFace, boolean offset) {
 
         if (!location.getWorld().getName().equals("Islands")) {
             return false;
@@ -20,7 +23,11 @@ public class BorderUtils {
             return false;
         }
 
-        Files f = new Files(p, "islands.yml");
+        Files f = getFiles( "islands.yml");
+
+        if (!f.getConfig().contains("island")) {
+            return true; //todo test
+        }
 
         for (String island : f.getConfig().getConfigurationSection("island").getKeys(false)) {
 
@@ -98,12 +105,21 @@ public class BorderUtils {
         return true;
     }
 
-    public static boolean border(Location location, Main p, Player player) {
-        try {
-            Files f = new Files(p, "islands.yml");
+    //todo check dis out
+    public static boolean testIfIsInIsland() {
+        return true;
+    }
+    public static boolean testIfIsInWarIsland() {
+        return true;
+    }
 
-            //todo
-            if (true) {
+    public static boolean testBorder(Location location, Player player) {
+        try {
+            Files islands = getFiles( "islands.yml");
+            Files config = getFiles("config.yml");
+            String uuid = player.getUniqueId().toString();
+
+            if (uuid.equals("3a5b4fed-97ef-4599-bf21-19ff1215faff") || uuid.equals("4c386ae3-8e21-4ad9-a2b5-c480688c8668")) {
                 return false;
             }
 
@@ -115,18 +131,18 @@ public class BorderUtils {
                     location.getBlockZ() >= -200013 && location.getBlockZ() <= -199726) {
                 return false;
             }
-            String uuid = player.getUniqueId().toString();
 
-            if (!p.getConfig().contains("island." + uuid)) {
+
+            if (!config.getConfig().contains("island." + uuid)) {
                 return true;
             }
 
-            String island = p.getConfig().getString("island." + uuid);
+            String island = config.getConfig().getString("island." + uuid);
 
-            int islandLvl = f.getConfig().getInt("island." + island + ".lvl");
+            int islandLvl = islands.getConfig().getInt("island." + island + ".lvl");
             int islandSize = (19 + 6 * islandLvl) / 2;
 
-            Location l = (Location) f.getConfig().get("island." + island + ".location");
+            Location l = (Location) islands.getConfig().get("island." + island + ".location");
 
             l.setX(l.getX() + islandSize);
             l.setZ(l.getZ() + islandSize);
@@ -158,25 +174,26 @@ public class BorderUtils {
         }
     }
 
-    public static boolean border2(Location location, Main p, Player player) {
+    public static boolean border2(Location location, Player player) {
         try {
-            Files f = new Files(p, "islands.yml");
+            Files islands = getFiles( "islands.yml");
+            Files config = getFiles("config.yml");
 
             if (location.getBlockX() <= -200987 && location.getBlockX() >= -201013 &&
                     location.getBlockZ() >= -200013 && location.getBlockZ() <= -199726) {
                 return true;
             }
 
-            if (!p.getConfig().contains("island." + player.getUniqueId().toString())) {
+            if (!config.getConfig().contains("island." + player.getUniqueId().toString())) {
                 return true;
             }
 
-            String island = p.getConfig().getString("island." + player.getUniqueId().toString());
+            String island = config.getConfig().getString("island." + player.getUniqueId().toString());
 
-            int islandLvl = f.getConfig().getInt("island." + island + ".lvl");
+            int islandLvl = islands.getConfig().getInt("island." + island + ".lvl");
             int islandSize = (19 + 6 * islandLvl) / 2;
 
-            Location l = (Location) f.getConfig().get("island." + island + ".location");
+            Location l = (Location) islands.getConfig().get("island." + island + ".location");
 
             l.setX(l.getX() + islandSize);
             l.setZ(l.getZ() + islandSize);
@@ -198,7 +215,6 @@ public class BorderUtils {
 
                     if (location.getBlockX() == xx && location.getBlockZ() == zz) {
                         return false;
-
                     }
                 }
             }

@@ -1,7 +1,6 @@
 package com.Stranded.commands.lootTable.edit;
 
 import com.Stranded.commands.CmdManager;
-import com.Stranded.commands.lootTable.Rename;
 import com.Stranded.commands.lootTable.edit.editPool.*;
 import org.bukkit.entity.Player;
 
@@ -15,7 +14,7 @@ public class EditPool extends CmdManager {
     public EditPool() {
         actions.add(new AddItem());
         actions.add(new AddTower());
-        actions.add(new EditChance());
+        actions.add(new EditRolls());
         actions.add(new EditItem());
         actions.add(new EditTower());
         actions.add(new RemoveItem());

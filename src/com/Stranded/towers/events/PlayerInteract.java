@@ -1,6 +1,9 @@
 package com.Stranded.towers.events;
 
+import com.Stranded.Main;
+import com.Stranded.towers.TowerInfo;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -10,7 +13,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import static com.Stranded.towers.TowerUtil.upgradeTower;
+
 public class PlayerInteract implements Listener {
+
+    private Main p;
+
+    public PlayerInteract(Main main) {
+        p = main;
+    }
 
     @EventHandler
     @SuppressWarnings("unused")
@@ -25,23 +36,47 @@ public class PlayerInteract implements Listener {
 
                     Sign opposite = null;
 
+                    boolean north = true;
+
                     if (s.getData().toString().equals("WALL_SIGN(2) facing NORTH")) {
-                        opposite = (Sign) Bukkit.getWorld(player.getWorld().getName()).getBlockAt(s.getX(), s.getY(), s.getZ() + 4).getState();
+                        if (player.getWorld().getBlockAt(s.getX(), s.getY(), s.getZ() + 4).getType().equals(Material.WALL_SIGN)) {
+                            opposite = (Sign) player.getWorld().getBlockAt(s.getX(), s.getY(), s.getZ() + 4).getState();
+                        } else {
+                            //todo corrupted tower
+                            return;
+                        }
+                    } else if (s.getData().toString().equals("WALL_SIGN(3) facing SOUTH")) {
+                        if (player.getWorld().getBlockAt(s.getX(), s.getY(), s.getZ() - 4).getType().equals(Material.WALL_SIGN)) {
+                            opposite = (Sign) player.getWorld().getBlockAt(s.getX(), s.getY(), s.getZ() - 4).getState();
+                            north = false;
+                        } else {
+                            //todo corrupted tower
+                            return;
+                        }
                     }
-                    if (s.getData().toString().equals("WALL_SIGN(3) facing SOUTH")) {
-                        opposite = (Sign) Bukkit.getWorld(player.getWorld().getName()).getBlockAt(s.getX(), s.getY(), s.getZ() - 4).getState();
+                    if (opposite == null) {
+                        //todo corrupted tower
+                        return;
+                    }
+
+                    Location towerLoc = new Location(player.getWorld(), s.getLocation().getBlockX(), s.getLocation().getBlockY() - 1, s.getLocation().getBlockZ() + 2);
+                    if (!north) {
+                        towerLoc = new Location(player.getWorld(), s.getLocation().getBlockX(), s.getLocation().getBlockY() - 1, s.getLocation().getBlockZ() - 2);
                     }
 
                     if (s.getLine(0).equals("§3Friendly Tower") || s.getLine(0).equals("§4Enemy Tower")) {
                         if (s.getLine(1).startsWith("Speed lvl: ") || s.getLine(1).startsWith("Slow lvl: ")
                                 || s.getLine(1).startsWith("Regen lvl: ") || s.getLine(1).startsWith("Haste lvl: ")
                                 || s.getLine(1).startsWith("Wither lvl: ") || s.getLine(1).startsWith("Hunger lvl: ")
-                                || s.getLine(1).startsWith("Tnt lvl: ") || s.getLine(1).startsWith("Arrow lvl: ")) {
+                                || s.getLine(1).startsWith("Tnt lvl: ") || s.getLine(1).startsWith("Arrow lvl: ")
+                                || s.getLine(1).startsWith("Tp lvl: ")) {
 
                             String lvl = (s.getLine(1).replace("Speed lvl: ", "").replace("Slow lvl: ", "")
                                     .replace("Regen lvl: ", "").replace("Haste lvl: ", "")
                                     .replace("Wither lvl: ", "").replace("Hunger lvl: ", "")
-                                    .replace("Tnt lvl: ", "").replace("Arrow lvl: ", ""));
+                                    .replace("Tnt lvl: ", "").replace("Arrow lvl: ", "")
+                                    .replace("Tp lvl: ", ""));
+
                             int lvlInt;
                             try {
                                 lvlInt = Integer.parseInt(lvl);
@@ -52,48 +87,14 @@ public class PlayerInteract implements Listener {
 
                             int upgrade = Integer.parseInt(s.getLine(3));
 
-                            if (lvlInt == 8) {
-                                if (player.getLevel() >= upgrade) {
-
-                                    s.setLine(1, s.getLine(1).replace(lvl, "MAX"));
-                                    s.setLine(3, "-");
-                                    s.update();
-
-                                    assert opposite != null; //todo check assert
-                                    opposite.setLine(1, s.getLine(1).replace(lvl, "MAX"));
-                                    opposite.setLine(3, "-");
-                                    opposite.update();
-
-
-                                    player.setLevel(player.getLevel() - upgrade);
-
-                                    player.sendMessage("This tower is now max upgraded");
-
-                                } else {
-                                    player.sendMessage("Not enough xp levels");
-                                }
-                                return;
-                            }
-
                             if (player.getLevel() >= upgrade) {
 
-                                StringBuilder str = new StringBuilder();
-                                str.append(lvlInt + 1);
-
-                                s.setLine(1, s.getLine(1).replace(lvl, str.toString()));
-                                int newCost = Integer.parseInt(s.getLine(3)) + 2;
-                                s.setLine(3, newCost + "");
-                                s.update();
-
-                                assert opposite != null; //todo check assert
-                                opposite.setLine(1, s.getLine(1).replace(lvl, str.toString()));
-                                opposite.setLine(3, newCost + "");
-                                opposite.update();
-
-                                player.setLevel(player.getLevel() - upgrade);
-
-                                player.sendMessage("This tower is upgraded");
-
+                                if (!upgradeTower(lvlInt, lvl, s, opposite, player, upgrade, towerLoc,
+                                        towerLoc.getWorld().equals(Bukkit.getWorld("Islands")))) {
+                                    player.sendMessage("Could not upgrade tower");
+                                } else {
+                                    player.sendMessage("Couldn't upgrade tower, if this problem continues you can try removing the tower and place it again");
+                                }
                             } else {
                                 player.sendMessage("Not enough xp levels");
                             }
@@ -108,7 +109,8 @@ public class PlayerInteract implements Listener {
                         String lvl = (s.getLine(1).replace("Speed lvl: ", "").replace("Slow lvl: ", "")
                                 .replace("Regen lvl: ", "").replace("Haste lvl: ", "")
                                 .replace("Wither lvl: ", "").replace("Hunger lvl: ", "")
-                                .replace("Tnt lvl: ", "").replace("Arrow lvl: ", ""));
+                                .replace("Tnt lvl: ", "").replace("Arrow lvl: ", "")
+                                .replace("Tp lvl: ", ""));
 
                         player.sendMessage(TowerInfo.getTowerInfo(s.getLine(1), lvl));
 

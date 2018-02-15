@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Stranded.Permissions.hasPermission;
+
 public class WarIsland implements CommandExecutor {
 
     public List<CmdManager> actions = new ArrayList<>();
@@ -43,8 +45,7 @@ public class WarIsland implements CommandExecutor {
 
         Player player = (Player) commandSender;
 
-        if (!player.hasPermission("Stranded.WarIsland")) {
-            player.sendMessage("you don't have permission");
+        if (!hasPermission(player, "Stranded.WarIsland")) {
             return false;
         }
         if (args.length == 0) {

@@ -1,8 +1,10 @@
 package com.Stranded.commands;
 
 import com.Stranded.Main;
-import com.Stranded.commands.lootTable.*;
+import com.Stranded.commands.lootTable.Add;
 import com.Stranded.commands.lootTable.Edit;
+import com.Stranded.commands.lootTable.Remove;
+import com.Stranded.commands.lootTable.Rename;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,10 +16,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LootTable implements CommandExecutor {
-    
-    private Main p;
+
     public List<CmdManager> actions = new ArrayList<>();
-    
+    private Main p;
+
     public LootTable(Main main) {
         p = main;
         actions.add(new Add());
@@ -26,51 +28,53 @@ public class LootTable implements CommandExecutor {
         actions.add(new Rename());
     }
 
-    // lootTable /*get all lootTables*/
+    // lootTable
     // lootTable add <name>
     // lootTable remove <name>
     // lootTable rename <name> <newName>
 
-    // lootTable edit <name> addPool <poolName> [rollChance /*default 100*/]
+    // lootTable edit <name> addPool <poolName> [rolls=1,3,equal]
     // lootTable edit <name> removePool <poolName>
     // lootTable edit <name> renamePool <poolName> <newName>
 
-    // lootTable edit <name> editPool <poolName> editChance max <Integer [<101]>
-    // lootTable edit <name> editPool <poolName> editChance min <Integer [>-1]>
-    // lootTable edit <name> editPool <poolName> editChance chance [equal, low, lower, high, higher]
+    // lootTable edit <name> editPool <poolName> editRolls max <Integer>
+    // lootTable edit <name> editPool <poolName> editRolls min <Integer>
+    // lootTable edit <name> editPool <poolName> editRolls chance [equal, low, lower, high, higher]
 
-    // lootTable edit <name> editPool <poolName> addTower <name> <tower> /*chance:[max=100,min=0],amount:[max=64,min=0],damage:0*/
+    // lootTable edit <name> editPool <poolName> addTower <name> <tower> [chance=1,3,equal] [amount=1,3,equal] [level=1,3,equal]
     // lootTable edit <name> editPool <poolName> removeTower <name>
-    // lootTable edit <name> editPool <poolName> editTower <name> chance max <Integer [<101]>
-    // lootTable edit <name> editPool <poolName> editTower <name> chance min <Integer [>-1]>
+    // lootTable edit <name> editPool <poolName> editTower
+    // lootTable edit <name> editPool <poolName> editTower <name> chance max <Integer>
+    // lootTable edit <name> editPool <poolName> editTower <name> chance min <Integer]>
     // lootTable edit <name> editPool <poolName> editTower <name> chance chance [equal, low, lower, high, higher]
-    // lootTable edit <name> editPool <poolName> editTower <name> amount max <Integer [< maxStack]>
-    // lootTable edit <name> editPool <poolName> editTower <name> amount min <Integer [>-1]>
+    // lootTable edit <name> editPool <poolName> editTower <name> amount max <Integer>
+    // lootTable edit <name> editPool <poolName> editTower <name> amount min <Integer>
     // lootTable edit <name> editPool <poolName> editTower <name> amount chance [equal, low, lower, high, higher]
-    // lootTable edit <name> editPool <poolName> editTower <name> level max <Integer [< maxStack]>
-    // lootTable edit <name> editPool <poolName> editTower <name> level min <Integer [>-1]>
+    // lootTable edit <name> editPool <poolName> editTower <name> level max <Integer>
+    // lootTable edit <name> editPool <poolName> editTower <name> level min <Integer]>
     // lootTable edit <name> editPool <poolName> editTower <name> level chance [equal, low, lower, high, higher]
     // lootTable edit <name> editPool <poolName> editTower <name> type <towerType:random>
 
-    // lootTable edit <name> editPool <poolName> addItem <name> <material> /*chance:[max=100,min=0],amount:[max=64,min=0],damage:0*/
+    // lootTable edit <name> editPool <poolName> addItem <name> <material> [chance=1,3,equal] [amount=1,3,equal] [damage=0]
     // lootTable edit <name> editPool <poolName> removeItem <name>
+    // lootTable edit <name> editPool <poolName> editItem
     // lootTable edit <name> editPool <poolName> editItem <name> material <material>
-    // lootTable edit <name> editPool <poolName> editItem <name> chance max <Integer [<101]>
-    // lootTable edit <name> editPool <poolName> editItem <name> chance min <Integer [<-1]>
+    // lootTable edit <name> editPool <poolName> editItem <name> chance max <Integer>
+    // lootTable edit <name> editPool <poolName> editItem <name> chance min <Integer>
     // lootTable edit <name> editPool <poolName> editItem <name> chance chance [equal, low, lower, high, higher]
-    // lootTable edit <name> editPool <poolName> editItem <name> amount max <Integer [< maxStack]>
-    // lootTable edit <name> editPool <poolName> editItem <name> amount min <Integer [>-1]>
+    // lootTable edit <name> editPool <poolName> editItem <name> amount max <Integer>
+    // lootTable edit <name> editPool <poolName> editItem <name> amount min <Integer>
     // lootTable edit <name> editPool <poolName> editItem <name> amount chance [equal, low, lower, high, higher]
-    // lootTable edit <name> editPool <poolName> editItem <name> damage <Integer [<16]>
-    
+    // lootTable edit <name> editPool <poolName> editItem <name> damage <Integer>
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String alias, String[] args) {
-        
+
         if (!(commandSender instanceof Player)) {
             return false;
         }
         Player player = (Player) commandSender;
-        
+
         if (args.length == 0) {
 
             StringBuilder str = new StringBuilder();
@@ -92,7 +96,7 @@ public class LootTable implements CommandExecutor {
             }
             return false;
         }
-        
+
         for (CmdManager action : this.actions) {
             if (args[0].toLowerCase().equals(action.getName()) || args[0].toLowerCase().equals(action.getAlias())) {
                 action.setMain(p);

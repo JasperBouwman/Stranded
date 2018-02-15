@@ -4,9 +4,15 @@ import com.Stranded.Files;
 import com.Stranded.Main;
 import org.bukkit.Location;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class WarIslandUtil {
 
-    public Files f;
+    private Files f;
+
+    public Files getF() {
+        return f;
+    }
 
     public boolean testWarIslandValidation(Main p, String warIslandName) {
 
@@ -14,7 +20,7 @@ public class WarIslandUtil {
             warIslandName += ".yml";
         }
 
-        Files warIsland = new Files(p, warIslandName);
+        Files warIsland = new Files(p,"/warIslands", warIslandName);
         if (!warIsland.isWarIsland()) {
             return false;
         }

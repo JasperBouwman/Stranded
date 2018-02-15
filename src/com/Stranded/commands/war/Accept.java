@@ -1,17 +1,18 @@
 package com.Stranded.commands.war;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
-import com.Stranded.commands.stranded.Reload;
 import com.Stranded.commands.war.runnables.island2askPlayers;
 import com.Stranded.commands.war.util.StartWar;
 import com.Stranded.commands.war.util.WarUtil;
 import com.Stranded.playerUUID.PlayerUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Accept extends CmdManager {
     @Override
@@ -30,21 +31,21 @@ public class Accept extends CmdManager {
         // war accept <island1> [players]
 
         String uuid = player.getUniqueId().toString();
+        Files config = getFiles("config.yml");
 
-
-        if (!p.getConfig().contains("island." + uuid)) {
-            player.sendMessage("you aren't in an island");
+        if (!config.getConfig().contains("island." + uuid)) {
+            player.sendMessage("you aren't in an island" + ChatColor.RED);
             return;
         }
 
         long pendingTime = 30;
 
-        Files warData = new Files(p, "warData.yml");
-        Files islands = new Files(p, "islands.yml");
+        Files warData = getFiles("warData.yml");
+        Files islands = getFiles("islands.yml");
 
-        String islandName2 = p.getConfig().getString("island." + uuid);
+        String islandName2 = config.getConfig().getString("island." + uuid);
 
-        if (WarUtil.testIfIsInWarWithComments(p, player))
+        if (WarUtil.testIfIsInWarWithComments(player))
             return;
 
         if ((args.length == 3 && !args[2].equalsIgnoreCase(player.getName())) || args.length > 3) {
@@ -55,12 +56,12 @@ public class Accept extends CmdManager {
             String islandName1 = args[1];
 
             if (islandName1.equalsIgnoreCase(islandName2)) {
-                player.sendMessage("you can't start a war with your own island");
+                player.sendMessage("you can't start a war with your own island" + ChatColor.RED);
                 return;
             }
 
             if (!warData.getConfig().contains("war.pending.islandInvite." + islandName1)) {
-                player.sendMessage("the island " + islandName1 + " is not asking for a war");
+                player.sendMessage("the island " + islandName1 + " is not asking for a war" + ChatColor.RED);
                 return;
             }
 
@@ -68,17 +69,17 @@ public class Accept extends CmdManager {
             for (int i = 2; i < args.length; i++) {
 
                 //get player uuid
-                String playerUUID = PlayerUUID.getPlayerUUID(args[i], p);
+                String playerUUID = PlayerUUID.getPlayerUUID(args[i]);
                 //test if player is found
                 if (playerUUID == null) {
-                    ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[i], p);
+                    ArrayList<String> tempPlayers = PlayerUUID.getGlobalPlayerUUID(args[i]);
                     if (tempPlayers.size() > 1) {
                         //more players found with name
-                        player.sendMessage("there are more players found with the " + args[i]);
+                        player.sendMessage("there are more players found with the " + args[i] + ChatColor.RED);
                         br = true;
                     } else if (tempPlayers.size() == 0) {
                         //no players found with name
-                        player.sendMessage("there is no player found with the name " + args[i]);
+                        player.sendMessage("there is no player found with the name " + args[i] + ChatColor.RED);
                         br = true;
                     } else {
                         //set full on player uuid
@@ -90,23 +91,23 @@ public class Accept extends CmdManager {
                     return;
                 }
                 //get final player name (case sensitive)
-                String playerName = PlayerUUID.getPlayerName(playerUUID, p);
+                String playerName = PlayerUUID.getPlayerName(playerUUID);
                 //get player
-                Player tmpPlayer = PlayerUUID.getPlayerExact(playerName, p);
+                Player tmpPlayer = PlayerUUID.getPlayerExact(playerName);
 
 
                 if (!tempUsersUUID.contains(playerUUID)) {
                     tempUsersUUID.add(playerUUID);
 
                     if (!island2MemberList.contains(playerUUID)) {
-                        player.sendMessage(playerName + " is not a member in your island");
+                        player.sendMessage(playerName + " is not a member in your island" + ChatColor.RED);
                         br = true;
                     } else if (tmpPlayer == null) {
-                        player.sendMessage(playerName + " is not online");
+                        player.sendMessage(playerName + " is not online" + ChatColor.RED);
                         br = true;
                     }
                 } else {
-                    player.sendMessage(playerName + " is already mentioned");
+                    player.sendMessage(playerName + " is already mentioned" + ChatColor.YELLOW);
                     br = true;
                 }
             }
@@ -121,16 +122,16 @@ public class Accept extends CmdManager {
             int min = warData.getConfig().getInt("war.pending.islandInvite." + islandName1 + ".islandMin");
 
             if (tempUsersUUID.size() > max) {
-                player.sendMessage("you have chosen to many players, you have to remove " + (tempUsersUUID.size() - max) + " players");
+                player.sendMessage("You have chosen too many players, you have to remove " + (tempUsersUUID.size() - max) + " players");
                 return;
             }
 
             if (tempUsersUUID.size() < min) {
-                player.sendMessage("you have chosen to few players, you have to add " + (min - tempUsersUUID.size()) + " players");
+                player.sendMessage("You have chosen to few players, you have to add " + (min - tempUsersUUID.size()) + " players");
                 return;
             }
 
-            player.sendMessage("all players have to accept this, and than the war will begin");
+            player.sendMessage("All players have to accept this, and than the war will begin");
 
 //            ArrayList<String> memberPendingListNewIsland = (ArrayList<String>) warData.getConfig().getStringList("war.pending.memberPendingListNewIsland");
 //            memberPendingListNewIsland.add(islandName2);
@@ -160,7 +161,7 @@ public class Accept extends CmdManager {
                 //canceled island1AcceptIsland2
                 Bukkit.getScheduler().cancelTask(pendingID);
 
-                StartWar.startWar(island2, p);
+                StartWar.startWar(island2);
                 return;
             }
 
@@ -168,12 +169,12 @@ public class Accept extends CmdManager {
             String islandName1 = args[1];
 
             if (islandName1.equalsIgnoreCase(islandName2)) {
-                player.sendMessage("you can't start a war with your own island");
+                player.sendMessage("You can't start a war with your own island" + ChatColor.RED);
                 return;
             }
 
             if (!warData.getConfig().contains("war.pending.islandInvite." + islandName1)) {
-                player.sendMessage("the island " + islandName1 + " is not asking for a war");
+                player.sendMessage("The island " + islandName1 + " is not asking for a war" + ChatColor.RED);
                 return;
             }
 
@@ -183,12 +184,12 @@ public class Accept extends CmdManager {
             int min = warData.getConfig().getInt("war.pending.island1." + islandName1 + ".islandMin");
 
             if (tempUsers.size() > max) {
-                player.sendMessage("you have chosen to many players, you have to remove " + (tempUsers.size() - max) + " players");
+                player.sendMessage("You have chosen to many players, you have to remove " + (tempUsers.size() - max) + " players" + ChatColor.RED);
                 return;
             }
 
             if (tempUsers.size() < min) {
-                player.sendMessage("you have chosen to few players, you have to add " + (min - tempUsers.size()) + " players");
+                player.sendMessage("You have chosen to few players, you have to add " + (min - tempUsers.size()) + " players" + ChatColor.RED);
                 return;
             }
 
@@ -211,7 +212,7 @@ public class Accept extends CmdManager {
             new Ready().skipReady2(p, player);
 
         } else {
-            player.sendMessage("wrong use");
+            player.sendMessage("Wrong use" + ChatColor.RED);
         }
     }
 }

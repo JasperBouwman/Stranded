@@ -1,7 +1,6 @@
 package com.Stranded.worldGeneration;
 
 import com.Stranded.Files;
-import com.Stranded.Main;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
@@ -10,17 +9,18 @@ import org.bukkit.entity.Villager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class IslandGeneration {
 
     public static Location nexusLocation;
     public static UUID UUID;
 
-    public static void generate(Location l, Main p, String type) {
+    public static void generate(Location l, String type) {
 
         HashMap<Integer, Block> blocks = new HashMap<>();
 
-        Files f = new Files(p, "islands.yml");
+        Files f = getFiles("islands.yml");
         for (String s : f.getConfig().getConfigurationSection("islandData.islandTypes").getKeys(false)) {
 
             if (type.equalsIgnoreCase(f.getConfig().getString("islandData.islandTypes." + s + ".name"))) {
@@ -79,7 +79,7 @@ public class IslandGeneration {
                     setBlock(blocks.get(BlockCount), block);
 
                     if (nexus && block.getType().equals(Material.BEDROCK)) {
-                        nexusLocation = spawnNexus(block.getLocation(), p);
+                        nexusLocation = spawnNexus(block.getLocation());
                         nexus = false;
                         block.setType(Material.AIR);
                     }
@@ -90,28 +90,30 @@ public class IslandGeneration {
         }
 
         if (nexus) {
-            nexusLocation = spawnNexus(new Location(l.getWorld(), maxX, maxY, maxZ), p);
+            nexusLocation = spawnNexus(new Location(l.getWorld(), maxX, maxY, maxZ));
         }
 
     }
 
-    public static Location spawnNexus(Location l, Main p) {
+    public static Location spawnNexus(Location l) {
+
+        Files config = getFiles("config.yml");
 
         l.setX(l.getX() + 0.5);
         l.setZ(l.getZ() + 0.5);
 
         Villager v = l.getWorld().spawn(l, Villager.class);
 
-        ArrayList<String> list = (ArrayList<String>) p.getConfig().getStringList("nexus.uuid");
+        ArrayList<String> list = (ArrayList<String>) config.getConfig().getStringList("nexus.uuid");
         list.add(v.getUniqueId().toString());
-        p.getConfig().set("nexus.uuid", list);
-        p.saveConfig();
+        config.getConfig().set("nexus.uuid", list);
+        config.saveConfig();
 
         v.setCustomName("§2Nexus");
         v.setCustomNameVisible(true);
         v.setProfession(Villager.Profession.NITWIT);
         v.setAI(false);
-        v.isSilent();
+        v.setSilent(true);
         v.setAdult();
         v.setCanPickupItems(false);
         v.setCollidable(true);

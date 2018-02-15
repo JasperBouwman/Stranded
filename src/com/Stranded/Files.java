@@ -11,10 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import static com.Stranded.GettingFiles.getFiles;
+
 public class Files {
 
     private final String fileName;
     private final JavaPlugin plugin;
+    private final Main p;
 
     private File configFile;
     private FileConfiguration fileConfiguration;
@@ -23,12 +26,14 @@ public class Files {
         this.plugin = plugin;
         this.fileName = fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml");
         this.configFile = new File(plugin.getDataFolder(), fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml"));
+        this.p = (Main) plugin;
     }
 
     public Files(JavaPlugin plugin, String extraPath, String fileName) {
         this.plugin = plugin;
         this.fileName = fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml");
         this.configFile = new File(plugin.getDataFolder() + extraPath, fileName + (fileName.toLowerCase().endsWith(".yml") ? "" : ".yml"));
+        this.p = (Main) plugin;
     }
 
     public void setWarIsland() {
@@ -52,14 +57,22 @@ public class Files {
         return fileConfiguration;
     }
 
-    public void saveConfig() {
+    public void saveConfig(boolean force) {
+
+        if (!force && getFiles("pluginData").getConfig().getString("plugin.files.autoSave").equalsIgnoreCase("false")) return;
+
         if (fileConfiguration != null && configFile != null) {
             try {
                 getConfig().save(configFile);
+
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, ex);
             }
         }
+    }
+
+    public void saveConfig() {
+        saveConfig(false);
     }
 
     void saveDefaultConfig() {

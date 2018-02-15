@@ -53,14 +53,19 @@ public class InvSlots {
 
         int offset;
 
-        if (width == 3) {
-            offset = 3;
-        } else if (width == 5) {
-            offset = 2;
-        } else if (width == 7) {
-            offset = 1;
-        } else {
-            offset = 0;
+        switch (width) {
+            case 3:
+                offset = 3;
+                break;
+            case 5:
+                offset = 2;
+                break;
+            case 7:
+                offset = 1;
+                break;
+            default:
+                offset = 0;
+                break;
         }
 
         Main.reloadHolds += 1;

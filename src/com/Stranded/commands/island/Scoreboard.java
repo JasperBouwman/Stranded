@@ -3,7 +3,6 @@ package com.Stranded.commands.island;
 import com.Stranded.Files;
 import com.Stranded.Main;
 import com.Stranded.commands.CmdManager;
-import net.minecraft.server.v1_12_R1.MinecraftServer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -11,12 +10,15 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.ScoreboardManager;
 
+import static com.Stranded.GettingFiles.getFiles;
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Scoreboard extends CmdManager {
 
     private static void removeScoreboard(Player player) {
         ScoreboardManager manager = Bukkit.getScoreboardManager();
         org.bukkit.scoreboard.Scoreboard board = manager.getNewScoreboard();
-        String name = "something";
+        String name = "conke or bepis";
         Objective objective = board.registerNewObjective(name, "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
@@ -43,11 +45,7 @@ public class Scoreboard extends CmdManager {
 
         String uuid = player.getUniqueId().toString();
 
-        if (Main.reloadPending) {
-            player.sendMessage("the server is trying to reload, please wait just a second to let the server reload");
-            return;
-        }
-        Files playerData = new Files(p, "playerData.yml");
+        Files playerData = getFiles("playerData.yml");
 
         if (args.length == 2) {
 
@@ -63,18 +61,22 @@ public class Scoreboard extends CmdManager {
                 playerData.getConfig().set("scoreboard." + uuid, 1);
                 playerData.saveConfig();
                 player.sendMessage(ChatColor.GREEN + "Scoreboard is now on");
-                com.Stranded.Scoreboard.scores(p, player);
+                com.Stranded.Scoreboard.scores(player);
 
             } else if (args[1].equalsIgnoreCase("show")) {
+                if (Main.reloadPending) {
+                    player.sendMessage(ChatColor.RED + "The server is trying to reload, please wait just a second to let the server reload");
+                    return;
+                }
 
                 playerData.getConfig().set("scoreboard." + uuid, 2);
                 playerData.saveConfig();
 
-                com.Stranded.Scoreboard.scores(p, player);
+                com.Stranded.Scoreboard.scores(player);
 
                 Bukkit.getScheduler().runTaskLater(p, () -> {
 
-                    Files playerDataTemp = new Files(p, "playerData.yml");
+                    Files playerDataTemp = getFiles("playerData.yml");
                     removeScoreboard(player);
                     playerDataTemp.getConfig().set("scoreboard." + uuid, 0);
                     playerDataTemp.saveConfig();
@@ -83,11 +85,15 @@ public class Scoreboard extends CmdManager {
 
                 player.sendMessage(ChatColor.GREEN + "Scoreboard is now showed for 10 seconds");
             } else {
-                player.sendMessage(ChatColor.RED + "Usage: /island scoreboard <on:off:show>");
+                sendWrongUse(player, new String[]{"/island scoreboard <on:off:show>", "/island scoreboard "});
             }
         } else if (args.length == 3) {
 
             if (args[1].equalsIgnoreCase("show")) {
+                if (Main.reloadPending) {
+                    player.sendMessage(ChatColor.RED + "The server is trying to reload, please wait just a second to let the server reload");
+                    return;
+                }
                 int time;
                 try {
                     time = Integer.parseInt(args[2]);
@@ -99,10 +105,10 @@ public class Scoreboard extends CmdManager {
                 playerData.getConfig().set("scoreboard." + uuid, 2);
                 playerData.saveConfig();
 
-                com.Stranded.Scoreboard.scores(p, player);
+                com.Stranded.Scoreboard.scores(player);
 
                 Bukkit.getScheduler().runTaskLater(p, () -> {
-                    Files playerDataTemp = new Files(p, "playerData.yml");
+                    Files playerDataTemp = getFiles("playerData.yml");
                     removeScoreboard(player);
                     playerDataTemp.getConfig().set("scoreboard." + uuid, 0);
                     playerDataTemp.saveConfig();
@@ -113,10 +119,11 @@ public class Scoreboard extends CmdManager {
                 } else {
                     player.sendMessage(ChatColor.GREEN + "Scoreboard is now showed for " + time + " seconds");
                 }
+            } else {
+                sendWrongUse(player, new String[]{"/island scoreboard <on:off:show>", "/island scoreboard "});
             }
-
         } else {
-            player.sendMessage(ChatColor.RED + "Usage: /island scoreboard <on:off:show>");
+            sendWrongUse(player, new String[]{"/island scoreboard <on:off:show>", "/island scoreboard "});
         }
     }
 }

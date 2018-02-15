@@ -2,6 +2,7 @@ package com.Stranded.commands.war;
 
 import com.Stranded.Files;
 import com.Stranded.Main;
+import com.Stranded.commands.Chat;
 import com.Stranded.commands.CmdManager;
 import com.Stranded.commands.stranded.Reload;
 import com.Stranded.commands.war.runnables.askServerForWar;
@@ -10,11 +11,14 @@ import com.Stranded.fancyMassage.Colors;
 import com.Stranded.fancyMassage.FancyMessage;
 import com.Stranded.playerUUID.PlayerUUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
+
+import static com.Stranded.GettingFiles.getFiles;
 
 public class Ready extends CmdManager {
     @Override
@@ -28,7 +32,7 @@ public class Ready extends CmdManager {
     }
 
     void skipReady1(Main p, String islandName1, Long pendingTime) {
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
 
 //                ArrayList<String> islandPendingList = (ArrayList<String>) warData.getConfig().getStringList("war.pending.islandPendingList");
 //                islandPendingList.add(islandName1);
@@ -38,9 +42,9 @@ public class Ready extends CmdManager {
 //        memberPendingList.remove(islandName1);
 //        warData.getConfig().set("war.pending.memberPendingList", memberPendingList);
 
-        int pendingID = Bukkit.getScheduler().runTaskLater(p, new askServerForWar(p, islandName1), pendingTime * 20).getTaskId();
+        int pendingID = Bukkit.getScheduler().runTaskLater(p, new askServerForWar(islandName1), pendingTime * 20).getTaskId();
 
-        sendWarMessage(islandName1, p, pendingTime);
+        sendWarMessage(islandName1, pendingTime);
 
 //        Bukkit.getScheduler().cancelTask(war.getConfig().getInt("war.pending.memberInvite." + island + ".pendingID"));
 
@@ -52,22 +56,23 @@ public class Ready extends CmdManager {
     private void memberInvite(Player player) {
         Long pendingTime;
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
+        Files config = getFiles("config.yml");
         try {
             pendingTime = Long.parseLong(warData.getConfig().getString("war.pending.timeIslandWarriors"));
         } catch (NumberFormatException nfe) {
             pendingTime = (long) 10 /*300 (5 min)*/;
         }
 
-        String islandName1 = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String islandName1 = config.getConfig().getString("island." + player.getUniqueId().toString());
 
         if (!warData.getConfig().contains("war.pending.island1." + islandName1)) {
-            player.sendMessage("your island isn't pending for a war");
+            player.sendMessage("Your island isn't pending for a war" + ChatColor.RED);
             return;
         }
 
         if (warData.getConfig().getBoolean("war.pending.island1." + islandName1 + ".players." + player.getUniqueId().toString())) {
-            player.sendMessage("you already accepted");
+            player.sendMessage("You already accepted" + ChatColor.RED);
 
         } else {
             warData.getConfig().set("war.pending.island1." + islandName1 + ".players." + player.getUniqueId().toString(), true);
@@ -104,7 +109,7 @@ public class Ready extends CmdManager {
 
                 warData.saveConfig();
                 for (Player island1Player : onlineIsland1Players) {
-                    island1Player.sendMessage("war request is canceled, to many people logged off");
+                    island1Player.sendMessage("War request is canceled, to many people logged off" + ChatColor.RED);
                 }
 
                 return;
@@ -120,9 +125,9 @@ public class Ready extends CmdManager {
 //                memberPendingList.remove(islandName1);
 //                warData.getConfig().set("war.pending.memberPendingList", memberPendingList);
 
-                int pendingID = Bukkit.getScheduler().runTaskLater(p, new askServerForWar(p, islandName1), pendingTime * 20).getTaskId();
+                int pendingID = Bukkit.getScheduler().runTaskLater(p, new askServerForWar(islandName1), pendingTime * 20).getTaskId();
 
-                sendWarMessage(islandName1, p, pendingTime);
+                sendWarMessage(islandName1, pendingTime);
 
                 //canceled memberPendingList
                 Bukkit.getScheduler().cancelTask(warData.getConfig().getInt("war.pending.island1." + islandName1 + ".pendingID"));
@@ -140,7 +145,7 @@ public class Ready extends CmdManager {
                 for (String island1Players : warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false)) {
                     if (!warData.getConfig().getBoolean("war.pending.island1." + islandName1 + ".players." + island1Players)) {
                         str.append(" ");
-                        str.append(PlayerUUID.getPlayerName(island1Players, p));
+                        str.append(PlayerUUID.getPlayerName(island1Players));
                     }
                 }
 
@@ -154,9 +159,10 @@ public class Ready extends CmdManager {
     }
 
     void skipReady2(Main p, Player player) {
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
+        Files config = getFiles("config.yml");
 
-        String islandName2 = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String islandName2 = config.getConfig().getString("island." + player.getUniqueId().toString());
 
 //        ArrayList<String> memberPendingListNewIsland = (ArrayList<String>) warData.getConfig().getStringList("war.pending.memberPendingListNewIsland");
 //        memberPendingListNewIsland.remove(islandName2);
@@ -169,7 +175,7 @@ public class Ready extends CmdManager {
         if (Bukkit.getPlayer(UUID.fromString(warData.getConfig().getString("war.pending.island1." + islandName1 + ".starter"))) != null) {
             Player starter = Bukkit.getPlayer(UUID.fromString(warData.getConfig().getString("war.pending.island1." + islandName1 + ".starter")));
 
-            Files pluginData = new Files(p, "pluginData.yml");
+            Files pluginData = getFiles("pluginData.yml");
             FancyMessage fm = new FancyMessage();
             fm.addText(islandName2, Colors.AQUA);
             fm.addText(" has accepted your war request, click ", Colors.DARK_AQUA);
@@ -181,10 +187,10 @@ public class Ready extends CmdManager {
             fm.addText(" are:", Colors.DARK_AQUA);
             for (String s : warData.getConfig().getConfigurationSection("war.pending.island2." + islandName2 + ".players").getKeys(false)) {
 
-                String tmpPlayerName = PlayerUUID.getPlayerName(s, p);
+                String tmpPlayerName = PlayerUUID.getPlayerName(s);
 
                 fm.addText(" " + tmpPlayerName, Colors.RED);
-                Files playerData = new Files(p, "playerData.yml");
+                Files playerData = getFiles("playerData.yml");
                 long walk = playerData.getConfig().getLong("walk." + s) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
                 long block = playerData.getConfig().getLong("BlockBreak." + s) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
                 long pvp = playerData.getConfig().getLong("HitKill." + s) / pluginData.getConfig().getLong("plugin.scoreboard.pvp.amplifier");
@@ -206,8 +212,8 @@ public class Ready extends CmdManager {
             warData.getConfig().set("war.pending.acceptation." + starter.getName() + ".island2", islandName2);
             warData.saveConfig();
         } else {
-            ArrayList<String> island1 = new ArrayList<>();
-            island1.addAll(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
+            ArrayList<String> island1 = new ArrayList<>(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
+
             while (true) {
                 String newRandomStarter = island1.get(new Random().nextInt(island1.size()));
                 Player newStarter = Bukkit.getPlayer(UUID.fromString(newRandomStarter));
@@ -216,7 +222,7 @@ public class Ready extends CmdManager {
                     island1.remove(newRandomStarter);
                 } else {
 //                    newStarter.sendMessage(islandName2 + " has accepted your war request, type /war accept " + islandName2 + " to go into war");
-                    Files pluginData = new Files(p, "pluginData.yml");
+                    Files pluginData = getFiles("pluginData.yml");
                     FancyMessage fm = new FancyMessage();
                     fm.addText(islandName2, Colors.AQUA);
                     fm.addText(" has accepted your war request, click ", Colors.DARK_AQUA);
@@ -227,8 +233,8 @@ public class Ready extends CmdManager {
                     fm.addText(islandName2, Colors.AQUA);
                     fm.addText(" are:", Colors.DARK_AQUA);
                     for (String s : warData.getConfig().getConfigurationSection("war.pending.island2." + islandName2 + ".players").getKeys(false)) {
-                        fm.addText(" " + PlayerUUID.getPlayerName(s, p), Colors.RED);
-                        Files playerData = new Files(p, "playerData.yml");
+                        fm.addText(" " + PlayerUUID.getPlayerName(s), Colors.RED);
+                        Files playerData = getFiles("playerData.yml");
                         long walk = playerData.getConfig().getLong("walk." + s) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
                         long block = playerData.getConfig().getLong("BlockBreak." + s) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
                         long pvp = playerData.getConfig().getLong("HitKill." + s) / pluginData.getConfig().getLong("plugin.scoreboard.pvp.amplifier");
@@ -259,17 +265,18 @@ public class Ready extends CmdManager {
 
     private void memberInviteStartWar(Player player) {
 
-        Files warData = new Files(p, "warData.yml");
+        Files warData = getFiles("warData.yml");
+        Files config = getFiles("config.yml");
 
-        String islandName2 = p.getConfig().getString("island." + player.getUniqueId().toString());
+        String islandName2 = config.getConfig().getString("island." + player.getUniqueId().toString());
 
         if (!warData.getConfig().contains("war.pending.island2." + islandName2)) {
-            player.sendMessage("your island isn't pending for a war");
+            player.sendMessage("Your island isn't pending for a war" + ChatColor.RED);
             return;
         }
 
         if (warData.getConfig().getBoolean("war.pending.island2." + islandName2 + ".players." + player.getUniqueId().toString())) {
-            player.sendMessage("you already accepted");
+            player.sendMessage("You already accepted" + ChatColor.RED);
 
         } else {
             warData.getConfig().set("war.pending.island2." + islandName2 + ".players." + player.getUniqueId().toString(), true);
@@ -313,7 +320,7 @@ public class Ready extends CmdManager {
                 if (Bukkit.getPlayerExact(warData.getConfig().getString("war.pending.island1." + islandName1 + ".starter")) != null) {
                     Player starter = Bukkit.getPlayer(UUID.fromString(warData.getConfig().getString("war.pending.island1." + islandName1 + ".starter")));
 
-                    starter.sendMessage(islandName2 + " has accepted your war request, type /war accept " + islandName2 + " to go into war");
+                    starter.sendMessage(ChatColor.GREEN + islandName2 + " has accepted your war request, type /war accept " + islandName2 + " to go into war");
 
                     int pendingID = Bukkit.getScheduler().runTaskLater(p, new island1AcceptIsland2(p, islandName2), 10).getTaskId();
 
@@ -321,8 +328,7 @@ public class Ready extends CmdManager {
                     warData.getConfig().set("war.pending.acceptation." + starter.getUniqueId().toString() + ".island2", islandName2);
                     warData.saveConfig();
                 } else {
-                    ArrayList<String> island1 = new ArrayList<>();
-                    island1.addAll(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
+                    ArrayList<String> island1 = new ArrayList<>(warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false));
                     while (true) {
 
                         String newRandomStarter = island1.get(new Random().nextInt(island1.size()));
@@ -332,7 +338,7 @@ public class Ready extends CmdManager {
                         if (newStarter == null) {
                             island1.remove(newRandomStarter);
                         } else {
-                            newStarter.sendMessage(islandName2 + " has accepted your war request, type /war accept " + islandName2 + " to go into war");
+                            newStarter.sendMessage(ChatColor.GREEN + islandName2 + " has accepted your war request, type /war accept " + islandName2 + " to go into war");
 
                             int pendingID = Bukkit.getScheduler().scheduleSyncDelayedTask(p, new island1AcceptIsland2(p, islandName2), 10);
 
@@ -353,7 +359,7 @@ public class Ready extends CmdManager {
                 for (String island2Players : warData.getConfig().getConfigurationSection("war.pending.island2." + islandName2 + ".players").getKeys(false)) {
                     if (!warData.getConfig().getBoolean("war.pending.island2." + islandName2 + ".players." + island2Players)) {
                         str.append(" ");
-                        str.append(PlayerUUID.getPlayerName(island2Players, p));
+                        str.append(PlayerUUID.getPlayerName(island2Players));
                     }
                 }
 
@@ -369,13 +375,14 @@ public class Ready extends CmdManager {
     @Override
     public void run(String[] args, Player player) {
 
+        Files config = getFiles("config.yml");
 
-        if (!p.getConfig().contains("island." + player.getUniqueId().toString())) {
-            player.sendMessage("you aren't in an island");
+        if (!config.getConfig().contains("island." + player.getUniqueId().toString())) {
+            player.sendMessage(ChatColor.RED + "You aren't in an island");
             return;
         }
-        Files warData = new Files(p, "warData.yml");
-        String ownIslandName = p.getConfig().getString("island." + player.getUniqueId().toString());
+        Files warData = getFiles("warData.yml");
+        String ownIslandName = config.getConfig().getString("island." + player.getUniqueId().toString());
 
         if (warData.getConfig().contains("war.pending.island1." + ownIslandName)) {
             memberInvite(player);
@@ -385,21 +392,21 @@ public class Ready extends CmdManager {
             memberInviteStartWar(player);
             return;
         }
-        player.sendMessage("your island isn't asking for a war");
+        player.sendMessage(ChatColor.RED + "Your island isn't asking for a war");
     }
 
-    private void sendWarMessage(String islandName1, Main p, long time) {
-        Files warData = new Files(p, "warData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
+    private void sendWarMessage(String islandName1, long time) {
+        Files warData = getFiles("warData.yml");
+        Files pluginData = getFiles("pluginData.yml");
 
         FancyMessage fm = new FancyMessage();
 
         fm.addText(islandName1 + " want war you have " + time + " seconds to answer\nPlayers:", Colors.BLUE);
 
         for (String s : warData.getConfig().getConfigurationSection("war.pending.island1." + islandName1 + ".players").getKeys(false)) {
-            fm.addText(" " + PlayerUUID.getPlayerName(s, p), Colors.RED);
+            fm.addText(" " + PlayerUUID.getPlayerName(s), Colors.RED);
 
-            Files playerData = new Files(p, "playerData.yml");
+            Files playerData = getFiles("playerData.yml");
             long walk = playerData.getConfig().getLong("walk." + s) / pluginData.getConfig().getLong("plugin.scoreboard.walking.amplifier");
             long block = playerData.getConfig().getLong("BlockBreak." + s) / pluginData.getConfig().getLong("plugin.scoreboard.mining.amplifier");
             long pvp = playerData.getConfig().getLong("HitKill." + s) / pluginData.getConfig().getLong("plugin.scoreboard.pvp.amplifier");

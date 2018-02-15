@@ -12,6 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.Random;
 import java.util.UUID;
+import static com.Stranded.GettingFiles.getFiles;
 
 public class PlayerEffects implements Runnable {
 
@@ -188,22 +189,22 @@ public class PlayerEffects implements Runnable {
         }
     }
 
-    public void Effects() {
+    public void effects() {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(p, this, 20, 20);
     }
 
     @Override
     public void run() {
-        Files playerData = new Files(p, "playerData.yml");
-        Files pluginData = new Files(p, "pluginData.yml");
+        Files playerData = getFiles("playerData.yml");
+        Files pluginData = getFiles("pluginData.yml");
 
         walkEffect(playerData, pluginData);
         flyEffect(playerData, pluginData);
         mineEffect(playerData, pluginData);
         pvpEffect(playerData, pluginData);
 
-        Pos.showOffset(p);
-        Pos.showBoundary(p);
+        Pos.showOffset();
+        Pos.showBoundary();
 
     }
 }

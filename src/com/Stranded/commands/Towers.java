@@ -12,6 +12,8 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.Stranded.api.ServerMessages.sendWrongUse;
+
 public class Towers implements CommandExecutor {
 
     public List<CmdManager> actions = new ArrayList<>();
@@ -29,12 +31,12 @@ public class Towers implements CommandExecutor {
 
         //tower
         //tower own
-        //tower own [all:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed]
+        //tower own [all:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed:teleport]
         //tower shop
-        //tower show [friendly:enemy:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed]
+        //tower show [friendly:enemy:tnt:slowness:hunger:wither:arrow:haste:regeneration:speed:teleport]
 
         if (!(commandSender instanceof Player)) {
-            commandSender.sendMessage("you must be a player to use this");
+            commandSender.sendMessage("You must be a player to use this");
             return false;
         }
 
@@ -52,14 +54,14 @@ public class Towers implements CommandExecutor {
                 return false;
             }
         }
-        player.sendMessage("this is not a sub-command");
+        sendWrongUse(player, "/tower own", "/tower shop");
         return false;
 
         /*
         * /tower
         * /tower [own:shop]
         * /tower own [filters:all]
-        * /tower shop [friendly:enemy:towers]
+        * /tower shop [friendly:enemy]
         */
 
     }
